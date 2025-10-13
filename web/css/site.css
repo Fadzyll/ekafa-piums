@@ -1,0 +1,215 @@
+/* Layout fix: Flex container for sticky footer */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-image: url('../images/Masjid_UMS.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    position: relative;
+    margin: 0;
+    color: #212529;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Darker for better contrast */
+    z-index: -1;
+}
+
+main#main {
+    flex: 1;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: #002f26;
+    height: calc(100vh - 56px); /* adjust if navbar height changes */
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 220px;
+    overflow-y: auto;
+    z-index: 1000;
+    color: #ffffff;
+}
+
+.sidebar a {
+    color: #ffffff;
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #014134;
+}
+
+.sidebar a.active {
+    background-color: #02695e;
+    font-weight: bold;
+    border-left: 4px solid #ffc107;
+}
+
+/* Content wrapper */
+.content-wrapper {
+    margin-left: 220px;
+    padding: 20px;
+    flex: 1 0 auto;
+}
+
+.guest-center {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Footer */
+/* Footer */
+footer#footer {
+    background-color: #004135;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: auto; /* Pushes footer to bottom naturally */
+    position: relative;
+    z-index: 1;
+}
+
+.footer-logged-in {
+    margin-left: 220px; /* keeps alignment when sidebar visible */
+}
+
+.footer > .container {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Navbar */
+.navbar-custom {
+    background-color: #004135 !important;
+}
+
+.navbar-custom .navbar-nav .nav-link,
+.navbar-custom .navbar-brand,
+.navbar-custom .navbar-text {
+    color: white !important;
+}
+
+.navbar-custom .nav-link:hover {
+    color: #ffc107;
+}
+
+/* GridView Sorting Icons */
+a.asc:after, a.desc:after {
+    content: '';
+    left: 3px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: solid 5px transparent;
+    margin: 4px 4px 2px 4px;
+    background: transparent;
+}
+
+a.asc:after {
+    border-bottom: solid 7px #212529;
+    border-top-width: 0;
+}
+
+a.desc:after {
+    border-top: solid 7px #212529;
+    border-bottom-width: 0;
+}
+
+.grid-view th {
+    white-space: nowrap;
+}
+
+/* Form & Error Styling */
+.hint-block {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+}
+
+.error-summary {
+    color: #a94442;
+    background: #fdf7f7;
+    border-left: 3px solid #eed3d7;
+    padding: 10px 20px;
+    margin: 0 0 15px 0;
+}
+
+/* Logout Button */
+.nav li > form > button.logout {
+    padding-top: 7px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media(max-width: 767px) {
+    .nav li > form > button.logout {
+        display: block;
+        text-align: left;
+        width: 100%;
+        padding: 10px 0;
+    }
+}
+
+.nav > li > form > button.logout:focus,
+.nav > li > form > button.logout:hover {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.nav > li > form > button.logout:focus {
+    outline: none;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+/* Login / Register Panels */
+.site-login.container,
+.site-register.container {
+    display: inline-block;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 70%;
+    max-width: 100%;
+    margin: 25px auto;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 900px;
+    margin: 40px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* General Typography */
+h1, h2, h3, h4, h5 {
+    color: #1c1c1c;
+}
+
+p {
+    font-size: 1rem;
+    color: #333333;
+}
