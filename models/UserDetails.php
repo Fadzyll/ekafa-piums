@@ -3,11 +3,11 @@
 namespace app\models;
 
 use Yii;
-use app\models\Users;
-use app\models\PartnerDetails;
-use app\models\UserJob;
-use app\models\UserDetailsQuery;
 use yii\web\UploadedFile;
+use app\models\Users;
+use app\models\UserJob;
+use app\models\PartnerDetails;
+use app\models\UserDetailsQuery;
 
 /**
  * This is the model class for table "user_details".
@@ -31,6 +31,8 @@ use yii\web\UploadedFile;
  * @property string|null $updated_at
  *
  * @property Users $users
+ * @property UserJob $userJob
+ * @property PartnerDetails $partnerDetails
  *
  * @property UploadedFile $imageFile
  */
@@ -60,11 +62,14 @@ class UserDetails extends \yii\db\ActiveRecord
             [['postcode'], 'string', 'max' => 10],
 
             [['ic_number'], 'unique'],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'user_id']],
+            [['user_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => Users::class,
+                'targetAttribute' => ['user_id' => 'user_id']
+            ],
 
             ['gender', 'in', 'range' => array_keys(self::optsGender())],
 
-            // File validation: extensions, mime types, max size (2MB), optional
+            // File validation
             [['imageFile'], 'file',
                 'skipOnEmpty' => true,
                 'extensions' => ['png', 'jpg', 'jpeg'],
@@ -74,14 +79,13 @@ class UserDetails extends \yii\db\ActiveRecord
                 'checkExtensionByMimeType' => true,
             ],
 
-            // Image validation: dimension limits, optional
+            // Image validation
             [['imageFile'], 'image',
                 'skipOnEmpty' => true,
                 'minWidth' => 100,
                 'minHeight' => 100,
                 'maxWidth' => 1000,
                 'maxHeight' => 1000,
-                'tooBig' => 'The image is too large. Maximum size is 2MB.',
                 'underWidth' => 'The image width is too small. Minimum width is 100px.',
                 'underHeight' => 'The image height is too small. Minimum height is 100px.',
                 'overWidth' => 'The image width is too large. Maximum width is 1000px.',
@@ -114,28 +118,28 @@ class UserDetails extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * Relations
+     */
     public function getUsers()
     {
-        return $this->hasOne(User::class, ['user_id' => 'user_id']);
+        return $this->hasOne(Users::class, ['user_id' => 'user_id']);
     }
 
-        public function getUserJob()
+    public function getUserJob()
     {
-        return $this->hasOne(\app\models\UserJob::class, ['user_id' => 'user_id']);
+        return $this->hasOne(UserJob::class, ['user_id' => 'user_id']);
     }
-
 
     public function getPartnerDetails()
     {
-        return $this->hasOne(PartnerDetails::class, ['partner_id' => 'user_details_id']);
+        // ✅ FIXED: link by user_id, not user_details_id
+        return $this->hasOne(PartnerDetails::class, ['partner_id' => 'user_id']);
     }
 
-    public static function find()
-    {
-        return new UserDetailsQuery(get_called_class());
-    }
-
-    // GENDER ENUM
+    /**
+     * Gender options
+     */
     public static function optsGender()
     {
         return [
@@ -159,6 +163,9 @@ class UserDetails extends \yii\db\ActiveRecord
         return $this->gender === self::GENDER_FEMALE;
     }
 
+    /**
+     * Auto timestamp handling
+     */
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
@@ -169,5 +176,10 @@ class UserDetails extends \yii\db\ActiveRecord
             return true;
         }
         return false;
+    }
+
+    public static function find()
+    {
+        return new UserDetailsQuery(get_called_class());
     }
 }

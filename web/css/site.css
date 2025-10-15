@@ -25,7 +25,7 @@ body::before {
 }
 
 main#main {
-    flex: 1;
+    flex: 1 0 auto;
 }
 
 /* Sidebar */
@@ -84,6 +84,7 @@ footer#footer {
     margin-top: auto; /* Pushes footer to bottom naturally */
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
 }
 
 .footer-logged-in {

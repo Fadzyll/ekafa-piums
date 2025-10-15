@@ -10,9 +10,14 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use app\models\UserDetails;
 use app\models\UserJob;
+use app\models\PartnerDetails;
+use app\models\PartnerJob; // ✅ Added if you have PartnerJob model
 
 class UserDetailsController extends Controller
 {
+    /**
+     * Access and HTTP verb control.
+     */
     public function behaviors()
     {
         return [
@@ -21,7 +26,7 @@ class UserDetailsController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'], // Only authenticated users
+                        'roles' => ['@'], // ✅ Only authenticated users
                     ],
                 ],
             ],
@@ -35,7 +40,7 @@ class UserDetailsController extends Controller
     }
 
     /**
-     * Create or update user profile (including profile picture).
+     * Create or update user profile (with image upload).
      */
     public function actionProfile()
     {
@@ -51,14 +56,14 @@ class UserDetailsController extends Controller
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
             if ($model->validate()) {
-                // Handle profile image upload
+                // ✅ Handle profile image upload
                 if ($model->imageFile) {
                     $uploadDir = Yii::getAlias('@webroot/uploads/');
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0775, true);
                     }
 
-                    // Delete old profile image if exists
+                    // Delete old image if it exists
                     if (!empty($model->profile_picture_url)) {
                         $oldPath = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
                         if (file_exists($oldPath)) {
@@ -75,14 +80,16 @@ class UserDetailsController extends Controller
                     }
                 }
 
+                // ✅ Save profile
                 if ($model->save(false)) {
                     Yii::$app->session->setFlash('success', 'Profile updated successfully.');
 
-                    // Redirect user to job creation if no job found
+                    // If no job yet, go to job form first
                     if (!$model->userJob) {
-                        return $this->redirect(['user-job/job']);
+                        return $this->redirect(['user-job/profile']);
                     }
 
+                    // Otherwise go back to profile view
                     return $this->redirect(['view']);
                 }
             }
@@ -94,16 +101,20 @@ class UserDetailsController extends Controller
     }
 
     /**
-     * Displays the user profile along with related job info.
+     * Display the user's profile with job, partner, and partner job details.
      */
     public function actionView()
     {
         $userId = Yii::$app->user->id;
 
-        // Load profile + related job using Yii relations
+        // ✅ Preload all related models: userJob + partnerDetails + partnerJob (nested relation)
         $model = UserDetails::find()
             ->where(['user_id' => $userId])
-            ->with('userJob') // <-- Preload relation
+            ->with([
+                'userJob',
+                'partnerDetails',
+                'partnerDetails.partnerJob' // ✅ Include partner job relationship
+            ])
             ->one();
 
         if (!$model) {
@@ -114,5 +125,16 @@ class UserDetailsController extends Controller
         return $this->render('view', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Optional: Used if you need to fetch user details elsewhere.
+     */
+    protected function findModel($id)
+    {
+        if (($model = UserDetails::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested user profile does not exist.');
     }
 }

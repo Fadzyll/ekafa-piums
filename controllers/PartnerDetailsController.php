@@ -2,126 +2,89 @@
 
 namespace app\controllers;
 
-use app\models\PartnerDetails;
-use app\models\PartnerDetailsSearch;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
+use app\models\PartnerDetails;
 
-/**
- * PartnerDetailsController implements the CRUD actions for PartnerDetails model.
- */
 class PartnerDetailsController extends Controller
 {
     /**
-     * @inheritDoc
+     * Add or update partner details (including image upload).
      */
-    public function behaviors()
+    public function actionProfile()
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
-                ],
-            ]
-        );
-    }
+        $userId = Yii::$app->user->id;
 
-    /**
-     * Lists all PartnerDetails models.
-     *
-     * @return string
-     */
-    public function actionIndex()
-    {
-        $searchModel = new PartnerDetailsSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
+        // Load existing record or create a new one
+        $model = PartnerDetails::findOne(['partner_id' => $userId]);
+        if (!$model) {
+            $model = new PartnerDetails();
+            $model->partner_id = $userId;
+        }
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+        if ($model->load(Yii::$app->request->post())) {
+            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-    /**
-     * Displays a single PartnerDetails model.
-     * @param int $partner_id Partner ID
-     * @return string
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($partner_id)
-    {
-        return $this->render('view', [
-            'model' => $this->findModel($partner_id),
-        ]);
-    }
+            if ($model->validate()) {
+                // ✅ Handle profile picture upload
+                if ($model->imageFile) {
+                    $uploadDir = Yii::getAlias('@webroot/uploads/');
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0775, true);
+                    }
 
-    /**
-     * Creates a new PartnerDetails model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
-     */
-    public function actionCreate()
-    {
-        $model = new PartnerDetails();
+                    // Delete old profile picture safely
+                    if (!empty($model->profile_picture_url)) {
+                        $oldFile = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
+                        if (is_file($oldFile)) {
+                            @unlink($oldFile);
+                        }
+                    }
 
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'partner_id' => $model->partner_id]);
+                    // Generate new filename and save
+                    $filename = 'partner_' . $model->partner_id . '_' . time() . '.' . $model->imageFile->extension;
+                    $filePath = $uploadDir . $filename;
+
+                    if ($model->imageFile->saveAs($filePath)) {
+                        $model->profile_picture_url = 'uploads/' . $filename;
+                    }
+                }
+
+                // Save the updated record
+                if ($model->save(false)) {
+                    Yii::$app->session->setFlash('success', 'Partner details saved successfully.');
+
+                    // ✅ Redirect back to the user details page
+                    return $this->redirect(['user-details/view']);
+                }
             }
-        } else {
-            $model->loadDefaultValues();
         }
 
-        return $this->render('create', [
+        return $this->render('profile', [
             'model' => $model,
         ]);
     }
 
     /**
-     * Updates an existing PartnerDetails model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $partner_id Partner ID
-     * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * View partner details (mainly for admin or debug use).
      */
-    public function actionUpdate($partner_id)
+    public function actionView($partner_id = null)
     {
-        $model = $this->findModel($partner_id);
+        $userId = $partner_id ?? Yii::$app->user->id;
+        $model = $this->findModel($userId);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'partner_id' => $model->partner_id]);
-        }
-
-        return $this->render('update', [
+        return $this->render('view', [
             'model' => $model,
         ]);
     }
 
     /**
-     * Deletes an existing PartnerDetails model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $partner_id Partner ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($partner_id)
-    {
-        $this->findModel($partner_id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the PartnerDetails model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $partner_id Partner ID
-     * @return PartnerDetails the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
+     * Finds the PartnerDetails model based on partner_id.
+     * @param int $partner_id
+     * @return PartnerDetails
+     * @throws NotFoundHttpException
      */
     protected function findModel($partner_id)
     {
@@ -129,6 +92,6 @@ class PartnerDetailsController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('The requested partner record does not exist.');
     }
 }

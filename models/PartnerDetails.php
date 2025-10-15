@@ -3,26 +3,13 @@
 namespace app\models;
 
 use Yii;
+use yii\web\UploadedFile;
 
-/**
- * This is the model class for table "partner_details".
- *
- * @property int $partner_id
- * @property string $partner_name
- * @property string $partner_ic_number
- * @property string|null $partner_phone_number
- * @property string|null $partner_citizenship
- * @property string|null $partner_marital_status
- * @property string|null $partner_address
- * @property string|null $partner_city
- * @property string|null $partner_postcode
- * @property string|null $partner_state
- *
- * @property PartnerJob $partnerJob
- * @property UserDetails $userDetails
- */
 class PartnerDetails extends \yii\db\ActiveRecord
 {
+    /** @var UploadedFile */
+    public $imageFile;
+
     public static function tableName()
     {
         return 'partner_details';
@@ -40,9 +27,18 @@ class PartnerDetails extends \yii\db\ActiveRecord
             [['partner_marital_status'], 'string', 'max' => 50],
             [['partner_postcode'], 'string', 'max' => 10],
             [['partner_id'], 'unique'],
-            [['partner_id'], 'exist', 'skipOnError' => true,
+            [['profile_picture_url'], 'string', 'max' => 255],
+
+            // ✅ Image file validation
+            [['imageFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg'],
+
+            // ✅ Fix relation validation — use user_id (not user_details_id)
+            [
+                ['partner_id'], 'exist',
+                'skipOnError' => true,
                 'targetClass' => UserDetails::class,
-                'targetAttribute' => ['partner_id' => 'user_details_id']],
+                'targetAttribute' => ['partner_id' => 'user_id']
+            ],
         ];
     }
 
@@ -59,17 +55,25 @@ class PartnerDetails extends \yii\db\ActiveRecord
             'partner_city' => 'Partner City',
             'partner_postcode' => 'Partner Postcode',
             'partner_state' => 'Partner State',
+            'profile_picture_url' => 'Profile Picture',
+            'imageFile' => 'Upload New Picture',
         ];
     }
 
+    /**
+     * Relation to PartnerJob table
+     */
     public function getPartnerJob()
     {
         return $this->hasOne(PartnerJob::class, ['partner_id' => 'partner_id']);
     }
 
+    /**
+     * Relation back to UserDetails
+     */
     public function getUserDetails()
     {
-        return $this->hasOne(UserDetails::class, ['user_details_id' => 'partner_id']);
+        return $this->hasOne(UserDetails::class, ['user_id' => 'partner_id']);
     }
 
     public static function find()
