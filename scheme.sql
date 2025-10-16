@@ -376,7 +376,7 @@ CREATE TABLE attendance_summary (
     summary_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     class_id INT NOT NULL,
-    year_month VARCHAR(7) NOT NULL COMMENT 'Format: YYYY-MM',
+    `year_month` VARCHAR(7) NOT NULL COMMENT 'Format: YYYY-MM',
     total_school_days TINYINT NOT NULL,
     present_count TINYINT NOT NULL DEFAULT 0,
     absent_count TINYINT NOT NULL DEFAULT 0,
@@ -387,8 +387,8 @@ CREATE TABLE attendance_summary (
     
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_student_month (student_id, year_month),
-    INDEX idx_summary_month (year_month)
+    UNIQUE KEY unique_student_month (student_id, `year_month`),
+    INDEX idx_summary_month (`year_month`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Pre-computed monthly attendance stats';
 
 DROP TABLE IF EXISTS learning_materials;
@@ -1227,18 +1227,18 @@ BEGIN
         COMMIT;
         
         SELECT 
-            'Success' AS status,
+            'Success' AS `status`,
             p_student_id AS student_id,
             v_overall_grade AS grade,
             v_average AS percentage,
-            v_class_rank AS rank,
+            v_class_rank AS `rank`,
             CONCAT('Report card generated - Grade: ', v_overall_grade, 
                    ' (', ROUND(v_average, 2), '%), Rank: ', v_class_rank, 
                    '/', v_total_students) AS message;
     END IF;
 END$$
 
-DROP PROCEDURE IF EXISTS sp_send_payment_reminders$
+DROP PROCEDURE IF EXISTS sp_send_payment_reminders$$
 CREATE PROCEDURE sp_send_payment_reminders()
 BEGIN
     DECLARE v_reminder_count INT DEFAULT 0;
