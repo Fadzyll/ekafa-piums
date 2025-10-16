@@ -1,14 +1,13 @@
 <?php
-
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=ekafa_db',
+    'dsn' => 'mysql:host=localhost;dbname=ekafa_piums',  // ← Fixed
     'username' => 'root',
     'password' => '',
-    'charset' => 'utf8',
-
-    // Schema cache options (for production environment)
-    //'enableSchemaCache' => true,
-    //'schemaCacheDuration' => 60,
-    //'schemaCache' => 'cache',
+    'charset' => 'utf8mb4',  // ← Fixed
+    
+    // Enable schema cache for production
+    'enableSchemaCache' => true,
+    'schemaCacheDuration' => 3600,
+    'schemaCache' => 'cache',
 ];
