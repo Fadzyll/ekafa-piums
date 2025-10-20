@@ -48,21 +48,36 @@ $this->title = 'Select Your Role';
             <!-- Back to Home -->
             <div class="text-center mt-4">
                 <?= Html::a('← Back to Home', ['site/index'], [
-                    'class' => 'text-decoration-none',
-                    'style' => 'color: var(--ekafa-gray-600);'
+                    'class' => 'text-decoration-none back-link'
                 ]) ?>
             </div>
         </div>
     </div>
 </div>
 
-<?php
-$this->registerCss(<<<CSS
+<style>
+/* Ensure CSS variables are available */
+:root {
+    --ekafa-primary: #004135;
+    --ekafa-primary-light: #11684d;
+    --ekafa-gray-900: #111827;
+    --ekafa-gray-600: #4b5563;
+    --ekafa-gray-200: #e5e7eb;
+    --ekafa-gray-100: #f3f4f6;
+    --radius-xl: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-md: 1rem;
+    --transition-base: 250ms ease-in-out;
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Role Grid Specific Styles */
 .role-title {
     font-weight: 700;
     font-size: 1.125rem;
     margin-top: 0.5rem;
     color: var(--ekafa-gray-900);
+    transition: color var(--transition-base);
 }
 
 .role-description {
@@ -74,5 +89,15 @@ $this->registerCss(<<<CSS
 .role-card-modern:hover .role-title {
     color: var(--ekafa-primary);
 }
-CSS);
-?>
+
+.back-link {
+    color: var(--ekafa-gray-600);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+.back-link:hover {
+    color: var(--ekafa-primary);
+}
+</style>
