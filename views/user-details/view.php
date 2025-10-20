@@ -1,182 +1,307 @@
 <?php
 use yii\helpers\Html;
 
-/** @var yii\web\View $this */
-/** @var app\models\UserDetails $model */
+$this->title = 'My Profile';
 
-$this->title = 'View Profile';
-$this->params['breadcrumbs'][] = $this->title;
-
-// Default profile image path
+// Helper function for safe image URLs
 $defaultImage = Yii::getAlias('@web/images/default_profile.png');
-
-// Safe image URL helper
 function safeImageUrl($relativePath, $defaultImage) {
     if (!$relativePath) return $defaultImage;
     $relative = ltrim($relativePath, '/');
     $filePath = Yii::getAlias('@webroot/' . $relative);
-    return file_exists($filePath)
-        ? Yii::getAlias('@web/' . $relative)
-        : $defaultImage;
+    return file_exists($filePath) ? Yii::getAlias('@web/' . $relative) : $defaultImage;
 }
 
-// User & Partner Images
 $imageUrl = safeImageUrl($model->profile_picture_url ?? null, $defaultImage);
 $partnerImageUrl = $model->partnerDetails && $model->partnerDetails->profile_picture_url
     ? safeImageUrl($model->partnerDetails->profile_picture_url, $defaultImage)
     : $defaultImage;
+
+$userRole = Yii::$app->user->identity->role ?? 'User';
 ?>
 
-<div class="container mt-4">
-
-    <!-- USER INFORMATION CARD -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">User Information</h3>
-            <div class="d-flex gap-2">
-                <?= Html::a('Update Profile', ['profile'], ['class' => 'btn btn-light']) ?>
-                <?= Html::a(
-                    $model->userJob ? 'Update Job' : 'Add Job',
-                    ['user-job/profile'],
-                    ['class' => 'btn btn-light']
-                ) ?>
-            </div>
+<div class="profile-container fade-in">
+    
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <img src="<?= Html::encode($imageUrl) ?>" alt="Profile Picture" class="profile-avatar-large">
+        <div class="profile-info">
+            <h1><?= Html::encode($model->full_name ?: 'Complete Your Profile') ?></h1>
+            <span class="role-badge">
+                <i class="bi bi-person-badge"></i>
+                <?= Html::encode($userRole) ?>
+            </span>
+            <p class="mt-2 mb-0" style="opacity: 0.9;">
+                <i class="bi bi-envelope"></i>
+                <?= Html::encode(Yii::$app->user->identity->email) ?>
+            </p>
         </div>
-
-        <div class="card-body">
-            <div class="row align-items-center">
-                <!-- Profile Picture -->
-                <div class="col-md-4 text-center mb-3">
-                    <img src="<?= Html::encode($imageUrl) ?>"
-                         class="img-thumbnail rounded-circle mb-3 shadow-sm"
-                         style="width: 150px; height: 150px; object-fit: cover;">
-                </div>
-
-                <!-- User Information -->
-                <div class="col-md-8">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Full Name:</strong> <?= Html::encode($model->full_name) ?></p>
-                            <p><strong>IC Number:</strong> <?= Html::encode($model->ic_number) ?></p>
-                            <p><strong>Age:</strong> <?= Html::encode($model->age) ?></p>
-                            <p><strong>Gender:</strong> <?= Html::encode($model->gender) ?></p>
-                            <p><strong>Race:</strong> <?= Html::encode($model->race) ?></p>
-                            <p><strong>Phone Number:</strong> <?= Html::encode($model->phone_number) ?></p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Citizenship:</strong> <?= Html::encode($model->citizenship) ?></p>
-                            <p><strong>Marital Status:</strong> <?= Html::encode($model->marital_status) ?></p>
-                            <p><strong>Address:</strong> <?= Html::encode($model->address) ?></p>
-                            <p><strong>City:</strong> <?= Html::encode($model->city) ?></p>
-                            <p><strong>Postcode:</strong> <?= Html::encode($model->postcode) ?></p>
-                            <p><strong>State:</strong> <?= Html::encode($model->state) ?></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- USER JOB INFORMATION -->
-            <hr class="my-4">
-            <h5 class="text-dark mb-3">Job Information</h5>
-
-            <?php if ($model->userJob): ?>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Job Title:</strong> <?= Html::encode($model->userJob->job) ?></p>
-                        <p><strong>Employer:</strong> <?= Html::encode($model->userJob->employer) ?></p>
-                        <p><strong>Employer Address:</strong> <?= Html::encode($model->userJob->employer_address) ?></p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Employer Phone:</strong> <?= Html::encode($model->userJob->employer_phone_number) ?></p>
-                        <p><strong>Gross Salary:</strong> RM <?= Html::encode($model->userJob->gross_salary) ?></p>
-                        <p><strong>Net Salary:</strong> RM <?= Html::encode($model->userJob->net_salary) ?></p>
-                    </div>
-                </div>
-            <?php else: ?>
-                <p class="text-muted fst-italic">
-                    No job information available. Click "Add Job" to complete your profile.
-                </p>
-            <?php endif; ?>
+        <div class="ms-auto">
+            <?= Html::a('<i class="bi bi-pencil-square"></i> Edit Profile', ['profile'], [
+                'class' => 'btn-modern btn-secondary-modern'
+            ]) ?>
         </div>
     </div>
 
-    <!-- PARTNER INFORMATION CARD -->
-    <div class="card shadow mb-5">
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Partner Information</h4>
-            <div class="d-flex gap-2">
-                <?= Html::a(
-                    $model->partnerDetails ? 'Update Partner' : 'Add Partner',
-                    ['partner-details/profile'],
-                    ['class' => 'btn btn-light']
-                ) ?>
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs-modern" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
+                <i class="bi bi-person"></i> Personal Info
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="job-tab" data-bs-toggle="tab" data-bs-target="#job" type="button">
+                <i class="bi bi-briefcase"></i> Employment
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="partner-tab" data-bs-toggle="tab" data-bs-target="#partner" type="button">
+                <i class="bi bi-people"></i> Partner Info
+            </button>
+        </li>
+    </ul>
 
-                <?php if ($model->partnerDetails): ?>
-                    <?= Html::a(
-                        $model->partnerDetails->partnerJob ? 'Update Partner Job' : 'Add Partner Job',
-                        ['partner-job/profile'],
-                        ['class' => 'btn btn-light']
-                    ) ?>
-                <?php endif; ?>
+    <!-- Tab Content -->
+    <div class="tab-content fade-in" id="profileTabsContent">
+        
+        <!-- Personal Information Tab -->
+        <div class="tab-pane fade show active" id="personal" role="tabpanel">
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-person-circle"></i>
+                    Personal Information
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value"><?= Html::encode($model->full_name ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">IC Number</div>
+                        <div class="info-value"><?= Html::encode($model->ic_number ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Age</div>
+                        <div class="info-value"><?= Html::encode($model->age ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Gender</div>
+                        <div class="info-value"><?= Html::encode($model->gender ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Race</div>
+                        <div class="info-value"><?= Html::encode($model->race ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Citizenship</div>
+                        <div class="info-value"><?= Html::encode($model->citizenship ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Marital Status</div>
+                        <div class="info-value"><?= Html::encode($model->marital_status ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone Number</div>
+                        <div class="info-value"><?= Html::encode($model->phone_number ?: '-') ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3 class="info-card-title">
+                    <i class="bi bi-geo-alt"></i>
+                    Address Information
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-label">Address</div>
+                        <div class="info-value"><?= Html::encode($model->address ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">City</div>
+                        <div class="info-value"><?= Html::encode($model->city ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Postcode</div>
+                        <div class="info-value"><?= Html::encode($model->postcode ?: '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">State</div>
+                        <div class="info-value"><?= Html::encode($model->state ?: '-') ?></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card-body">
-            <?php if ($model->partnerDetails): ?>
-                <div class="row align-items-center">
-                    <div class="col-md-4 text-center mb-3">
-                        <img src="<?= Html::encode($partnerImageUrl) ?>"
-                             class="img-thumbnail rounded-circle mb-3 shadow-sm"
-                             style="width: 150px; height: 150px; object-fit: cover;">
+        <!-- Employment Tab -->
+        <div class="tab-pane fade" id="job" role="tabpanel">
+            <?php if ($model->userJob): ?>
+                <div class="info-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="info-card-title mb-0">
+                            <i class="bi bi-briefcase-fill"></i>
+                            Employment Details
+                        </h3>
+                        <?= Html::a('<i class="bi bi-pencil"></i> Edit', ['user-job/profile'], [
+                            'class' => 'btn-modern btn-secondary-modern'
+                        ]) ?>
                     </div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Job Title</div>
+                            <div class="info-value"><?= Html::encode($model->userJob->job) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Employer</div>
+                            <div class="info-value"><?= Html::encode($model->userJob->employer) ?></div>
+                        </div>
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Employer Address</div>
+                            <div class="info-value"><?= Html::encode($model->userJob->employer_address) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Employer Phone</div>
+                            <div class="info-value"><?= Html::encode($model->userJob->employer_phone_number) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Gross Salary</div>
+                            <div class="info-value">RM <?= number_format($model->userJob->gross_salary, 2) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Net Salary</div>
+                            <div class="info-value">RM <?= number_format($model->userJob->net_salary, 2) ?></div>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="info-card text-center" style="padding: 3rem;">
+                    <i class="bi bi-briefcase" style="font-size: 3rem; color: var(--ekafa-gray-300);"></i>
+                    <h4 class="mt-3 mb-2">No Employment Information</h4>
+                    <p class="text-muted mb-4">Add your employment details to complete your profile</p>
+                    <?= Html::a('<i class="bi bi-plus-circle"></i> Add Employment Info', ['user-job/profile'], [
+                        'class' => 'btn-modern btn-primary-modern'
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+        </div>
 
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Name:</strong> <?= Html::encode($model->partnerDetails->partner_name) ?></p>
-                                <p><strong>IC Number:</strong> <?= Html::encode($model->partnerDetails->partner_ic_number) ?></p>
-                                <p><strong>Phone:</strong> <?= Html::encode($model->partnerDetails->partner_phone_number) ?></p>
-                                <p><strong>Citizenship:</strong> <?= Html::encode($model->partnerDetails->partner_citizenship) ?></p>
+        <!-- Partner Tab -->
+        <div class="tab-pane fade" id="partner" role="tabpanel">
+            <?php if ($model->partnerDetails): ?>
+                <div class="info-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="<?= Html::encode($partnerImageUrl) ?>" alt="Partner" 
+                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--ekafa-gray-200);">
+                            <div>
+                                <h3 class="info-card-title mb-1">
+                                    Partner Information
+                                </h3>
+                                <p class="text-muted mb-0"><?= Html::encode($model->partnerDetails->partner_name) ?></p>
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>Marital Status:</strong> <?= Html::encode($model->partnerDetails->partner_marital_status) ?></p>
-                                <p><strong>Address:</strong> <?= Html::encode($model->partnerDetails->partner_address) ?></p>
-                                <p><strong>City:</strong> <?= Html::encode($model->partnerDetails->partner_city) ?></p>
-                                <p><strong>Postcode:</strong> <?= Html::encode($model->partnerDetails->partner_postcode) ?></p>
-                                <p><strong>State:</strong> <?= Html::encode($model->partnerDetails->partner_state) ?></p>
-                            </div>
+                        </div>
+                        <?= Html::a('<i class="bi bi-pencil"></i> Edit', ['partner-details/profile'], [
+                            'class' => 'btn-modern btn-secondary-modern'
+                        ]) ?>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">IC Number</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_ic_number) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_phone_number) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Citizenship</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_citizenship) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Marital Status</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_marital_status) ?></div>
+                        </div>
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Address</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_address) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">City</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_city) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Postcode</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_postcode) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">State</div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_state) ?></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Partner Job Info -->
-                <hr class="my-4">
-                <h5 class="text-dark mb-3">Partner Job Information</h5>
-
                 <?php if ($model->partnerDetails->partnerJob): ?>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Occupation:</strong> <?= Html::encode($model->partnerDetails->partnerJob->partner_job) ?></p>
-                            <p><strong>Employer:</strong> <?= Html::encode($model->partnerDetails->partnerJob->partner_employer) ?></p>
-                            <p><strong>Employer Address:</strong> <?= Html::encode($model->partnerDetails->partnerJob->partner_employer_address) ?></p>
+                    <div class="info-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="info-card-title mb-0">
+                                <i class="bi bi-briefcase"></i>
+                                Partner Employment
+                            </h3>
+                            <?= Html::a('<i class="bi bi-pencil"></i> Edit', ['partner-job/profile'], [
+                                'class' => 'btn-modern btn-secondary-modern'
+                            ]) ?>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>Employer Phone:</strong> <?= Html::encode($model->partnerDetails->partnerJob->partner_employer_phone_number) ?></p>
-                            <p><strong>Gross Salary:</strong> RM <?= Html::encode($model->partnerDetails->partnerJob->partner_gross_salary) ?></p>
-                            <p><strong>Net Salary:</strong> RM <?= Html::encode($model->partnerDetails->partnerJob->partner_net_salary) ?></p>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Occupation</div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_job) ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Employer</div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer) ?></div>
+                            </div>
+                            <div class="info-item" style="grid-column: 1 / -1;">
+                                <div class="info-label">Employer Address</div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_address) ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Employer Phone</div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_phone_number) ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Gross Salary</div>
+                                <div class="info-value">RM <?= number_format($model->partnerDetails->partnerJob->partner_gross_salary, 2) ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Net Salary</div>
+                                <div class="info-value">RM <?= number_format($model->partnerDetails->partnerJob->partner_net_salary, 2) ?></div>
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <p class="text-muted fst-italic">
-                        No partner job information available. Click "Add Partner Job" to complete partner details.
-                    </p>
+                    <div class="info-card text-center" style="padding: 2rem;">
+                        <i class="bi bi-briefcase" style="font-size: 2rem; color: var(--ekafa-gray-300);"></i>
+                        <h5 class="mt-2 mb-2">No Partner Employment Info</h5>
+                        <p class="text-muted mb-3">Add partner's employment details</p>
+                        <?= Html::a('<i class="bi bi-plus-circle"></i> Add Partner Job', ['partner-job/profile'], [
+                            'class' => 'btn-modern btn-primary-modern btn-sm'
+                        ]) ?>
+                    </div>
                 <?php endif; ?>
 
             <?php else: ?>
-                <p class="text-muted fst-italic">
-                    No partner information available. Click "Add Partner" to complete your profile.
-                </p>
+                <div class="info-card text-center" style="padding: 3rem;">
+                    <i class="bi bi-people" style="font-size: 3rem; color: var(--ekafa-gray-300);"></i>
+                    <h4 class="mt-3 mb-2">No Partner Information</h4>
+                    <p class="text-muted mb-4">Add your partner's details to complete your profile</p>
+                    <?= Html::a('<i class="bi bi-plus-circle"></i> Add Partner Info', ['partner-details/profile'], [
+                        'class' => 'btn-modern btn-primary-modern'
+                    ]) ?>
+                </div>
             <?php endif; ?>
         </div>
+
     </div>
 </div>

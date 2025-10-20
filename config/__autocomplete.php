@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * This class only exists here for IDE (PHPStorm/Netbeans/...) autocompletion.
+ * This file is never included anywhere.
+ */
 class Yii {
     /**
      * @var \yii\web\Application|\yii\console\Application|__Application
@@ -8,19 +12,15 @@ class Yii {
 }
 
 /**
- * @property yii\rbac\DbManager $authManager
+ * @property yii\rbac\DbManager $authManager 
  * @property \yii\web\User|__WebUser $user
- * @property \yii\db\Connection $db
- * @property \yii\caching\FileCache $cache
- * @property \yii\log\Dispatcher $log
- * @property \yii\web\UrlManager $urlManager
- * @property \yii\symfonymailer\Mailer $mailer
+ * 
  */
 class __Application {
 }
 
 /**
- * @property app\models\User $identity
+ * @property app\models\Users $identity // Changed from User to Users
  */
 class __WebUser {
 }

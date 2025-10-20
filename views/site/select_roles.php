@@ -2,87 +2,77 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$this->title = 'Select Role';
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Select Your Role';
 ?>
 
-<div class="container py-5">
-    <div class="role-selection-wrapper p-4 mx-auto">
-        <h2 class="text-center mb-5">Please Choose Access Type</h2>
+<div class="auth-wrapper">
+    <div class="auth-container fade-in-up" style="max-width: 600px;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="bi bi-key"></i>
+                </div>
+                <h1 class="auth-title">Choose Access Type</h1>
+                <p class="auth-subtitle">Select your role to continue to E-KAFA PIUMS</p>
+            </div>
 
-        <div class="row justify-content-center g-4">
-            <!-- Admin Card -->
-            <div class="col-10 col-sm-6 col-md-4 col-lg-3">
-                <a href="<?= Url::to(['site/login', 'role' => 'Admin']) ?>" class="text-decoration-none">
-                    <div class="card role-card">
-                        <i class="bi bi-shield-lock-fill role-icon"></i>
-                        <span>Admin</span>
+            <div class="role-grid">
+                <!-- Admin Card -->
+                <a href="<?= Url::to(['site/login', 'role' => 'Admin']) ?>" class="role-card-modern">
+                    <div class="role-icon-modern">
+                        <i class="bi bi-shield-lock-fill"></i>
                     </div>
+                    <div class="role-title">Admin</div>
+                    <div class="role-description">System Administrator</div>
+                </a>
+
+                <!-- Teacher Card -->
+                <a href="<?= Url::to(['site/login', 'role' => 'Teacher']) ?>" class="role-card-modern">
+                    <div class="role-icon-modern">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+                    <div class="role-title">Teacher</div>
+                    <div class="role-description">KAFA Educator</div>
+                </a>
+
+                <!-- Parent Card -->
+                <a href="<?= Url::to(['site/login', 'role' => 'Parent']) ?>" class="role-card-modern">
+                    <div class="role-icon-modern">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="role-title">Parent</div>
+                    <div class="role-description">Student Guardian</div>
                 </a>
             </div>
 
-            <!-- Teacher Card -->
-            <div class="col-10 col-sm-6 col-md-4 col-lg-3">
-                <a href="<?= Url::to(['site/login', 'role' => 'Teacher']) ?>" class="text-decoration-none">
-                    <div class="card role-card">
-                        <i class="bi bi-person-badge-fill role-icon"></i>
-                        <span>Teacher</span>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Parent Card -->
-            <div class="col-10 col-sm-6 col-md-4 col-lg-3">
-                <a href="<?= Url::to(['site/login', 'role' => 'Parent']) ?>" class="text-decoration-none">
-                    <div class="card role-card">
-                        <i class="bi bi-people-fill role-icon"></i>
-                        <span>Parent</span>
-                    </div>
-                </a>
+            <!-- Back to Home -->
+            <div class="text-center mt-4">
+                <?= Html::a('← Back to Home', ['site/index'], [
+                    'class' => 'text-decoration-none',
+                    'style' => 'color: var(--ekafa-gray-600);'
+                ]) ?>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-/* Outer container */
-.role-selection-wrapper {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 40px 20px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    max-width: 1000px;
-    max-height: 1000px;
-    margin: auto;
-    min-height: 50vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+<?php
+$this->registerCss(<<<CSS
+.role-title {
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-top: 0.5rem;
+    color: var(--ekafa-gray-900);
 }
 
-/* Role Cards */
-.role-card {
-    background-color: #014421;
-    color: #ffffff;
-    width: 100%;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    font-size: 1.25rem;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+.role-description {
+    font-size: 0.875rem;
+    color: var(--ekafa-gray-600);
+    margin-top: 0.25rem;
 }
 
-.role-card:hover {
-    background-color: #02663c;
-    transform: translateY(-4px);
+.role-card-modern:hover .role-title {
+    color: var(--ekafa-primary);
 }
-
-.role-icon {
-    font-size: 2.75rem;
-    margin-bottom: 12px;
-}
-</style>
+CSS);
+?>

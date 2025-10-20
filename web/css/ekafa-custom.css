@@ -1,0 +1,644 @@
+/* ============================================================================
+   E-KAFA PIUMS - Modern UI Design System
+   ============================================================================ */
+
+:root {
+    /* Primary Colors */
+    --ekafa-primary: #004135;
+    --ekafa-primary-light: #11684d;
+    --ekafa-primary-dark: #002820;
+    
+    /* Accent Colors */
+    --ekafa-accent: #00a86b;
+    --ekafa-accent-light: #00c77f;
+    
+    /* Status Colors */
+    --ekafa-success: #10b981;
+    --ekafa-danger: #ef4444;
+    --ekafa-warning: #f59e0b;
+    --ekafa-info: #3b82f6;
+    
+    /* Neutral Colors */
+    --ekafa-gray-50: #f9fafb;
+    --ekafa-gray-100: #f3f4f6;
+    --ekafa-gray-200: #e5e7eb;
+    --ekafa-gray-300: #d1d5db;
+    --ekafa-gray-400: #9ca3af;
+    --ekafa-gray-500: #6b7280;
+    --ekafa-gray-600: #4b5563;
+    --ekafa-gray-700: #374151;
+    --ekafa-gray-800: #1f2937;
+    --ekafa-gray-900: #111827;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 250ms ease-in-out;
+    --transition-slow: 350ms ease-in-out;
+}
+
+/* ============================================================================
+   Global Styles
+   ============================================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+    color: var(--ekafa-gray-900);
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   Modern Card Design (Glassmorphism)
+   ============================================================================ */
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* ============================================================================
+   Modern Authentication Pages
+   ============================================================================ */
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 440px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: var(--spacing-xl);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.auth-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-md);
+    background: linear-gradient(135deg, var(--ekafa-primary), var(--ekafa-primary-light));
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--ekafa-gray-900);
+    margin-bottom: var(--spacing-sm);
+}
+
+.auth-subtitle {
+    color: var(--ekafa-gray-600);
+    font-size: 0.9375rem;
+}
+
+/* ============================================================================
+   Modern Form Controls
+   ============================================================================ */
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--ekafa-gray-700);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.875rem;
+    transition: color var(--transition-fast);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ekafa-gray-200);
+    border-radius: var(--radius-lg);
+    font-size: 0.9375rem;
+    transition: all var(--transition-base);
+    background-color: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--ekafa-primary);
+    box-shadow: 0 0 0 4px rgba(0, 65, 53, 0.1);
+    background-color: white;
+}
+
+.form-control:hover:not(:focus) {
+    border-color: var(--ekafa-gray-300);
+}
+
+.form-control::placeholder {
+    color: var(--ekafa-gray-400);
+}
+
+/* Input with Icon */
+.input-with-icon {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ekafa-gray-400);
+    pointer-events: none;
+    transition: color var(--transition-fast);
+}
+
+.input-with-icon .form-control {
+    padding-left: 2.75rem;
+}
+
+.input-with-icon .form-control:focus ~ .input-icon {
+    color: var(--ekafa-primary);
+}
+
+/* Password Toggle */
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--ekafa-gray-500);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.password-toggle:hover {
+    color: var(--ekafa-primary);
+    background-color: var(--ekafa-gray-100);
+}
+
+/* ============================================================================
+   Modern Buttons
+   ============================================================================ */
+
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-modern:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, var(--ekafa-primary), var(--ekafa-primary-light));
+    color: white;
+    box-shadow: 0 4px 14px rgba(0, 65, 53, 0.4);
+}
+
+.btn-primary-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 65, 53, 0.5);
+}
+
+.btn-primary-modern:active {
+    transform: translateY(0);
+}
+
+.btn-secondary-modern {
+    background: white;
+    color: var(--ekafa-primary);
+    border: 2px solid var(--ekafa-gray-200);
+}
+
+.btn-secondary-modern:hover {
+    border-color: var(--ekafa-primary);
+    background-color: var(--ekafa-gray-50);
+}
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================================================
+   Role Selection Cards
+   ============================================================================ */
+
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+}
+
+.role-card-modern {
+    background: white;
+    border: 2px solid var(--ekafa-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    color: var(--ekafa-gray-700);
+}
+
+.role-card-modern:hover {
+    border-color: var(--ekafa-primary);
+    background: var(--ekafa-gray-50);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    color: var(--ekafa-primary);
+}
+
+.role-icon-modern {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--ekafa-gray-100), var(--ekafa-gray-200));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    transition: all var(--transition-base);
+}
+
+.role-card-modern:hover .role-icon-modern {
+    background: linear-gradient(135deg, var(--ekafa-primary), var(--ekafa-primary-light));
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ============================================================================
+   Profile Page - Tab Design
+   ============================================================================ */
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--ekafa-primary), var(--ekafa-primary-light));
+    color: white;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.profile-avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: var(--shadow-lg);
+}
+
+.profile-info h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.profile-info .role-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    backdrop-filter: blur(10px);
+}
+
+/* Modern Tabs */
+.nav-tabs-modern {
+    border-bottom: 2px solid var(--ekafa-gray-200);
+    margin-bottom: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+}
+
+.nav-tabs-modern .nav-link {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--ekafa-gray-600);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+}
+
+.nav-tabs-modern .nav-link:hover {
+    color: var(--ekafa-primary);
+    background-color: var(--ekafa-gray-50);
+}
+
+.nav-tabs-modern .nav-link.active {
+    color: var(--ekafa-primary);
+    border-bottom-color: var(--ekafa-primary);
+}
+
+/* Info Cards */
+.info-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-lg);
+    transition: box-shadow var(--transition-base);
+}
+
+.info-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.info-card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ekafa-gray-900);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.info-item {
+    padding: var(--spacing-sm) 0;
+}
+
+.info-label {
+    font-size: 0.8125rem;
+    color: var(--ekafa-gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--ekafa-gray-900);
+    font-weight: 500;
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* ============================================================================
+   Alert Messages (Modern)
+   ============================================================================ */
+
+.alert-modern {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.alert-success-modern {
+    background-color: #ecfdf5;
+    border-color: var(--ekafa-success);
+    color: #065f46;
+}
+
+.alert-danger-modern {
+    background-color: #fef2f2;
+    border-color: var(--ekafa-danger);
+    color: #991b1b;
+}
+
+.alert-warning-modern {
+    background-color: #fffbeb;
+    border-color: var(--ekafa-warning);
+    color: #92400e;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .auth-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .role-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+.text-center {
+    text-align: center;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+.mt-2 {
+    margin-top: var(--spacing-sm);
+}
+
+.mt-4 {
+    margin-top: var(--spacing-md);
+}
+
+.gap-2 {
+    gap: var(--spacing-sm);
+}
+
+.d-flex {
+    display: flex;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.w-100 {
+    width: 100%;
+}
