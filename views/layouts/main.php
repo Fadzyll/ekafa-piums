@@ -41,8 +41,25 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         body {
             padding-top: 70px;
             font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('<?= Yii::getAlias('@web/images/Masjid_UMS.jpg') ?>');
+            background-size: cover;
+            background-repeat: no-repeat;
             background-attachment: fixed;
+            background-position: center;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Dark overlay for better content visibility */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.5));
+            z-index: -1;
         }
 
         /* Modern Navbar */
@@ -303,6 +320,14 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+            }
+            
+            body::before {
+                background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.75));
+            }
+
             .sidebar {
                 width: 100%;
                 height: auto;
