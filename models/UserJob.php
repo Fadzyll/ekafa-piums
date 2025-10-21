@@ -28,43 +28,54 @@ class UserJob extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            // Make these fields required:
+            // ✅ REQUIRED FIELDS
             [['user_id', 'job', 'employer', 'employer_address', 'employer_phone_number', 'gross_salary', 'net_salary'], 'required'],
 
             [['user_id'], 'integer'],
             [['employer_address'], 'string'],
-            [['gross_salary', 'net_salary'], 'number'],
+            
+            // ✅ Salary validation
+            [['gross_salary', 'net_salary'], 'number', 'min' => 0],
+            
+            // ✅ Net salary cannot exceed gross salary
+            ['net_salary', 'compare', 'compareAttribute' => 'gross_salary', 'operator' => '<=', 'message' => 'Net salary cannot be greater than gross salary.'],
+            
             [['job'], 'string', 'max' => 100],
             [['employer'], 'string', 'max' => 255],
             [['employer_phone_number'], 'string', 'max' => 20],
+            
+            // ✅ Phone validation
+            [['employer_phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
 
+            // ✅ FIXED: Foreign key
             [['user_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => UserDetails::class,
-                'targetAttribute' => ['user_id' => 'user_details_id']
+                'targetAttribute' => ['user_id' => 'user_id']
             ],
         ];
     }
 
-
     public function attributeLabels()
     {
         return [
-            'userJob_id' => 'User Job ID',
+            'userJob_id' => 'Job ID',
             'user_id' => 'User ID',
-            'job' => 'Job',
-            'employer' => 'Employer',
+            'job' => 'Job Title',
+            'employer' => 'Employer Name',
             'employer_address' => 'Employer Address',
             'employer_phone_number' => 'Employer Phone Number',
-            'gross_salary' => 'Gross Salary',
-            'net_salary' => 'Net Salary',
+            'gross_salary' => 'Gross Salary (RM)',
+            'net_salary' => 'Net Salary (RM)',
         ];
     }
 
-        public function getUserDetails()
+    /**
+     * ✅ FIXED: Relation to UserDetails
+     */
+    public function getUserDetails()
     {
-        return $this->hasOne(\app\models\UserDetails::class, ['user_id' => 'user_id']);
+        return $this->hasOne(UserDetails::class, ['user_id' => 'user_id']);
     }
-
 
     public static function find()
     {

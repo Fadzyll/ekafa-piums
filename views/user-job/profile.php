@@ -65,7 +65,7 @@ body {
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* spreads left and right */
+    justify-content: space-between;
     gap: 1.5rem;
 }
 
@@ -257,7 +257,7 @@ body {
 }
 
 .error-message {
-    display: flex;
+    display: none; /* Hidden by default */
     align-items: center;
     gap: 0.5rem;
     color: #dc2626;
@@ -270,8 +270,13 @@ body {
     border-left: 3px solid #dc2626;
 }
 
+.error-message:not(:empty) {
+    display: flex; /* Show when it has content */
+}
+
 .error-message::before {
     content: '⚠';
+    font-size: 1.125rem;
 }
 
 .form-actions {
@@ -353,7 +358,7 @@ body {
     color: white;
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
-    margin: 0; /* remove margin-bottom */
+    margin: 0;
 }
 
 .btn-back:hover {
@@ -452,7 +457,7 @@ body {
                 <?= $form->field($model, 'employer_phone_number')->textInput([
                     'placeholder' => 'e.g., +60123456789',
                     'maxlength' => true
-                ])->label('Employer Phone <span class="required-star">*</span>') ?>
+                ])->label('Employer Phone') ?>
             </div>
         </div>
     </div>
@@ -531,39 +536,9 @@ body {
 </div>
 
 <script>
-// Auto-calculate net salary suggestion
-const grossInput = document.getElementById('gross-salary');
-const netInput = document.getElementById('net-salary');
-
-if (grossInput && netInput) {
-    grossInput.addEventListener('input', function() {
-        if (this.value && !netInput.value) {
-            const suggested = (parseFloat(this.value) * 0.85).toFixed(2);
-            netInput.placeholder = 'Suggested: ' + suggested;
-            netInput.style.borderColor = '#10b981';
-        }
-    });
-    
-    netInput.addEventListener('focus', function() {
-        if (this.placeholder.includes('Suggested:') && !this.value) {
-            const suggested = this.placeholder.replace('Suggested: ', '');
-            this.value = suggested;
-        }
-    });
-}
-
-// Form reset
 function resetForm() {
-    if (confirm('🔄 Reset all changes?')) {
-        document.querySelector('form').reset();
-        netInput.placeholder = '0.00';
+    if (confirm('Are you sure you want to reset all fields?')) {
+        document.querySelector('.modern-form').reset();
     }
 }
-
-// Form submission
-document.querySelector('form').addEventListener('submit', function() {
-    const btn = document.getElementById('submit-btn');
-    btn.classList.add('btn-loading');
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Saving...</span>';
-});
 </script>

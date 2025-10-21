@@ -27,7 +27,7 @@ class PartnerJob extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            // ✅ Required fields
+            // ✅ REQUIRED FIELDS
             [
                 [
                     'partner_id',
@@ -44,15 +44,19 @@ class PartnerJob extends \yii\db\ActiveRecord
             [['partner_id'], 'integer'],
             [['partner_employer_address'], 'string'],
 
-            // ✅ Salary must be numeric and non-negative
+            // ✅ Salary validation
             [['partner_gross_salary', 'partner_net_salary'], 'number', 'min' => 0],
+            
+            // ✅ Net salary validation
+            ['partner_net_salary', 'compare', 'compareAttribute' => 'partner_gross_salary', 'operator' => '<=', 'message' => 'Net salary cannot be greater than gross salary.'],
 
-            // ✅ Length limits
             [['partner_job'], 'string', 'max' => 100],
             [['partner_employer'], 'string', 'max' => 255],
             [['partner_employer_phone_number'], 'string', 'max' => 20],
+            
+            // ✅ Phone validation
+            [['partner_employer_phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
 
-            // ✅ Unique and relational checks
             [['partner_id'], 'unique'],
             [
                 ['partner_id'],
@@ -83,18 +87,6 @@ class PartnerJob extends \yii\db\ActiveRecord
     public function getPartnerDetails()
     {
         return $this->hasOne(PartnerDetails::class, ['partner_id' => 'partner_id']);
-    }
-
-    /**
-     * Set default salary values on new records
-     */
-    public function beforeValidate()
-    {
-        if ($this->isNewRecord) {
-            $this->partner_gross_salary = $this->partner_gross_salary ?? 0.00;
-            $this->partner_net_salary = $this->partner_net_salary ?? 0.00;
-        }
-        return parent::beforeValidate();
     }
 
     public static function find()

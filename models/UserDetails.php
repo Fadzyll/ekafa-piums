@@ -4,10 +4,6 @@ namespace app\models;
 
 use Yii;
 use yii\web\UploadedFile;
-use app\models\Users;
-use app\models\UserJob;
-use app\models\PartnerDetails;
-use app\models\UserDetailsQuery;
 
 /**
  * This is the model class for table "user_details".
@@ -30,10 +26,9 @@ use app\models\UserDetailsQuery;
  * @property string|null $created_at
  * @property string|null $updated_at
  *
- * @property Users $users
+ * @property Users $user
  * @property UserJob $userJob
  * @property PartnerDetails $partnerDetails
- *
  * @property UploadedFile $imageFile
  */
 class UserDetails extends \yii\db\ActiveRecord
@@ -52,34 +47,55 @@ class UserDetails extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            // ✅ REQUIRED FIELDS
+            [['full_name', 'ic_number', 'phone_number'], 'required'],
+            
+            // Integer fields
             [['user_id', 'age'], 'integer'],
-            [['gender', 'address'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            
+            // String fields with length limits
             [['full_name', 'profile_picture_url'], 'string', 'max' => 255],
             [['ic_number', 'phone_number'], 'string', 'max' => 20],
             [['race', 'marital_status'], 'string', 'max' => 50],
             [['citizenship', 'city', 'state'], 'string', 'max' => 100],
             [['postcode'], 'string', 'max' => 10],
-
+            
+            // Text fields
+            [['gender', 'address'], 'string'],
+            
+            // Date fields
+            [['created_at', 'updated_at'], 'safe'],
+            
+            // ✅ IC Number validation
             [['ic_number'], 'unique'],
+            [['ic_number'], 'match', 'pattern' => '/^\d{12}$/', 'message' => 'IC number must be exactly 12 digits.'],
+            
+            // ✅ Phone number validation
+            [['phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
+            
+            // ✅ Age validation
+            [['age'], 'integer', 'min' => 18, 'max' => 100],
+            
+            // Gender validation
+            ['gender', 'in', 'range' => array_keys(self::optsGender())],
+            
+            // Foreign key validation
             [['user_id'], 'exist', 'skipOnError' => true,
                 'targetClass' => Users::class,
                 'targetAttribute' => ['user_id' => 'user_id']
             ],
 
-            ['gender', 'in', 'range' => array_keys(self::optsGender())],
-
-            // File validation
+            // ✅ File validation
             [['imageFile'], 'file',
                 'skipOnEmpty' => true,
                 'extensions' => ['png', 'jpg', 'jpeg'],
                 'mimeTypes' => ['image/jpeg', 'image/png'],
-                'maxSize' => 2 * 1024 * 1024, // 2MB
+                'maxSize' => 2 * 1024 * 1024,
                 'tooBig' => 'The file is too large. Maximum size is 2MB.',
                 'checkExtensionByMimeType' => true,
             ],
 
-            // Image validation
+            // ✅ Image validation
             [['imageFile'], 'image',
                 'skipOnEmpty' => true,
                 'minWidth' => 100,
@@ -119,21 +135,26 @@ class UserDetails extends \yii\db\ActiveRecord
     }
 
     /**
-     * Relations
+     * ✅ FIXED: Relation to Users
      */
-    public function getUsers()
+    public function getUser()
     {
         return $this->hasOne(Users::class, ['user_id' => 'user_id']);
     }
 
+    /**
+     * ✅ FIXED: Relation to UserJob
+     */
     public function getUserJob()
     {
         return $this->hasOne(UserJob::class, ['user_id' => 'user_id']);
     }
 
+    /**
+     * ✅ FIXED: Relation to PartnerDetails
+     */
     public function getPartnerDetails()
     {
-        // ✅ FIXED: link by user_id, not user_details_id
         return $this->hasOne(PartnerDetails::class, ['partner_id' => 'user_id']);
     }
 
@@ -164,7 +185,7 @@ class UserDetails extends \yii\db\ActiveRecord
     }
 
     /**
-     * Auto timestamp handling
+     * ✅ Auto timestamp handling
      */
     public function beforeSave($insert)
     {
@@ -176,6 +197,33 @@ class UserDetails extends \yii\db\ActiveRecord
             return true;
         }
         return false;
+    }
+
+    /**
+     * ✅ Auto-extract age and gender from Malaysian IC
+     * Format: YYMMDD-PB-###G (12 digits without dash)
+     */
+    public function beforeValidate()
+    {
+        if ($this->ic_number && strlen($this->ic_number) == 12) {
+            // Extract birth year
+            $year = substr($this->ic_number, 0, 2);
+            $currentYear = date('Y');
+            $currentCentury = floor($currentYear / 100) * 100;
+            $previousCentury = $currentCentury - 100;
+            
+            // Determine century
+            $birthYear = ($year > date('y')) ? $previousCentury + $year : $currentCentury + $year;
+            
+            // Calculate age
+            $this->age = $currentYear - $birthYear;
+            
+            // Extract gender (last digit: odd = male, even = female)
+            $lastDigit = (int) substr($this->ic_number, -1);
+            $this->gender = ($lastDigit % 2 == 0) ? self::GENDER_FEMALE : self::GENDER_MALE;
+        }
+        
+        return parent::beforeValidate();
     }
 
     public static function find()

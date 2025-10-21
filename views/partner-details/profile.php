@@ -19,7 +19,6 @@ $imageUrl = ($model->profile_picture_url && file_exists($uploadedPath))
 ?>
 
 <style>
-/* Reuse enhanced styles with partner-specific theme */
 :root {
     --partner-gradient: linear-gradient(135deg, #dc2626, #f87171);
     --partner-light: linear-gradient(135deg, #fef2f2, #fee2e2);
@@ -44,7 +43,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Partner-specific Header (Heart/Love Theme) */
 .partner-header {
     background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
     color: white;
@@ -71,7 +69,7 @@ body {
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* spreads left and right */
+    justify-content: space-between;
     gap: 1.5rem;
 }
 
@@ -105,7 +103,6 @@ body {
     margin: 0;
 }
 
-/* Edit Grid */
 .edit-grid {
     display: grid;
     grid-template-columns: 400px 1fr;
@@ -118,7 +115,6 @@ body {
     }
 }
 
-/* Picture Section (Pink/Rose Theme) */
 .picture-card {
     background: white;
     border-radius: 24px;
@@ -231,6 +227,10 @@ body {
     letter-spacing: 0.1em;
 }
 
+.picture-upload {
+    text-align: center;
+}
+
 .file-input-hidden {
     display: none;
 }
@@ -248,11 +248,42 @@ body {
     transition: all 0.3s ease;
     border: none;
     box-shadow: 0 8px 24px rgba(236, 72, 153, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.upload-button:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .upload-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 32px rgba(236, 72, 153, 0.4);
+}
+
+.upload-button i {
+    font-size: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.upload-button span {
+    position: relative;
+    z-index: 1;
 }
 
 .upload-hint {
@@ -262,8 +293,15 @@ body {
     border-radius: 12px;
     color: #9f1239;
     font-size: 0.875rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     border: 1px solid #fbcfe8;
+}
+
+.upload-hint i {
+    font-size: 1.125rem;
 }
 
 .info-notice {
@@ -294,7 +332,6 @@ body {
     color: #9a3412;
 }
 
-/* Form Cards */
 .form-card {
     background: white;
     border-radius: 24px;
@@ -406,7 +443,7 @@ body {
 }
 
 .error-message {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.5rem;
     color: #dc2626;
@@ -419,8 +456,13 @@ body {
     border-left: 3px solid #dc2626;
 }
 
+.error-message:not(:empty) {
+    display: flex;
+}
+
 .error-message::before {
     content: '⚠';
+    font-size: 1.125rem;
 }
 
 .form-actions {
@@ -499,7 +541,7 @@ body {
     color: white;
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
-    margin: 0; /* remove margin-bottom */
+    margin: 0;
 }
 
 .btn-back:hover {
@@ -530,14 +572,12 @@ body {
 </style>
 
 <div class="partner-edit-container">
-    <!-- Partner Header -->
     <div class="partner-header">
         <div class="partner-header-content">
-            <!-- Back Button -->
-                <?= Html::a('<i class="bi bi-arrow-left"></i>', ['user-details/view'], [
-                    'class' => 'btn-back',
-                    'title' => 'Back to Profile'
-                ]) ?>
+            <?= Html::a('<i class="bi bi-arrow-left"></i>', ['user-details/view'], [
+                'class' => 'btn-back',
+                'title' => 'Back to Profile'
+            ]) ?>
             <div class="partner-header-text">
                 <h1><?= Html::encode($this->title) ?></h1>
                 <p>Add your partner's details for family records and emergency contact</p>
@@ -549,7 +589,16 @@ body {
     </div>
 
     <?php $form = ActiveForm::begin([
-        'options' => ['enctype' => 'multipart/form-data', 'class' => 'modern-form'],
+        'id' => 'partner-form',
+        'options' => [
+            'enctype' => 'multipart/form-data', 
+            'class' => 'modern-form'
+        ],
+        'enableClientValidation' => true,
+        'enableAjaxValidation' => false,
+        'validateOnBlur' => false,
+        'validateOnChange' => false,
+        'validateOnSubmit' => true,
         'fieldConfig' => [
             'template' => "{label}\n{input}\n{error}",
             'labelOptions' => ['class' => 'form-label-modern'],
@@ -559,7 +608,6 @@ body {
     ]); ?>
 
     <div class="edit-grid">
-        <!-- Left Column: Partner Picture -->
         <div class="picture-section">
             <div class="picture-card">
                 <div class="picture-header">
@@ -595,7 +643,7 @@ body {
                     
                     <div class="upload-hint">
                         <i class="bi bi-info-circle"></i>
-                        JPG, PNG • Max 2MB • 100×100 to 1000×1000px
+                        <span>JPG, PNG • Max 2MB • 100×100 to 1000×1000px</span>
                     </div>
                 </div>
 
@@ -609,10 +657,7 @@ body {
             </div>
         </div>
 
-        <!-- Right Column: Form Fields -->
         <div class="form-section">
-            
-            <!-- Personal Information Card -->
             <div class="form-card">
                 <div class="form-card-header">
                     <i class="bi bi-person-vcard"></i>
@@ -666,7 +711,6 @@ body {
                 </div>
             </div>
 
-            <!-- Address Information Card -->
             <div class="form-card">
                 <div class="form-card-header">
                     <i class="bi bi-geo-alt-fill"></i>
@@ -725,7 +769,6 @@ body {
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="form-actions">
                 <div class="actions-left">
                     <?= Html::a('<i class="bi bi-x-circle"></i><span>Cancel</span>', ['user-details/view'], [
@@ -752,7 +795,6 @@ body {
 </div>
 
 <script>
-// Image preview
 function loadPreview(event) {
     const preview = document.getElementById('preview');
     const file = event.target.files[0];
@@ -765,12 +807,14 @@ function loadPreview(event) {
         }
         
         if (!file.type.match('image.*')) {
-            alert('⚠️ Please select an image file');
+            alert('⚠️ Please select an image file (JPG, PNG)');
             event.target.value = '';
             return;
         }
         
+        preview.style.transition = 'opacity 0.3s ease';
         preview.style.opacity = '0.5';
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
@@ -780,18 +824,11 @@ function loadPreview(event) {
     }
 }
 
-// Form reset
 function resetForm() {
     if (confirm('🔄 Reset all changes?')) {
         document.querySelector('form').reset();
-        document.getElementById('preview').src = '<?= Html::encode($imageUrl) ?>';
+        const preview = document.getElementById('preview');
+        preview.src = '<?= Html::encode($imageUrl) ?>';
     }
 }
-
-// Form submission
-document.querySelector('form').addEventListener('submit', function() {
-    const btn = document.getElementById('submit-btn');
-    btn.classList.add('btn-loading');
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Saving...</span>';
-});
-</script>
+</script>a

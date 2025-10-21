@@ -19,10 +19,6 @@ $imageUrl = ($model->profile_picture_url && file_exists($uploadedPath))
 ?>
 
 <style>
-/* ============================================================================
-   Enhanced Profile Edit Page - Modern Design System
-   ============================================================================ */
-
 :root {
     --primary-gradient: linear-gradient(135deg, #004135, #11684d);
     --success-gradient: linear-gradient(135deg, #10b981, #00c77f);
@@ -45,19 +41,9 @@ body {
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-
-/* ============================================================================
-   Stunning Header with Glass Effect
-   ============================================================================ */
 
 .edit-header {
     background: rgba(255, 255, 255, 0.98);
@@ -166,10 +152,6 @@ body {
     font-size: 1.5rem;
 }
 
-/* ============================================================================
-   Two-Column Grid Layout
-   ============================================================================ */
-
 .edit-grid {
     display: grid;
     grid-template-columns: 400px 1fr;
@@ -182,10 +164,6 @@ body {
         grid-template-columns: 1fr;
     }
 }
-
-/* ============================================================================
-   Left Column - Profile Picture Section (Stunning!)
-   ============================================================================ */
 
 .picture-section {
     position: sticky;
@@ -231,7 +209,6 @@ body {
     margin: 0;
 }
 
-/* Picture Preview with Magic Hover */
 .picture-preview-wrapper {
     margin-bottom: 2rem;
     display: flex;
@@ -303,7 +280,6 @@ body {
     letter-spacing: 0.1em;
 }
 
-/* Upload Button - Stunning Design */
 .picture-upload {
     text-align: center;
 }
@@ -382,7 +358,6 @@ body {
     font-size: 1.125rem;
 }
 
-/* Stats Card */
 .stats-mini {
     margin-top: 1.5rem;
     display: grid;
@@ -426,10 +401,6 @@ body {
     font-weight: 600;
 }
 
-/* ============================================================================
-   Right Column - Form Fields (Stunning!)
-   ============================================================================ */
-
 .form-section {
     display: flex;
     flex-direction: column;
@@ -452,14 +423,8 @@ body {
 .form-card:nth-child(3) { animation-delay: 0.3s; }
 
 @keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .form-card:hover {
@@ -506,7 +471,6 @@ body {
     border: 1px solid #fca5a5;
 }
 
-/* Form Grid */
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -518,13 +482,6 @@ body {
     grid-column: 1 / -1;
 }
 
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Modern Form Controls - Stunning! */
 .form-group {
     margin-bottom: 0;
 }
@@ -578,7 +535,6 @@ body {
     color: #d1d5db;
 }
 
-/* Textarea */
 .textarea-modern {
     resize: vertical;
     min-height: 120px;
@@ -586,7 +542,6 @@ body {
     line-height: 1.6;
 }
 
-/* Select Dropdown */
 .select-modern {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23004135' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -601,9 +556,8 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2300a86b' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
 }
 
-/* Error Messages */
 .error-message {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.5rem;
     color: #dc2626;
@@ -614,23 +568,16 @@ body {
     background: #fef2f2;
     border-radius: 8px;
     border-left: 3px solid #dc2626;
-    animation: shake 0.4s ease-in-out;
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
+.error-message:not(:empty) {
+    display: flex;
 }
 
 .error-message::before {
     content: '⚠';
     font-size: 1.125rem;
 }
-
-/* ============================================================================
-   Action Buttons - Stunning!
-   ============================================================================ */
 
 .form-actions {
     display: flex;
@@ -734,33 +681,6 @@ body {
     z-index: 1;
 }
 
-/* Loading State */
-.btn-loading {
-    pointer-events: none;
-    opacity: 0.7;
-    position: relative;
-}
-
-.btn-loading::after {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    top: 50%;
-    left: 50%;
-    margin-left: -9px;
-    margin-top: -9px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Responsive */
 @media (max-width: 768px) {
     .edit-header {
         padding: 1.5rem;
@@ -789,6 +709,10 @@ body {
         padding: 1.5rem;
     }
     
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
     .form-actions {
         flex-direction: column;
         gap: 1rem;
@@ -807,7 +731,6 @@ body {
 </style>
 
 <div class="profile-edit-container">
-    <!-- Stunning Header with Back Button Inside -->
     <div class="edit-header">
         <div class="header-content">
             <div class="back-button-wrapper">
@@ -828,17 +751,25 @@ body {
     </div>
 
     <?php $form = ActiveForm::begin([
-        'options' => ['enctype' => 'multipart/form-data', 'class' => 'modern-form'],
+        'id' => 'profile-form',
+        'options' => [
+            'enctype' => 'multipart/form-data', 
+            'class' => 'modern-form'
+        ],
+        'enableClientValidation' => true,
+        'enableAjaxValidation' => false,
+        'validateOnBlur' => false,
+        'validateOnChange' => false,
+        'validateOnSubmit' => true,
         'fieldConfig' => [
             'template' => "{label}\n{input}\n{error}",
             'labelOptions' => ['class' => 'form-label-modern'],
             'inputOptions' => ['class' => 'form-control-modern'],
-            'errorOptions' => ['class' => 'error-message', 'style' => 'display:none'],
+            'errorOptions' => ['class' => 'error-message'],
         ],
     ]); ?>
 
     <div class="edit-grid">
-        <!-- Left Column: Profile Picture -->
         <div class="picture-section">
             <div class="picture-card">
                 <div class="picture-header">
@@ -893,10 +824,7 @@ body {
             </div>
         </div>
 
-        <!-- Right Column: Form Fields -->
         <div class="form-section">
-            
-            <!-- Personal Information Card -->
             <div class="form-card">
                 <div class="form-card-header">
                     <i class="bi bi-person-circle"></i>
@@ -977,7 +905,6 @@ body {
                 </div>
             </div>
 
-            <!-- Address Information Card -->
             <div class="form-card">
                 <div class="form-card-header">
                     <i class="bi bi-geo-alt-fill"></i>
@@ -1036,7 +963,6 @@ body {
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="form-actions">
                 <div class="actions-left">
                     <?= Html::a('<i class="bi bi-x-circle"></i><span>Cancel</span>', ['view'], [
@@ -1065,104 +991,40 @@ body {
 </div>
 
 <script>
-// Image preview with smooth animation
 function loadPreview(event) {
     const preview = document.getElementById('preview');
     const file = event.target.files[0];
     
     if (file) {
-        // Validate file size (2MB)
         if (file.size > 2 * 1024 * 1024) {
             alert('⚠️ File size must be less than 2MB');
             event.target.value = '';
             return;
         }
         
-        // Validate file type
         if (!file.type.match('image.*')) {
             alert('⚠️ Please select an image file (JPG, PNG)');
             event.target.value = '';
             return;
         }
         
-        // Smooth fade animation
         preview.style.transition = 'opacity 0.3s ease';
         preview.style.opacity = '0.5';
         
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
-            setTimeout(() => {
-                preview.style.opacity = '1';
-            }, 150);
+            setTimeout(() => preview.style.opacity = '1', 150);
         };
         reader.readAsDataURL(file);
     }
 }
 
-// Form reset function
 function resetForm() {
     if (confirm('🔄 Reset all changes?')) {
         document.querySelector('form').reset();
-        
-        // Reset image preview to original
         const preview = document.getElementById('preview');
         preview.src = '<?= Html::encode($imageUrl) ?>';
     }
 }
-
-// Form submission loading state
-document.querySelector('form').addEventListener('submit', function() {
-    const submitBtn = document.getElementById('submit-btn');
-    submitBtn.classList.add('btn-loading');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Saving...</span>';
-});
-
-// Auto-save notification (optional - can be enabled)
-let formChanged = false;
-document.querySelectorAll('.form-control-modern').forEach(input => {
-    input.addEventListener('change', () => {
-        formChanged = true;
-    });
-});
-
-window.addEventListener('beforeunload', (e) => {
-    if (formChanged) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-    }
-});
-
-// Smooth scroll to first error
-document.querySelector('form').addEventListener('invalid', function(e) {
-    e.preventDefault();
-    const firstError = document.querySelector('.error-message');
-    if (firstError) {
-        firstError.closest('.form-card').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-        });
-    }
-}, true);
-
-// Add floating label effect
-document.querySelectorAll('.form-control-modern').forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.classList.add('focused');
-    });
-    
-    input.addEventListener('blur', function() {
-        if (!this.value) {
-            this.parentElement.classList.remove('focused');
-        }
-    });
-});
 </script>
-<?php $this->registerCss("
-.focused .form-label-modern {
-    color: #00a86b;
-    transform: translateY(-2px);
-    transition: all 0.3s ease;
-}
-"); ?>

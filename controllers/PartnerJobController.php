@@ -6,7 +6,6 @@ use Yii;
 use app\models\PartnerJob;
 use app\models\PartnerDetails;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
@@ -20,7 +19,7 @@ class PartnerJobController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'], // ✅ Only logged-in users
+                        'roles' => ['@'],
                     ],
                 ],
             ],
@@ -34,36 +33,81 @@ class PartnerJobController extends Controller
     }
 
     /**
-     * Create or update partner job profile.
+     * ✅ FIXED: Partner job profile with validation
      */
     public function actionProfile()
     {
         $userId = Yii::$app->user->id;
 
-        // ✅ Step 1: Find PartnerDetails based on logged-in user's ID
+        // ✅ Check if partner_details exists first
         $partnerDetails = PartnerDetails::findOne(['partner_id' => $userId]);
-
         if (!$partnerDetails) {
             Yii::$app->session->setFlash('warning', 'Please add your Partner Details first before adding job information.');
             return $this->redirect(['partner-details/profile']);
         }
 
-        // ✅ Step 2: Find or create PartnerJob
+        // Find or create partner job record
         $model = PartnerJob::findOne(['partner_id' => $partnerDetails->partner_id]);
         if (!$model) {
             $model = new PartnerJob();
             $model->partner_id = $partnerDetails->partner_id;
         }
 
-        // ✅ Step 3: Handle form submission
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', 'Partner job details saved successfully.');
-            return $this->redirect(['user-details/view']);
+        if ($model->load(Yii::$app->request->post())) {
+            // ✅ Validate BEFORE saving
+            if (!$model->validate()) {
+                Yii::$app->session->setFlash('error', 'Please correct the errors below.');
+                return $this->render('profile', ['model' => $model]);
+            }
+
+            if ($model->save(false)) {
+                Yii::$app->session->setFlash('success', 'Partner job details saved successfully!');
+                return $this->redirect(['user-details/view']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Failed to save partner job details.');
+            }
         }
 
-        // ✅ Step 4: Render profile form
-        return $this->render('profile', [
-            'model' => $model,
-        ]);
+        return $this->render('profile', ['model' => $model]);
+    }
+
+    /**
+     * View partner job details
+     */
+    public function actionView()
+    {
+        $userId = Yii::$app->user->id;
+        
+        $partnerDetails = PartnerDetails::findOne(['partner_id' => $userId]);
+        if (!$partnerDetails) {
+            Yii::$app->session->setFlash('warning', 'Partner details not found.');
+            return $this->redirect(['partner-details/profile']);
+        }
+
+        $model = PartnerJob::findOne(['partner_id' => $partnerDetails->partner_id]);
+        if (!$model) {
+            Yii::$app->session->setFlash('warning', 'No partner job information found.');
+            return $this->redirect(['profile']);
+        }
+
+        return $this->render('view', ['model' => $model]);
+    }
+
+    /**
+     * Delete partner job record
+     */
+    public function actionDelete()
+    {
+        $userId = Yii::$app->user->id;
+        
+        $partnerDetails = PartnerDetails::findOne(['partner_id' => $userId]);
+        if ($partnerDetails) {
+            $model = PartnerJob::findOne(['partner_id' => $partnerDetails->partner_id]);
+            if ($model && $model->delete()) {
+                Yii::$app->session->setFlash('success', 'Partner job record deleted successfully.');
+            }
+        }
+
+        return $this->redirect(['user-details/view']);
     }
 }

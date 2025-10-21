@@ -18,7 +18,7 @@ class UserSearch extends Users
     {
         return [
             [['user_id'], 'integer'],
-            [['email', 'password_hash', 'role', 'date_registered', 'last_login'], 'safe'],
+            [['username', 'email', 'password_hash', 'role', 'date_registered', 'last_login'], 'safe'], // Added username
         ];
     }
 
@@ -47,6 +47,11 @@ class UserSearch extends Users
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'date_registered' => SORT_DESC,
+                ]
+            ],
         ]);
 
         $this->load($params, $formName);
@@ -60,13 +65,20 @@ class UserSearch extends Users
         // grid filtering conditions
         $query->andFilterWhere([
             'user_id' => $this->user_id,
-            'date_registered' => $this->date_registered,
+            'role' => $this->role, // Use exact match for role (dropdown)
             'last_login' => $this->last_login,
         ]);
 
-        $query->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-            ->andFilterWhere(['like', 'role', $this->role]);
+        // Use LIKE for text searches (username, email)
+        $query->andFilterWhere(['like', 'username', $this->username]) // Added username search
+            ->andFilterWhere(['like', 'email', $this->email])
+            ->andFilterWhere(['like', 'password_hash', $this->password_hash]);
+
+        // Handle date_registered filter properly
+        if (!empty($this->date_registered)) {
+            $query->andFilterWhere(['>=', 'date_registered', $this->date_registered . ' 00:00:00'])
+                  ->andFilterWhere(['<=', 'date_registered', $this->date_registered . ' 23:59:59']);
+        }
 
         return $dataProvider;
     }

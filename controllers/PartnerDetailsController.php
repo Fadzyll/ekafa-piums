@@ -6,18 +6,42 @@ use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
+use yii\filters\AccessControl;
 use app\models\PartnerDetails;
+use app\models\UserDetails;
 
 class PartnerDetailsController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     /**
-     * Add or update partner details (including image upload).
+     * ✅ FIXED: Partner profile with validation
      */
     public function actionProfile()
     {
         $userId = Yii::$app->user->id;
 
-        // Load existing record or create a new one
+        // ✅ Check if user_details exists
+        $userDetails = UserDetails::findOne(['user_id' => $userId]);
+        if (!$userDetails) {
+            Yii::$app->session->setFlash('warning', 'Please complete your personal profile first.');
+            return $this->redirect(['user-details/profile']);
+        }
+
+        // Find or create partner record using user_id
         $model = PartnerDetails::findOne(['partner_id' => $userId]);
         if (!$model) {
             $model = new PartnerDetails();
@@ -27,64 +51,61 @@ class PartnerDetailsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-            if ($model->validate()) {
-                // ✅ Handle profile picture upload
-                if ($model->imageFile) {
-                    $uploadDir = Yii::getAlias('@webroot/uploads/');
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0775, true);
-                    }
+            // ✅ Validate BEFORE processing
+            if (!$model->validate()) {
+                Yii::$app->session->setFlash('error', 'Please correct the errors below.');
+                return $this->render('profile', ['model' => $model]);
+            }
 
-                    // Delete old profile picture safely
-                    if (!empty($model->profile_picture_url)) {
-                        $oldFile = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
-                        if (is_file($oldFile)) {
-                            @unlink($oldFile);
-                        }
-                    }
+            // Handle image upload
+            if ($model->imageFile) {
+                $uploadDir = Yii::getAlias('@webroot/uploads/');
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0775, true);
+                }
 
-                    // Generate new filename and save
-                    $filename = 'partner_' . $model->partner_id . '_' . time() . '.' . $model->imageFile->extension;
-                    $filePath = $uploadDir . $filename;
-
-                    if ($model->imageFile->saveAs($filePath)) {
-                        $model->profile_picture_url = 'uploads/' . $filename;
+                // Delete old image
+                if (!empty($model->profile_picture_url)) {
+                    $oldFile = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
+                    if (is_file($oldFile)) {
+                        @unlink($oldFile);
                     }
                 }
 
-                // Save the updated record
-                if ($model->save(false)) {
-                    Yii::$app->session->setFlash('success', 'Partner details saved successfully.');
+                // Save new image
+                $filename = 'partner_' . $model->partner_id . '_' . time() . '.' . $model->imageFile->extension;
+                $filePath = $uploadDir . $filename;
 
-                    // ✅ Redirect back to the user details page
-                    return $this->redirect(['user-details/view']);
+                if ($model->imageFile->saveAs($filePath)) {
+                    $model->profile_picture_url = 'uploads/' . $filename;
                 }
+            }
+
+            // Save without re-validation
+            if ($model->save(false)) {
+                Yii::$app->session->setFlash('success', 'Partner details saved successfully!');
+                return $this->redirect(['user-details/view']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Failed to save partner details.');
             }
         }
 
-        return $this->render('profile', [
-            'model' => $model,
-        ]);
+        return $this->render('profile', ['model' => $model]);
     }
 
     /**
-     * View partner details (mainly for admin or debug use).
+     * View partner details
      */
     public function actionView($partner_id = null)
     {
         $userId = $partner_id ?? Yii::$app->user->id;
         $model = $this->findModel($userId);
 
-        return $this->render('view', [
-            'model' => $model,
-        ]);
+        return $this->render('view', ['model' => $model]);
     }
 
     /**
-     * Finds the PartnerDetails model based on partner_id.
-     * @param int $partner_id
-     * @return PartnerDetails
-     * @throws NotFoundHttpException
+     * Find partner model
      */
     protected function findModel($partner_id)
     {

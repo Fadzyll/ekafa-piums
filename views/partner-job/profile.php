@@ -11,7 +11,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <style>
-/* Partner Job specific theme (Purple/Violet) */
 :root {
     --partner-job-gradient: linear-gradient(135deg, #7c3aed, #a78bfa);
     --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
@@ -35,7 +34,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Header with Couple Icon Theme */
 .partner-job-header {
     background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
     color: white;
@@ -62,7 +60,7 @@ body {
     z-index: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* spreads left and right */
+    justify-content: space-between;
     gap: 1.5rem;
 }
 
@@ -96,7 +94,6 @@ body {
     margin: 0;
 }
 
-/* Currency Input */
 .currency-input-group {
     position: relative;
 }
@@ -148,7 +145,6 @@ body {
     margin-bottom: 0.25rem;
 }
 
-/* Form Cards */
 .form-card {
     background: white;
     border-radius: 24px;
@@ -251,7 +247,7 @@ body {
 }
 
 .error-message {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.5rem;
     color: #dc2626;
@@ -264,8 +260,13 @@ body {
     border-left: 3px solid #dc2626;
 }
 
+.error-message:not(:empty) {
+    display: flex;
+}
+
 .error-message::before {
     content: '⚠';
+    font-size: 1.125rem;
 }
 
 .form-actions {
@@ -344,7 +345,7 @@ body {
     color: white;
     transition: all 0.3s ease;
     backdrop-filter: blur(8px);
-    margin: 0; /* remove margin-bottom */
+    margin: 0;
 }
 
 .btn-back:hover {
@@ -375,7 +376,6 @@ body {
 </style>
 
 <div class="partner-job-container">
-    <!-- Partner Job Header -->
     <div class="partner-job-header">
         <div class="partner-job-header-content">
             <?= Html::a('<i class="bi bi-arrow-left"></i>', ['user-details/view'], [
@@ -393,7 +393,16 @@ body {
     </div>
 
     <?php $form = ActiveForm::begin([
-        'options' => ['class' => 'modern-form'],
+        'id' => 'partner-job-form',
+        'options' => [
+            'enctype' => 'multipart/form-data', 
+            'class' => 'modern-form'
+        ],
+        'enableClientValidation' => true,
+        'enableAjaxValidation' => false,
+        'validateOnBlur' => false,
+        'validateOnChange' => false,
+        'validateOnSubmit' => true,
         'fieldConfig' => [
             'template' => "{label}\n{input}\n{error}",
             'labelOptions' => ['class' => 'form-label-modern'],
@@ -402,7 +411,6 @@ body {
         ],
     ]); ?>
 
-    <!-- Employment Details Card -->
     <div class="form-card">
         <div class="form-card-header">
             <i class="bi bi-building"></i>
@@ -442,12 +450,11 @@ body {
                 <?= $form->field($model, 'partner_employer_phone_number')->textInput([
                     'placeholder' => 'e.g., +60123456789',
                     'maxlength' => true
-                ])->label('Employer Phone <span class="required-star">*</span>') ?>
+                ])->label('Employer Phone') ?>
             </div>
         </div>
     </div>
 
-    <!-- Salary Information Card -->
     <div class="form-card">
         <div class="form-card-header">
             <i class="bi bi-wallet2"></i>
@@ -497,7 +504,6 @@ body {
         </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="form-actions">
         <div class="actions-left">
             <?= Html::a('<i class="bi bi-x-circle"></i><span>Cancel</span>', ['user-details/view'], [
@@ -521,69 +527,9 @@ body {
 </div>
 
 <script>
-// Auto-calculate net salary suggestion for partner
-const grossInput = document.getElementById('partner-gross-salary');
-const netInput = document.getElementById('partner-net-salary');
-
-if (grossInput && netInput) {
-    grossInput.addEventListener('input', function() {
-        if (this.value && !netInput.value) {
-            const suggested = (parseFloat(this.value) * 0.85).toFixed(2);
-            netInput.placeholder = 'Suggested: ' + suggested;
-            netInput.style.borderColor = '#7c3aed';
-        }
-    });
-    
-    netInput.addEventListener('focus', function() {
-        if (this.placeholder.includes('Suggested:') && !this.value) {
-            const suggested = this.placeholder.replace('Suggested: ', '');
-            this.value = suggested;
-        }
-    });
-}
-
-// Form reset
 function resetForm() {
     if (confirm('🔄 Reset all changes?')) {
         document.querySelector('form').reset();
-        netInput.placeholder = '0.00';
-        netInput.style.borderColor = '#e5e7eb';
     }
 }
-
-// Form submission
-document.querySelector('form').addEventListener('submit', function() {
-    const btn = document.getElementById('submit-btn');
-    btn.classList.add('btn-loading');
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i><span>Saving...</span>';
-    btn.disabled = true;
-});
-
-// Add loading animation style
-const style = document.createElement('style');
-style.textContent = `
-    .btn-loading {
-        pointer-events: none;
-        opacity: 0.7;
-        position: relative;
-    }
-    .btn-loading::after {
-        content: '';
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        top: 50%;
-        left: 50%;
-        margin-left: -9px;
-        margin-top: -9px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-`;
-document.head.appendChild(style);
 </script>

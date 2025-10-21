@@ -10,7 +10,9 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\RegisterAccForm;
-use app\models\UserDetails;  // Make sure to import UserDetails model
+use app\models\UserDetails;
+use app\models\UserJob;
+use app\models\PartnerDetails;
 
 class SiteController extends Controller
 {
@@ -38,9 +40,7 @@ class SiteController extends Controller
     }
 
     /**
-     * This runs before every action.
-     * It checks if user is logged in and has completed their profile.
-     * If not, redirect them to profile completion page.
+     * ✅ FIXED: Check ALL profile sections before allowing access
      */
     public function beforeAction($action)
     {
@@ -50,22 +50,61 @@ class SiteController extends Controller
 
         if (!Yii::$app->user->isGuest) {
             $userId = Yii::$app->user->id;
-            $profile = UserDetails::findOne(['user_id' => $userId]);
+            $userRole = Yii::$app->user->identity->role;
             $route = Yii::$app->controller->route;
 
-            // Define allowed routes without completed profile
+            // ✅ Define allowed routes without completed profile
             $allowedRoutes = [
                 'user-details/profile',
+                'user-details/view',
+                'user-job/profile',
+                'partner-details/profile',
+                'partner-job/profile',
                 'site/logout',
                 'site/error',
+                'site/dashboard',
+                'admin/dashboard',
+                'admin/index',
+                'teacher/dashboard',
+                'teacher/index',
+                'parent/dashboard',
             ];
 
-            // If profile missing or incomplete and trying to access disallowed pages, redirect
-            if (
-                (!$profile || !$this->isProfileComplete($profile)) &&
-                !in_array($route, $allowedRoutes)
-            ) {
+            // ✅ Admins can bypass all checks
+            if ($userRole === 'Admin') {
+                return true;
+            }
+
+            // ✅ Check profile completion status
+            $completionStatus = $this->getProfileCompletionStatus($userId, $userRole);
+
+            // ✅ If on allowed routes, let them through
+            if (in_array($route, $allowedRoutes)) {
+                return true;
+            }
+
+            // ✅ Redirect to incomplete section
+            if (!$completionStatus['user_details']) {
+                Yii::$app->session->setFlash('warning', 'Please complete your personal information first.');
                 return $this->redirect(['user-details/profile'])->send();
+            }
+
+            if (!$completionStatus['user_job']) {
+                Yii::$app->session->setFlash('warning', 'Please complete your employment information.');
+                return $this->redirect(['user-job/profile'])->send();
+            }
+
+            // ✅ Parents must complete partner info
+            if ($userRole === 'Parent') {
+                if (!$completionStatus['partner_details']) {
+                    Yii::$app->session->setFlash('warning', 'Please complete your partner information.');
+                    return $this->redirect(['partner-details/profile'])->send();
+                }
+
+                if (!$completionStatus['partner_job']) {
+                    Yii::$app->session->setFlash('warning', 'Please complete your partner employment information.');
+                    return $this->redirect(['partner-job/profile'])->send();
+                }
             }
         }
 
@@ -73,15 +112,82 @@ class SiteController extends Controller
     }
 
     /**
-     * Simple profile completion check: adjust as needed
+     * ✅ NEW: Get detailed profile completion status
+     * Returns array with completion status for each section
+     */
+    protected function getProfileCompletionStatus($userId, $userRole)
+    {
+        $userDetails = UserDetails::findOne(['user_id' => $userId]);
+        $userJob = UserJob::findOne(['user_id' => $userId]);
+        $partnerDetails = PartnerDetails::findOne(['partner_id' => $userId]);
+        
+        $status = [
+            'user_details' => false,
+            'user_job' => false,
+            'partner_details' => false,
+            'partner_job' => false,
+        ];
+
+        // ✅ Check User Details (required fields only)
+        if ($userDetails && 
+            !empty($userDetails->full_name) && 
+            !empty($userDetails->ic_number) && 
+            !empty($userDetails->phone_number)) {
+            $status['user_details'] = true;
+        }
+
+        // ✅ Check User Job (all fields required)
+        if ($userJob && 
+            !empty($userJob->job) && 
+            !empty($userJob->employer) && 
+            !empty($userJob->employer_address) && 
+            !empty($userJob->employer_phone_number) && 
+            !empty($userJob->gross_salary) && 
+            !empty($userJob->net_salary)) {
+            $status['user_job'] = true;
+        }
+
+        // ✅ Check Partner Details (only for Parents)
+        if ($userRole === 'Parent') {
+            if ($partnerDetails && 
+                !empty($partnerDetails->partner_name) && 
+                !empty($partnerDetails->partner_ic_number)) {
+                $status['partner_details'] = true;
+
+                // ✅ Check Partner Job (only if partner exists)
+                $partnerJob = $partnerDetails->partnerJob;
+                if ($partnerJob && 
+                    !empty($partnerJob->partner_job) && 
+                    !empty($partnerJob->partner_employer) && 
+                    !empty($partnerJob->partner_employer_address) && 
+                    !empty($partnerJob->partner_employer_phone_number) && 
+                    !empty($partnerJob->partner_gross_salary) && 
+                    !empty($partnerJob->partner_net_salary)) {
+                    $status['partner_job'] = true;
+                }
+            }
+        } else {
+            // ✅ Teachers don't need partner info
+            $status['partner_details'] = true;
+            $status['partner_job'] = true;
+        }
+
+        return $status;
+    }
+
+    /**
+     * ✅ SIMPLIFIED: Old method for backward compatibility
      */
     protected function isProfileComplete($profile)
     {
-        // Example: require full_name and ic_number to be filled
-        return !empty($profile->full_name) && !empty($profile->ic_number);
+        if (!$profile) {
+            return false;
+        }
+        
+        return !empty($profile->full_name) && 
+               !empty($profile->ic_number) && 
+               !empty($profile->phone_number);
     }
-
-    // ... your existing actions below unchanged ...
 
     public function actions()
     {
@@ -120,20 +226,24 @@ class SiteController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             $userId = Yii::$app->user->id;
-            $profile = \app\models\UserDetails::findOne(['user_id' => $userId]);
+            $userRole = Yii::$app->user->identity->role;
 
-            $isComplete = $profile && !empty($profile->full_name) && !empty($profile->ic_number);
+            // ✅ Admins skip profile check
+            if ($userRole === 'Admin') {
+                return $this->redirect(['/admin/dashboard']);
+            }
+
+            // ✅ Check profile completion
+            $profile = UserDetails::findOne(['user_id' => $userId]);
+            $isComplete = $this->isProfileComplete($profile);
 
             if (!$isComplete) {
                 Yii::$app->session->setFlash('warning', 'Please complete your profile.');
                 return $this->redirect(['user-details/profile']);
             }
 
-            // Redirect based on role
-            $userRole = Yii::$app->user->identity->role;
+            // ✅ Redirect based on role
             switch ($userRole) {
-                case 'Admin':
-                    return $this->redirect(['/admin/dashboard']);
                 case 'Teacher':
                     return $this->redirect(['/teacher/dashboard']);
                 case 'Parent':
@@ -150,7 +260,6 @@ class SiteController extends Controller
             'role' => $role,
         ]);
     }
-
 
     public function actionLogout()
     {
@@ -176,9 +285,6 @@ class SiteController extends Controller
         return $this->render('about');
     }
 
-    /**
-     * Redirects to role-specific dashboard controller
-     */
     public function actionDashboard()
     {
         $role = Yii::$app->user->identity->role ?? null;

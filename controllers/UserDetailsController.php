@@ -9,15 +9,9 @@ use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use app\models\UserDetails;
-use app\models\UserJob;
-use app\models\PartnerDetails;
-use app\models\PartnerJob; // ✅ Added if you have PartnerJob model
 
 class UserDetailsController extends Controller
 {
-    /**
-     * Access and HTTP verb control.
-     */
     public function behaviors()
     {
         return [
@@ -26,7 +20,7 @@ class UserDetailsController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'], // ✅ Only authenticated users
+                        'roles' => ['@'],
                     ],
                 ],
             ],
@@ -40,7 +34,7 @@ class UserDetailsController extends Controller
     }
 
     /**
-     * Create or update user profile (with image upload).
+     * ✅ FIXED: Profile edit with validation
      */
     public function actionProfile()
     {
@@ -55,81 +49,78 @@ class UserDetailsController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-            if ($model->validate()) {
-                // ✅ Handle profile image upload
-                if ($model->imageFile) {
-                    $uploadDir = Yii::getAlias('@webroot/uploads/');
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0775, true);
-                    }
+            // ✅ Validate BEFORE processing
+            if (!$model->validate()) {
+                Yii::$app->session->setFlash('error', 'Please correct the errors below.');
+                return $this->render('profile', ['model' => $model]);
+            }
 
-                    // Delete old image if it exists
-                    if (!empty($model->profile_picture_url)) {
-                        $oldPath = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
-                        if (file_exists($oldPath)) {
-                            @unlink($oldPath);
-                        }
-                    }
+            // Handle image upload
+            if ($model->imageFile) {
+                $uploadDir = Yii::getAlias('@webroot/uploads/');
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0775, true);
+                }
 
-                    // Save new image
-                    $filename = 'user_' . $model->user_id . '_' . time() . '.' . $model->imageFile->extension;
-                    $filePath = $uploadDir . $filename;
-
-                    if ($model->imageFile->saveAs($filePath)) {
-                        $model->profile_picture_url = 'uploads/' . $filename;
+                // Delete old image
+                if (!empty($model->profile_picture_url)) {
+                    $oldPath = Yii::getAlias('@webroot/' . ltrim($model->profile_picture_url, '/'));
+                    if (file_exists($oldPath)) {
+                        @unlink($oldPath);
                     }
                 }
 
-                // ✅ Save profile
-                if ($model->save(false)) {
-                    Yii::$app->session->setFlash('success', 'Profile updated successfully.');
+                // Save new image
+                $filename = 'user_' . $model->user_id . '_' . time() . '.' . $model->imageFile->extension;
+                $filePath = $uploadDir . $filename;
 
-                    // If no job yet, go to job form first
-                    if (!$model->userJob) {
-                        return $this->redirect(['user-job/profile']);
-                    }
-
-                    // Otherwise go back to profile view
-                    return $this->redirect(['view']);
+                if ($model->imageFile->saveAs($filePath)) {
+                    $model->profile_picture_url = 'uploads/' . $filename;
                 }
+            }
+
+            // ✅ Save without re-validation
+            if ($model->save(false)) {
+                Yii::$app->session->setFlash('success', 'Profile updated successfully!');
+
+                // Redirect to job form if not completed
+                if (!$model->userJob) {
+                    return $this->redirect(['user-job/profile']);
+                }
+
+                return $this->redirect(['view']);
+            } else {
+                Yii::$app->session->setFlash('error', 'Failed to save profile.');
             }
         }
 
-        return $this->render('profile', [
-            'model' => $model,
-        ]);
+        return $this->render('profile', ['model' => $model]);
     }
 
     /**
-     * Display the user's profile with job, partner, and partner job details.
+     * Display profile with all relations
      */
     public function actionView()
     {
         $userId = Yii::$app->user->id;
 
-        // ✅ Preload all related models: userJob + partnerDetails + partnerJob (nested relation)
         $model = UserDetails::find()
             ->where(['user_id' => $userId])
             ->with([
                 'userJob',
                 'partnerDetails',
-                'partnerDetails.partnerJob' // ✅ Include partner job relationship
+                'partnerDetails.partnerJob'
             ])
             ->one();
 
         if (!$model) {
-            Yii::$app->session->setFlash('warning', 'Profile not found. Please complete your profile.');
+            Yii::$app->session->setFlash('warning', 'Please complete your profile.');
             return $this->redirect(['profile']);
         }
 
-        return $this->render('view', [
-            'model' => $model,
-        ]);
+        return $this->render('view', ['model' => $model]);
     }
 
-    /**
-     * Optional: Used if you need to fetch user details elsewhere.
-     */
     protected function findModel($id)
     {
         if (($model = UserDetails::findOne($id)) !== null) {

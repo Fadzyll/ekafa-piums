@@ -5,6 +5,24 @@ namespace app\models;
 use Yii;
 use yii\web\UploadedFile;
 
+/**
+ * This is the model class for table "partner_details".
+ *
+ * @property int $partner_id
+ * @property string $partner_name
+ * @property string $partner_ic_number
+ * @property string|null $partner_phone_number
+ * @property string|null $partner_citizenship
+ * @property string|null $partner_marital_status
+ * @property string|null $partner_address
+ * @property string|null $partner_city
+ * @property string|null $partner_postcode
+ * @property string|null $partner_state
+ * @property string|null $profile_picture_url
+ *
+ * @property UserDetails $userDetails
+ * @property PartnerJob $partnerJob
+ */
 class PartnerDetails extends \yii\db\ActiveRecord
 {
     /** @var UploadedFile */
@@ -18,7 +36,9 @@ class PartnerDetails extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            // ✅ REQUIRED FIELDS
             [['partner_id', 'partner_name', 'partner_ic_number'], 'required'],
+            
             [['partner_id'], 'integer'],
             [['partner_address'], 'string'],
             [['partner_name'], 'string', 'max' => 255],
@@ -26,15 +46,28 @@ class PartnerDetails extends \yii\db\ActiveRecord
             [['partner_citizenship', 'partner_city', 'partner_state'], 'string', 'max' => 100],
             [['partner_marital_status'], 'string', 'max' => 50],
             [['partner_postcode'], 'string', 'max' => 10],
-            [['partner_id'], 'unique'],
             [['profile_picture_url'], 'string', 'max' => 255],
+            
+            // ✅ IC validation
+            [['partner_ic_number'], 'match', 'pattern' => '/^\d{12}$/', 'message' => 'IC number must be exactly 12 digits.'],
+            
+            // ✅ Phone validation
+            [['partner_phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
+            
+            [['partner_id'], 'unique'],
 
-            // ✅ Image file validation
-            [['imageFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg'],
+            // ✅ File validation
+            [['imageFile'], 'file',
+                'skipOnEmpty' => true,
+                'extensions' => ['png', 'jpg', 'jpeg'],
+                'mimeTypes' => ['image/jpeg', 'image/png'],
+                'maxSize' => 2 * 1024 * 1024,
+                'tooBig' => 'The file is too large. Maximum size is 2MB.',
+                'checkExtensionByMimeType' => true,
+            ],
 
-            // ✅ Fix relation validation — use user_id (not user_details_id)
-            [
-                ['partner_id'], 'exist',
+            // ✅ FIXED: Foreign key
+            [['partner_id'], 'exist',
                 'skipOnError' => true,
                 'targetClass' => UserDetails::class,
                 'targetAttribute' => ['partner_id' => 'user_id']
@@ -61,7 +94,7 @@ class PartnerDetails extends \yii\db\ActiveRecord
     }
 
     /**
-     * Relation to PartnerJob table
+     * Relation to PartnerJob
      */
     public function getPartnerJob()
     {
@@ -69,7 +102,7 @@ class PartnerDetails extends \yii\db\ActiveRecord
     }
 
     /**
-     * Relation back to UserDetails
+     * ✅ FIXED: Relation to UserDetails
      */
     public function getUserDetails()
     {
