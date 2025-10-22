@@ -10,9 +10,10 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
- * UserDocumentsController implements the CRUD actions for UserDocuments model.
+ * ✅ UPDATED: UserDocumentsController with support for new document table structure
  */
 class UserDocumentsController extends Controller
 {
@@ -24,6 +25,15 @@ class UserDocumentsController extends Controller
         return array_merge(
             parent::behaviors(),
             [
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ],
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
@@ -63,7 +73,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * Creates a new UserDocuments model with file upload support.
+     * ✅ UPDATED: Creates a new UserDocuments model with new fields support
      * @return string|\yii\web\Response
      */
     public function actionCreate()
@@ -72,6 +82,18 @@ class UserDocumentsController extends Controller
 
         if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
+            
+            // ✅ Set new fields
+            $model->uploaded_by = Yii::$app->user->id;
+            $model->upload_date = date('Y-m-d H:i:s');
+            
+            // ✅ Set default owner if not specified
+            if (empty($model->owner_type)) {
+                $model->owner_type = UserDocuments::OWNER_TYPE_USER;
+            }
+            if (empty($model->owner_id)) {
+                $model->owner_id = $model->user_id;
+            }
             
             // Handle file upload - check both 'file' and 'file_url' attributes
             $uploadedFile = UploadedFile::getInstance($model, 'file_url');
@@ -82,9 +104,6 @@ class UserDocumentsController extends Controller
             if ($uploadedFile) {
                 $model->file = $uploadedFile;
             }
-
-            // Set upload date automatically
-            $model->upload_date = date('Y-m-d H:i:s');
 
             // Upload file if provided
             if ($model->file && $model->uploadFile()) {
@@ -114,7 +133,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * User document upload page for logged-in users
+     * ✅ UPDATED: User document upload page for logged-in users with new fields
      * @return string|\yii\web\Response
      */
     public function actionMyDocuments()
@@ -125,9 +144,10 @@ class UserDocumentsController extends Controller
         // Get all active categories for this user's role
         $categories = DocumentCategory::getActiveCategories($userRole);
 
-        // Get user's uploaded documents indexed by category_id
+        // ✅ UPDATED: Get user's uploaded documents indexed by category_id, only latest versions
         $uploadedDocuments = UserDocuments::find()
-            ->where(['user_id' => $userId])
+            ->where(['user_id' => $userId, 'is_latest_version' => 1])
+            ->andWhere(['!=', 'status', UserDocuments::STATUS_DELETED])
             ->indexBy('category_id')
             ->all();
 
@@ -137,19 +157,41 @@ class UserDocumentsController extends Controller
 
             if ($categoryId && $file) {
                 // Check if document already exists for this category
-                $document = UserDocuments::findOne(['user_id' => $userId, 'category_id' => $categoryId]);
+                $existingDoc = UserDocuments::findOne([
+                    'user_id' => $userId, 
+                    'category_id' => $categoryId,
+                    'is_latest_version' => 1
+                ]);
                 
-                if (!$document) {
+                if ($existingDoc) {
+                    // ✅ Mark old version as replaced
+                    $existingDoc->is_latest_version = 0;
+                    $existingDoc->status = UserDocuments::STATUS_REPLACED;
+                    $existingDoc->save(false);
+                    
+                    // Create new version
+                    $document = new UserDocuments();
+                    $document->user_id = $userId;
+                    $document->category_id = $categoryId;
+                    $document->version = $existingDoc->version + 1;
+                } else {
                     // Create new document
                     $document = new UserDocuments();
                     $document->user_id = $userId;
                     $document->category_id = $categoryId;
-                    
-                    // Get category name for document_type
-                    $category = DocumentCategory::findOne($categoryId);
-                    if ($category) {
-                        $document->document_type = $category->category_name;
-                    }
+                    $document->version = 1;
+                }
+
+                // ✅ Set new fields
+                $document->uploaded_by = $userId;
+                $document->owner_type = UserDocuments::OWNER_TYPE_USER;
+                $document->owner_id = $userId;
+                
+                // Get category name for document_type
+                $category = DocumentCategory::findOne($categoryId);
+                if ($category) {
+                    $document->document_type = $category->category_name;
+                    $document->document_name = $category->category_name;
                 }
 
                 $document->file = $file;
@@ -173,7 +215,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * Updates an existing UserDocuments model with file re-upload support.
+     * ✅ UPDATED: Updates an existing UserDocuments model with versioning support
      * @param int $document_id Document ID
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
@@ -205,8 +247,8 @@ class UserDocumentsController extends Controller
                 $model->file_url = $oldFileUrl;
             }
 
-            // Update timestamp
-            $model->upload_date = date('Y-m-d H:i:s');
+            // ✅ Update timestamp
+            $model->updated_at = date('Y-m-d H:i:s');
 
             if ($model->save(false)) {
                 Yii::$app->session->setFlash('success', 'Document updated successfully.');
@@ -222,7 +264,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * Deletes an existing UserDocuments model and its file.
+     * ✅ UPDATED: Soft delete - marks as deleted instead of physical deletion
      * @param int $document_id Document ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
@@ -231,15 +273,68 @@ class UserDocumentsController extends Controller
     {
         $model = $this->findModel($document_id);
 
-        // Delete associated file if it exists
-        if ($model->file_url && file_exists(Yii::getAlias('@webroot/' . $model->file_url))) {
-            @unlink(Yii::getAlias('@webroot/' . $model->file_url));
+        // ✅ Soft delete - mark as deleted
+        $model->status = UserDocuments::STATUS_DELETED;
+        $model->is_latest_version = 0;
+        $model->updated_at = date('Y-m-d H:i:s');
+        
+        if ($model->save(false)) {
+            Yii::$app->session->setFlash('success', 'Document deleted successfully.');
         }
 
-        $model->delete();
-
-        Yii::$app->session->setFlash('success', 'Document deleted successfully.');
         return $this->redirect(['index']);
+    }
+
+    /**
+     * ✅ NEW: Approve document (Admin only)
+     */
+    public function actionApprove($document_id)
+    {
+        $model = $this->findModel($document_id);
+        
+        // Check if user is admin
+        if (Yii::$app->user->identity->role !== 'Admin') {
+            throw new \yii\web\ForbiddenHttpException('Only admins can approve documents.');
+        }
+
+        $model->status = UserDocuments::STATUS_APPROVED;
+        $model->verified_by = Yii::$app->user->id;
+        $model->verified_at = date('Y-m-d H:i:s');
+        $model->updated_at = date('Y-m-d H:i:s');
+
+        if ($model->save(false)) {
+            Yii::$app->session->setFlash('success', 'Document approved successfully.');
+        }
+
+        return $this->redirect(['view', 'document_id' => $model->document_id]);
+    }
+
+    /**
+     * ✅ NEW: Reject document (Admin only)
+     */
+    public function actionReject($document_id)
+    {
+        $model = $this->findModel($document_id);
+        
+        // Check if user is admin
+        if (Yii::$app->user->identity->role !== 'Admin') {
+            throw new \yii\web\ForbiddenHttpException('Only admins can reject documents.');
+        }
+
+        if (Yii::$app->request->isPost) {
+            $model->status = UserDocuments::STATUS_REJECTED;
+            $model->verified_by = Yii::$app->user->id;
+            $model->verified_at = date('Y-m-d H:i:s');
+            $model->updated_at = date('Y-m-d H:i:s');
+            $model->rejection_reason = Yii::$app->request->post('rejection_reason', '');
+
+            if ($model->save(false)) {
+                Yii::$app->session->setFlash('success', 'Document rejected.');
+                return $this->redirect(['view', 'document_id' => $model->document_id]);
+            }
+        }
+
+        return $this->render('reject', ['model' => $model]);
     }
 
     /**

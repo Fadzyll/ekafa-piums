@@ -6,28 +6,35 @@ use Yii;
 use yii\web\UploadedFile;
 
 /**
- * This is the model class for table "user_details".
+ * This is the model class for table "user_profiles".
  *
  * @property int $user_details_id
  * @property int|null $user_id
  * @property string|null $full_name
  * @property string|null $ic_number
  * @property int|null $age
+ * @property string|null $date_of_birth
  * @property string|null $gender
  * @property string|null $race
  * @property string|null $phone_number
+ * @property string|null $emergency_phone
+ * @property string|null $emergency_contact_name
+ * @property string|null $emergency_contact_relationship
  * @property string|null $citizenship
  * @property string|null $marital_status
+ * @property string|null $occupation
  * @property string|null $address
  * @property string|null $city
  * @property string|null $postcode
  * @property string|null $state
+ * @property string|null $country
  * @property string|null $profile_picture_url
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property string|null $blood_type
  *
  * @property Users $user
- * @property UserJob $userJob
+ * @property UserJobDetails $userJobDetails
  * @property PartnerDetails $partnerDetails
  * @property UploadedFile $imageFile
  */
@@ -41,7 +48,7 @@ class UserDetails extends \yii\db\ActiveRecord
 
     public static function tableName()
     {
-        return 'user_details';
+        return 'user_profiles';
     }
 
     public function rules()
@@ -54,30 +61,36 @@ class UserDetails extends \yii\db\ActiveRecord
             [['user_id', 'age'], 'integer'],
             
             // String fields with length limits
-            [['full_name', 'profile_picture_url'], 'string', 'max' => 255],
-            [['ic_number', 'phone_number'], 'string', 'max' => 20],
+            [['full_name', 'profile_picture_url', 'emergency_contact_name', 'occupation'], 'string', 'max' => 255],
+            [['ic_number', 'phone_number', 'emergency_phone'], 'string', 'max' => 20],
             [['race', 'marital_status'], 'string', 'max' => 50],
-            [['citizenship', 'city', 'state'], 'string', 'max' => 100],
+            [['citizenship', 'city', 'state', 'country', 'emergency_contact_relationship'], 'string', 'max' => 100],
             [['postcode'], 'string', 'max' => 10],
             
             // Text fields
-            [['gender', 'address'], 'string'],
+            [['gender', 'address', 'blood_type'], 'string'],
             
             // Date fields
-            [['created_at', 'updated_at'], 'safe'],
+            [['date_of_birth', 'created_at', 'updated_at'], 'safe'],
+            
+            // Default value
+            [['country'], 'default', 'value' => 'Malaysia'],
             
             // ✅ IC Number validation
             [['ic_number'], 'unique'],
             [['ic_number'], 'match', 'pattern' => '/^\d{12}$/', 'message' => 'IC number must be exactly 12 digits.'],
             
             // ✅ Phone number validation
-            [['phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
+            [['phone_number', 'emergency_phone'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.'],
             
             // ✅ Age validation
             [['age'], 'integer', 'min' => 18, 'max' => 100],
             
             // Gender validation
             ['gender', 'in', 'range' => array_keys(self::optsGender())],
+            
+            // Blood type validation
+            ['blood_type', 'in', 'range' => array_keys(self::optsBloodType())],
             
             // Foreign key validation
             [['user_id'], 'exist', 'skipOnError' => true,
@@ -118,24 +131,31 @@ class UserDetails extends \yii\db\ActiveRecord
             'full_name' => 'Full Name',
             'ic_number' => 'IC Number',
             'age' => 'Age',
+            'date_of_birth' => 'Date of Birth',
             'gender' => 'Gender',
             'race' => 'Race',
             'phone_number' => 'Phone Number',
+            'emergency_phone' => 'Emergency Phone',
+            'emergency_contact_name' => 'Emergency Contact Name',
+            'emergency_contact_relationship' => 'Emergency Contact Relationship',
             'citizenship' => 'Citizenship',
             'marital_status' => 'Marital Status',
+            'occupation' => 'Occupation',
             'address' => 'Address',
             'city' => 'City',
             'postcode' => 'Postcode',
             'state' => 'State',
+            'country' => 'Country',
             'profile_picture_url' => 'Profile Picture',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'blood_type' => 'Blood Type',
             'imageFile' => 'Upload Profile Picture',
         ];
     }
 
     /**
-     * ✅ FIXED: Relation to Users
+     * Relation to Users
      */
     public function getUser()
     {
@@ -143,15 +163,15 @@ class UserDetails extends \yii\db\ActiveRecord
     }
 
     /**
-     * ✅ FIXED: Relation to UserJob
+     * Relation to UserJobDetails
      */
-    public function getUserJob()
+    public function getUserJobDetails()
     {
-        return $this->hasOne(UserJob::class, ['user_id' => 'user_id']);
+        return $this->hasOne(UserJobDetails::class, ['user_id' => 'user_id']);
     }
 
     /**
-     * ✅ FIXED: Relation to PartnerDetails
+     * Relation to PartnerDetails
      */
     public function getPartnerDetails()
     {
@@ -166,6 +186,24 @@ class UserDetails extends \yii\db\ActiveRecord
         return [
             self::GENDER_MALE => 'Male',
             self::GENDER_FEMALE => 'Female',
+        ];
+    }
+
+    /**
+     * Blood type options
+     */
+    public static function optsBloodType()
+    {
+        return [
+            'A+' => 'A+',
+            'A-' => 'A-',
+            'B+' => 'B+',
+            'B-' => 'B-',
+            'AB+' => 'AB+',
+            'AB-' => 'AB-',
+            'O+' => 'O+',
+            'O-' => 'O-',
+            'Unknown' => 'Unknown',
         ];
     }
 
@@ -208,12 +246,18 @@ class UserDetails extends \yii\db\ActiveRecord
         if ($this->ic_number && strlen($this->ic_number) == 12) {
             // Extract birth year
             $year = substr($this->ic_number, 0, 2);
+            $month = substr($this->ic_number, 2, 2);
+            $day = substr($this->ic_number, 4, 2);
+            
             $currentYear = date('Y');
             $currentCentury = floor($currentYear / 100) * 100;
             $previousCentury = $currentCentury - 100;
             
             // Determine century
             $birthYear = ($year > date('y')) ? $previousCentury + $year : $currentCentury + $year;
+            
+            // Set date_of_birth
+            $this->date_of_birth = sprintf('%04d-%02d-%02d', $birthYear, $month, $day);
             
             // Calculate age
             $this->age = $currentYear - $birthYear;

@@ -11,7 +11,7 @@ use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\RegisterAccForm;
 use app\models\UserDetails;
-use app\models\UserJob;
+use app\models\UserJobDetails;
 use app\models\PartnerDetails;
 
 class SiteController extends Controller
@@ -40,7 +40,7 @@ class SiteController extends Controller
     }
 
     /**
-     * ✅ FIXED: Check ALL profile sections before allowing access
+     * ✅ UPDATED: Check ALL profile sections before allowing access
      */
     public function beforeAction($action)
     {
@@ -112,13 +112,13 @@ class SiteController extends Controller
     }
 
     /**
-     * ✅ NEW: Get detailed profile completion status
+     * ✅ UPDATED: Get detailed profile completion status using UserJobDetails
      * Returns array with completion status for each section
      */
     protected function getProfileCompletionStatus($userId, $userRole)
     {
         $userDetails = UserDetails::findOne(['user_id' => $userId]);
-        $userJob = UserJob::findOne(['user_id' => $userId]);
+        $userJobDetails = UserJobDetails::findOne(['user_id' => $userId]);
         $partnerDetails = PartnerDetails::findOne(['partner_id' => $userId]);
         
         $status = [
@@ -136,14 +136,14 @@ class SiteController extends Controller
             $status['user_details'] = true;
         }
 
-        // ✅ Check User Job (all fields required)
-        if ($userJob && 
-            !empty($userJob->job) && 
-            !empty($userJob->employer) && 
-            !empty($userJob->employer_address) && 
-            !empty($userJob->employer_phone_number) && 
-            !empty($userJob->gross_salary) && 
-            !empty($userJob->net_salary)) {
+        // ✅ Check User Job Details (using new model)
+        if ($userJobDetails && 
+            !empty($userJobDetails->job) && 
+            !empty($userJobDetails->employer) && 
+            !empty($userJobDetails->employer_address) && 
+            !empty($userJobDetails->employer_phone_number) && 
+            !empty($userJobDetails->gross_salary) && 
+            !empty($userJobDetails->net_salary)) {
             $status['user_job'] = true;
         }
 

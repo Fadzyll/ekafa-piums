@@ -3,20 +3,15 @@
 namespace app\models;
 
 /**
- * This is the ActiveQuery class for [[UserJob]].
+ * This is the ActiveQuery class for [[UserJobDetails]].
  *
- * @see UserJob
+ * @see UserJobDetails
  */
-class UserJobQuery extends \yii\db\ActiveQuery
+class UserJobDetailsQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
-    {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
     /**
      * {@inheritdoc}
-     * @return UserJob[]|array
+     * @return UserJobDetails[]|array
      */
     public function all($db = null)
     {
@@ -25,7 +20,7 @@ class UserJobQuery extends \yii\db\ActiveQuery
 
     /**
      * {@inheritdoc}
-     * @return UserJob|array|null
+     * @return UserJobDetails|array|null
      */
     public function one($db = null)
     {

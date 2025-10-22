@@ -34,7 +34,7 @@ class UserDetailsController extends Controller
     }
 
     /**
-     * ✅ FIXED: Profile edit with validation
+     * ✅ UPDATED: Profile edit with validation
      */
     public function actionProfile()
     {
@@ -83,8 +83,8 @@ class UserDetailsController extends Controller
             if ($model->save(false)) {
                 Yii::$app->session->setFlash('success', 'Profile updated successfully!');
 
-                // Redirect to job form if not completed
-                if (!$model->userJob) {
+                // ✅ UPDATED: Check userJobDetails instead of userJob
+                if (!$model->userJobDetails) {
                     return $this->redirect(['user-job/profile']);
                 }
 
@@ -98,7 +98,7 @@ class UserDetailsController extends Controller
     }
 
     /**
-     * Display profile with all relations
+     * ✅ UPDATED: Display profile with all relations using updated relation names
      */
     public function actionView()
     {
@@ -107,7 +107,7 @@ class UserDetailsController extends Controller
         $model = UserDetails::find()
             ->where(['user_id' => $userId])
             ->with([
-                'userJob',
+                'userJobDetails',  // ✅ UPDATED: was 'userJob'
                 'partnerDetails',
                 'partnerDetails.partnerJob'
             ])

@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\UserJob;
+use app\models\UserJobDetails;
 use app\models\UserDetails;
 use yii\web\Controller;
 use yii\filters\AccessControl;
@@ -33,7 +33,7 @@ class UserJobController extends Controller
     }
 
     /**
-     * ✅ FIXED: Job profile with validation
+     * ✅ UPDATED: Job profile using UserJobDetails model with validation
      */
     public function actionProfile()
     {
@@ -46,10 +46,10 @@ class UserJobController extends Controller
             return $this->redirect(['user-details/profile']);
         }
 
-        // Find or create job record
-        $model = UserJob::findOne(['user_id' => $userId]);
+        // Find or create job record using UserJobDetails
+        $model = UserJobDetails::findOne(['user_id' => $userId]);
         if (!$model) {
-            $model = new UserJob();
+            $model = new UserJobDetails();
             $model->user_id = $userId;
         }
 
@@ -72,12 +72,12 @@ class UserJobController extends Controller
     }
 
     /**
-     * View job details
+     * ✅ UPDATED: View job details using UserJobDetails
      */
     public function actionView()
     {
         $userId = Yii::$app->user->id;
-        $model = UserJob::findOne(['user_id' => $userId]);
+        $model = UserJobDetails::findOne(['user_id' => $userId]);
 
         if (!$model) {
             Yii::$app->session->setFlash('warning', 'No job information found.');
@@ -88,12 +88,12 @@ class UserJobController extends Controller
     }
 
     /**
-     * Delete job record
+     * ✅ UPDATED: Delete job record using UserJobDetails
      */
     public function actionDelete()
     {
         $userId = Yii::$app->user->id;
-        $model = UserJob::findOne(['user_id' => $userId]);
+        $model = UserJobDetails::findOne(['user_id' => $userId]);
 
         if ($model && $model->delete()) {
             Yii::$app->session->setFlash('success', 'Job record deleted successfully.');

@@ -5,41 +5,41 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "partner_job".
+ * This is the model class for table "user_job_details".
  *
- * @property int $partner_id
- * @property string|null $partner_job
+ * @property int $job_detail_id
+ * @property int $user_id
+ * @property string|null $job
  * @property string|null $job_title
  * @property string|null $department
  * @property string|null $employment_type
  * @property int|null $working_hours_per_week
  * @property string|null $employment_status
- * @property string|null $partner_employer
+ * @property string|null $employer
  * @property string|null $start_date
  * @property string|null $end_date
- * @property string|null $partner_employer_address
+ * @property string|null $employer_address
  * @property string|null $employment_letter_url
  * @property string|null $latest_payslip_url
- * @property string|null $partner_employer_phone_number
- * @property float|null $partner_gross_salary
- * @property float|null $partner_net_salary
+ * @property string|null $employer_phone_number
+ * @property float|null $gross_salary
+ * @property float|null $net_salary
  * @property string|null $currency
- * @property float|null $other_income
- * @property string|null $other_income_source
  * @property string|null $tax_identification_number
  * @property string|null $epf_number
  * @property string|null $socso_number
  * @property int|null $is_verified
  * @property int|null $verified_by
  * @property string|null $verified_at
- * @property string|null $notes
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property float|null $other_income
+ * @property string|null $other_income_source
  *
- * @property PartnerDetails $partnerDetails
+ * @property UserDetails $userDetails
  * @property Users $verifiedBy
  */
-class PartnerJob extends \yii\db\ActiveRecord
+class UserJobDetails extends \yii\db\ActiveRecord
 {
     const EMPLOYMENT_TYPE_FULL_TIME = 'Full-Time';
     const EMPLOYMENT_TYPE_PART_TIME = 'Part-Time';
@@ -55,50 +55,51 @@ class PartnerJob extends \yii\db\ActiveRecord
 
     public static function tableName()
     {
-        return 'partner_job';
+        return 'user_job_details';
     }
 
     public function rules()
     {
         return [
-            [['partner_id'], 'required'],
+            // ✅ REQUIRED FIELDS
+            [['user_id'], 'required'],
 
-            [['partner_id', 'working_hours_per_week', 'is_verified', 'verified_by'], 'integer'],
+            [['user_id', 'working_hours_per_week', 'is_verified', 'verified_by'], 'integer'],
             [['start_date', 'end_date', 'verified_at', 'created_at', 'updated_at'], 'safe'],
-            [['partner_employer_address', 'notes'], 'string'],
-            [['employment_type', 'employment_status'], 'string'],
+            [['employer_address'], 'string'],
             
-            // Salary validation
-            [['partner_gross_salary', 'partner_net_salary', 'other_income'], 'number', 'min' => 0],
+            // ✅ Salary validation
+            [['gross_salary', 'net_salary', 'other_income'], 'number', 'min' => 0],
             
-            // Net salary validation
-            ['partner_net_salary', 'compare', 'compareAttribute' => 'partner_gross_salary', 'operator' => '<=', 'message' => 'Net salary cannot be greater than gross salary.', 'skipOnEmpty' => true],
-
-            [['partner_job', 'job_title', 'department'], 'string', 'max' => 100],
-            [['partner_employer', 'employment_letter_url', 'latest_payslip_url', 'other_income_source'], 'string', 'max' => 255],
-            [['partner_employer_phone_number'], 'string', 'max' => 20],
+            // ✅ Net salary cannot exceed gross salary
+            ['net_salary', 'compare', 'compareAttribute' => 'gross_salary', 'operator' => '<=', 'message' => 'Net salary cannot be greater than gross salary.'],
+            
+            [['job', 'job_title', 'department'], 'string', 'max' => 100],
+            [['employer', 'employment_letter_url', 'latest_payslip_url', 'other_income_source'], 'string', 'max' => 255],
+            [['employer_phone_number'], 'string', 'max' => 20],
             [['currency'], 'string', 'max' => 3],
             [['tax_identification_number', 'epf_number', 'socso_number'], 'string', 'max' => 50],
+            [['employment_type', 'employment_status'], 'string'],
             
-            // Phone validation
-            [['partner_employer_phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.', 'skipOnEmpty' => true],
+            // ✅ Phone validation
+            [['employer_phone_number'], 'match', 'pattern' => '/^(\+?6?01)[0-9]{8,9}$/', 'message' => 'Please enter a valid Malaysian phone number.', 'skipOnEmpty' => true],
 
             // Default values
             [['currency'], 'default', 'value' => 'MYR'],
-            [['other_income'], 'default', 'value' => 0.00],
             [['employment_type'], 'default', 'value' => self::EMPLOYMENT_TYPE_FULL_TIME],
             [['employment_status'], 'default', 'value' => self::EMPLOYMENT_STATUS_ACTIVE],
             [['is_verified'], 'default', 'value' => 0],
+            [['other_income'], 'default', 'value' => 0.00],
             [['working_hours_per_week'], 'default', 'value' => 40],
 
             // Enum validation
             ['employment_type', 'in', 'range' => array_keys(self::optsEmploymentType())],
             ['employment_status', 'in', 'range' => array_keys(self::optsEmploymentStatus())],
 
-            [['partner_id'], 'unique'],
-            [['partner_id'], 'exist', 'skipOnError' => true,
-                'targetClass' => PartnerDetails::class,
-                'targetAttribute' => ['partner_id' => 'partner_id']
+            // ✅ Foreign keys
+            [['user_id'], 'exist', 'skipOnError' => true,
+                'targetClass' => UserDetails::class,
+                'targetAttribute' => ['user_id' => 'user_id']
             ],
             [['verified_by'], 'exist', 'skipOnError' => true,
                 'targetClass' => Users::class,
@@ -110,42 +111,48 @@ class PartnerJob extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'partner_id' => 'Partner ID',
-            'partner_job' => 'Job/Occupation',
+            'job_detail_id' => 'Job Detail ID',
+            'user_id' => 'User ID',
+            'job' => 'Job/Occupation',
             'job_title' => 'Job Title',
             'department' => 'Department',
             'employment_type' => 'Employment Type',
             'working_hours_per_week' => 'Working Hours Per Week',
             'employment_status' => 'Employment Status',
-            'partner_employer' => 'Employer Name',
+            'employer' => 'Employer Name',
             'start_date' => 'Start Date',
             'end_date' => 'End Date',
-            'partner_employer_address' => 'Employer Address',
+            'employer_address' => 'Employer Address',
             'employment_letter_url' => 'Employment Letter',
             'latest_payslip_url' => 'Latest Payslip',
-            'partner_employer_phone_number' => 'Employer Phone Number',
-            'partner_gross_salary' => 'Gross Salary (RM)',
-            'partner_net_salary' => 'Net Salary (RM)',
+            'employer_phone_number' => 'Employer Phone Number',
+            'gross_salary' => 'Gross Salary',
+            'net_salary' => 'Net Salary',
             'currency' => 'Currency',
-            'other_income' => 'Other Income',
-            'other_income_source' => 'Other Income Source',
             'tax_identification_number' => 'Tax ID Number',
             'epf_number' => 'EPF Number',
             'socso_number' => 'SOCSO Number',
             'is_verified' => 'Is Verified',
             'verified_by' => 'Verified By',
             'verified_at' => 'Verified At',
-            'notes' => 'Notes',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'other_income' => 'Other Income',
+            'other_income_source' => 'Other Income Source',
         ];
     }
 
-    public function getPartnerDetails()
+    /**
+     * Relation to UserDetails
+     */
+    public function getUserDetails()
     {
-        return $this->hasOne(PartnerDetails::class, ['partner_id' => 'partner_id']);
+        return $this->hasOne(UserDetails::class, ['user_id' => 'user_id']);
     }
 
+    /**
+     * Relation to Users (verified by)
+     */
     public function getVerifiedBy()
     {
         return $this->hasOne(Users::class, ['user_id' => 'verified_by']);
@@ -187,6 +194,6 @@ class PartnerJob extends \yii\db\ActiveRecord
 
     public static function find()
     {
-        return new PartnerJobQuery(get_called_class());
+        return new UserJobDetailsQuery(get_called_class());
     }
 }

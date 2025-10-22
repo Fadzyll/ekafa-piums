@@ -12,15 +12,25 @@ use yii\web\IdentityInterface;
  * @property string $username
  * @property string $email
  * @property string $password_hash
+ * @property string $auth_key
+ * @property string|null $password_reset_token
+ * @property string|null $verification_token
  * @property string $role
+ * @property int $status
  * @property string|null $date_registered
  * @property string|null $last_login
+ * @property int $created_at
+ * @property int $updated_at
  */
 class Users extends \yii\db\ActiveRecord implements IdentityInterface
 {
     const ROLE_ADMIN = 'Admin';
     const ROLE_TEACHER = 'Teacher';
     const ROLE_PARENT = 'Parent';
+
+    const STATUS_DELETED = 0;
+    const STATUS_INACTIVE = 9;
+    const STATUS_ACTIVE = 10;
 
     public $password;
 
@@ -34,11 +44,21 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             [['email', 'username', 'role'], 'required'],
             [['role'], 'string'],
+            [['status', 'created_at', 'updated_at'], 'integer'],
             [['date_registered', 'last_login'], 'safe'],
-            [['email', 'password_hash'], 'string', 'max' => 255],
+            [['email', 'password_hash', 'password_reset_token', 'verification_token'], 'string', 'max' => 255],
             [['username'], 'string', 'max' => 100],
+            [['auth_key'], 'string', 'max' => 32],
             [['email'], 'unique'],
             [['username'], 'unique'],
+            [['password_reset_token'], 'unique'],
+            [['verification_token'], 'unique'],
+
+            // Default values
+            [['status'], 'default', 'value' => self::STATUS_ACTIVE],
+            [['created_at', 'updated_at'], 'default', 'value' => function() {
+                return time();
+            }],
 
             // Password is required only on insert
             ['password', 'required', 'on' => 'insert'],
@@ -53,10 +73,9 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
 
             // Role options
             ['role', 'in', 'range' => array_keys(self::optsRole())],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
         ];
     }
-
-
 
     public function attributeLabels()
     {
@@ -66,9 +85,15 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
             'email' => 'Email',
             'password_hash' => 'Password Hash',
             'password' => 'Password',
+            'auth_key' => 'Auth Key',
+            'password_reset_token' => 'Password Reset Token',
+            'verification_token' => 'Verification Token',
             'role' => 'Role',
+            'status' => 'Status',
             'date_registered' => 'Date Registered',
             'last_login' => 'Last Login',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
         ];
     }
 
@@ -79,9 +104,17 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
                 $this->password_hash = Yii::$app->security->generatePasswordHash($this->password);
             }
 
-            if ($insert && empty($this->date_registered)) {
-                $this->date_registered = date('Y-m-d H:i:s');
+            if ($insert) {
+                if (empty($this->auth_key)) {
+                    $this->auth_key = Yii::$app->security->generateRandomString(32);
+                }
+                if (empty($this->date_registered)) {
+                    $this->date_registered = date('Y-m-d H:i:s');
+                }
+                $this->created_at = time();
             }
+
+            $this->updated_at = time();
 
             return true;
         }
@@ -126,9 +159,9 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
     // IdentityInterface implementations
     // ─────────────────────────────────────
 
-    public static function findIdentity($id): IdentityInterface
+    public static function findIdentity($id): ?IdentityInterface
     {
-        return static::findOne($id);
+        return static::findOne(['user_id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
     public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
@@ -144,17 +177,61 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getAuthKey(): ?string
     {
-        return null; // optional: implement if you want "remember me"
+        return $this->auth_key;
     }
 
     public function validateAuthKey($authKey): bool
     {
-        return true; // optional: implement if you want "remember me"
+        return $this->getAuthKey() === $authKey;
+    }
+
+    /**
+     * Generates password reset token
+     */
+    public function generatePasswordResetToken()
+    {
+        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Removes password reset token
+     */
+    public function removePasswordResetToken()
+    {
+        $this->password_reset_token = null;
+    }
+
+    /**
+     * Finds user by password reset token
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
+
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status' => self::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'] ?? 3600;
+        return $timestamp + $expire >= time();
     }
 
     public function getUserDetails()
     {
         return $this->hasOne(UserDetails::class, ['user_id' => 'user_id']);
     }
-
 }
