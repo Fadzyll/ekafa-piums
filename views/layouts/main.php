@@ -458,6 +458,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                     <div class="collapse" id="adminUser">
                         <?= Html::a('Users Account', ['/user/index'], ['class' => 'nav-link']) ?>
                         <?= Html::a('Admin Profile', ['/user-details/view'], ['class' => 'nav-link']) ?>
+                        <?= Html::a('Document Categories', ['/document-category/index'], ['class' => 'nav-link']) ?>
+                        <?= Html::a('Review Documents', ['/user-documents/index'], ['class' => 'nav-link']) ?>
                     </div>
                 </li>
                 
@@ -505,13 +507,15 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
             <?php elseif ($role === 'Teacher'): ?>
 
-                <!-- Teacher: Profile -->
+                <!-- Teacher: User Profile -->
                 <li class="nav-item">
-                    <?= Html::a(
-                        '<i class="bi bi-person-circle"></i> My Profile',
-                        ['/user-details/view'],
-                        ['class' => 'nav-link']
-                    ) ?>
+                    <a class="nav-link" data-bs-toggle="collapse" href="#teacherProfile" role="button" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> User Profile
+                    </a>
+                    <div class="collapse" id="teacherProfile">
+                        <?= Html::a('My Profile', ['/user-details/view'], ['class' => 'nav-link']) ?>
+                        <?= Html::a('<i class="bi bi-files"></i> My Documents', ['/user-documents/my-documents'], ['class' => 'nav-link']) ?>
+                    </div>
                 </li>
 
                 <div class="sidebar-divider"></div>
@@ -560,13 +564,15 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
             <?php elseif ($role === 'Parent'): ?>
 
-                <!-- Parent: Profile -->
+                <!-- Parent: User Profile -->
                 <li class="nav-item">
-                    <?= Html::a(
-                        '<i class="bi bi-person-circle"></i> My Profile',
-                        ['/user-details/view'],
-                        ['class' => 'nav-link']
-                    ) ?>
+                    <a class="nav-link" data-bs-toggle="collapse" href="#parentProfile" role="button" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> User Profile
+                    </a>
+                    <div class="collapse" id="parentProfile">
+                        <?= Html::a('My Profile', ['/user-details/view'], ['class' => 'nav-link']) ?>
+                        <?= Html::a('<i class="bi bi-files"></i> My Documents', ['/user-documents/my-documents'], ['class' => 'nav-link']) ?>
+                    </div>
                 </li>
 
                 <div class="sidebar-divider"></div>

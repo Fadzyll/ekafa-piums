@@ -488,6 +488,11 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                 <i class="bi bi-people-fill"></i> Partner Info
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button">
+                <i class="bi bi-file-earmark-text-fill"></i> My Documents
+            </button>
+        </li>
     </ul>
 
     <!-- Tab Content -->
@@ -720,6 +725,70 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                     <h4>No Partner Information</h4>
                     <p>Add your partner's details to complete your family profile and enable family-related features.</p>
                     <?= Html::a('<i class="bi bi-plus-circle"></i> Add Partner Info', ['partner-details/profile'], [
+                        'class' => 'btn-modern btn-primary-modern'
+                    ]) ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Documents Tab -->
+        <div class="tab-pane fade" id="documents" role="tabpanel">
+            <?php
+            $userId = Yii::$app->user->id;
+            $userRole = Yii::$app->user->identity->role;
+            $categories = \app\models\DocumentCategory::getActiveCategories($userRole);
+            $uploadedDocuments = \app\models\UserDocuments::find()
+                ->where(['user_id' => $userId])
+                ->with('category')
+                ->all();
+            ?>
+            <?php if ($uploadedDocuments): ?>
+                <div class="info-card">
+                    <h3 class="info-card-title">
+                        <i class="bi bi-files"></i>
+                        Uploaded Documents
+                    </h3>
+                    <div class="info-grid">
+                        <?php foreach ($uploadedDocuments as $doc): ?>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <?= Html::encode($doc->category->category_name ?? 'Unknown Category') ?>
+                                </div>
+                                <div class="info-value d-flex justify-content-between align-items-center">
+                                    <span><?= basename($doc->file_url) ?></span>
+                                    <div>
+                                        <?= Html::a('<i class="bi bi-eye"></i>', Yii::getAlias('@web/' . $doc->file_url), [
+                                            'class' => 'btn btn-sm btn-info',
+                                            'target' => '_blank',
+                                            'title' => 'View'
+                                        ]) ?>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <?php
+                                    $statusBadges = [
+                                        'Completed' => '<span class="badge bg-success">Approved</span>',
+                                        'Pending Review' => '<span class="badge bg-warning">Pending</span>',
+                                        'Rejected' => '<span class="badge bg-danger">Rejected</span>',
+                                    ];
+                                    echo $statusBadges[$doc->status] ?? '';
+                                    ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <?= Html::a('<i class="bi bi-plus-circle"></i> Manage Documents', ['/user-documents/my-documents'], [
+                            'class' => 'btn-modern btn-primary-modern'
+                        ]) ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="empty-state-card">
+                    <i class="bi bi-file-earmark-x empty-state-icon"></i>
+                    <h4>No Documents Uploaded</h4>
+                    <p>Upload your required documents to complete your profile.</p>
+                    <?= Html::a('<i class="bi bi-upload"></i> Upload Documents', ['/user-documents/my-documents'], [
                         'class' => 'btn-modern btn-primary-modern'
                     ]) ?>
                 </div>

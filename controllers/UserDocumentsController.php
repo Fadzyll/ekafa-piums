@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\UserDocuments;
 use app\models\UserDocumentsSearch;
+use app\models\DocumentCategory;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -92,6 +93,55 @@ class UserDocumentsController extends Controller
 
         return $this->render('create', [
             'model' => $model,
+        ]);
+    }
+
+
+    public function actionMyDocuments()
+    {
+        $userId = Yii::$app->user->id;
+        $userRole = Yii::$app->user->identity->role;
+
+        // Get all active categories for this user's role
+        $categories = DocumentCategory::getActiveCategories($userRole);
+
+        // Get user's uploaded documents
+        $uploadedDocuments = UserDocuments::find()
+            ->where(['user_id' => $userId])
+            ->indexBy('category_id')
+            ->all();
+
+        if (Yii::$app->request->isPost) {
+            $categoryId = Yii::$app->request->post('category_id');
+            $file = UploadedFile::getInstanceByName('file');
+
+            if ($categoryId && $file) {
+                // Check if document already exists
+                $document = UserDocuments::findOne(['user_id' => $userId, 'category_id' => $categoryId]);
+                
+                if (!$document) {
+                    $document = new UserDocuments();
+                    $document->user_id = $userId;
+                    $document->category_id = $categoryId;
+                }
+
+                $document->file = $file;
+                $document->upload_date = date('Y-m-d H:i:s');
+                $document->status = UserDocuments::STATUS_PENDING_REVIEW;
+
+                if ($document->uploadFile() && $document->save(false)) {
+                    Yii::$app->session->setFlash('success', 'Document uploaded successfully!');
+                } else {
+                    Yii::$app->session->setFlash('error', 'Failed to upload document.');
+                }
+
+                return $this->refresh();
+            }
+        }
+
+        return $this->render('my-documents', [
+            'categories' => $categories,
+            'uploadedDocuments' => $uploadedDocuments,
         ]);
     }
 
