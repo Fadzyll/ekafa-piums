@@ -72,23 +72,40 @@ class UserDocumentsController extends Controller
 
         if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
-            $model->file = UploadedFile::getInstance($model, 'file');
+            
+            // Handle file upload - check both 'file' and 'file_url' attributes
+            $uploadedFile = UploadedFile::getInstance($model, 'file_url');
+            if (!$uploadedFile) {
+                $uploadedFile = UploadedFile::getInstance($model, 'file');
+            }
+            
+            if ($uploadedFile) {
+                $model->file = $uploadedFile;
+            }
 
             // Set upload date automatically
             $model->upload_date = date('Y-m-d H:i:s');
 
+            // Upload file if provided
             if ($model->file && $model->uploadFile()) {
-                $model->status = UserDocuments::STATUS_PENDING_REVIEW;
+                // File uploaded successfully
+                if (!$model->status) {
+                    $model->status = UserDocuments::STATUS_PENDING_REVIEW;
+                }
             }
 
             if ($model->save(false)) {
                 Yii::$app->session->setFlash('success', 'Document uploaded successfully.');
                 return $this->redirect(['view', 'document_id' => $model->document_id]);
             } else {
-                Yii::$app->session->setFlash('error', 'Failed to upload document.');
+                Yii::$app->session->setFlash('error', 'Failed to upload document. Please check all required fields.');
             }
         } else {
             $model->loadDefaultValues();
+            // Set default status
+            if (!$model->status) {
+                $model->status = UserDocuments::STATUS_PENDING_REVIEW;
+            }
         }
 
         return $this->render('create', [
@@ -96,7 +113,10 @@ class UserDocumentsController extends Controller
         ]);
     }
 
-
+    /**
+     * User document upload page for logged-in users
+     * @return string|\yii\web\Response
+     */
     public function actionMyDocuments()
     {
         $userId = Yii::$app->user->id;
@@ -105,7 +125,7 @@ class UserDocumentsController extends Controller
         // Get all active categories for this user's role
         $categories = DocumentCategory::getActiveCategories($userRole);
 
-        // Get user's uploaded documents
+        // Get user's uploaded documents indexed by category_id
         $uploadedDocuments = UserDocuments::find()
             ->where(['user_id' => $userId])
             ->indexBy('category_id')
@@ -116,13 +136,20 @@ class UserDocumentsController extends Controller
             $file = UploadedFile::getInstanceByName('file');
 
             if ($categoryId && $file) {
-                // Check if document already exists
+                // Check if document already exists for this category
                 $document = UserDocuments::findOne(['user_id' => $userId, 'category_id' => $categoryId]);
                 
                 if (!$document) {
+                    // Create new document
                     $document = new UserDocuments();
                     $document->user_id = $userId;
                     $document->category_id = $categoryId;
+                    
+                    // Get category name for document_type
+                    $category = DocumentCategory::findOne($categoryId);
+                    if ($category) {
+                        $document->document_type = $category->category_name;
+                    }
                 }
 
                 $document->file = $file;
@@ -132,7 +159,7 @@ class UserDocumentsController extends Controller
                 if ($document->uploadFile() && $document->save(false)) {
                     Yii::$app->session->setFlash('success', 'Document uploaded successfully!');
                 } else {
-                    Yii::$app->session->setFlash('error', 'Failed to upload document.');
+                    Yii::$app->session->setFlash('error', 'Failed to upload document. Please try again.');
                 }
 
                 return $this->refresh();
@@ -157,19 +184,28 @@ class UserDocumentsController extends Controller
         $oldFileUrl = $model->file_url;
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-            $model->file = UploadedFile::getInstance($model, 'file');
-
-            // If a new file is uploaded, replace the old one
-            if ($model->file && $model->uploadFile()) {
-                // Optionally delete the old file
-                if ($oldFileUrl && file_exists(Yii::getAlias('@webroot/' . $oldFileUrl))) {
-                    @unlink(Yii::getAlias('@webroot/' . $oldFileUrl));
+            // Handle file upload - check both 'file' and 'file_url' attributes
+            $uploadedFile = UploadedFile::getInstance($model, 'file_url');
+            if (!$uploadedFile) {
+                $uploadedFile = UploadedFile::getInstance($model, 'file');
+            }
+            
+            if ($uploadedFile) {
+                $model->file = $uploadedFile;
+                
+                // If a new file is uploaded, replace the old one
+                if ($model->uploadFile()) {
+                    // Delete the old file
+                    if ($oldFileUrl && file_exists(Yii::getAlias('@webroot/' . $oldFileUrl))) {
+                        @unlink(Yii::getAlias('@webroot/' . $oldFileUrl));
+                    }
                 }
             } else {
                 // Keep old file if no new upload
                 $model->file_url = $oldFileUrl;
             }
 
+            // Update timestamp
             $model->upload_date = date('Y-m-d H:i:s');
 
             if ($model->save(false)) {

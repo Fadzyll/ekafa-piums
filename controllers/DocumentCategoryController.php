@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use Yii;
 use app\models\DocumentCategory;
+use app\models\DocumentCategorySearch;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -38,12 +39,14 @@ class DocumentCategoryController extends Controller
 
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => DocumentCategory::find()->orderBy(['created_at' => SORT_DESC]),
-            'pagination' => ['pageSize' => 20],
-        ]);
+        // Create search model instance
+        $searchModel = new DocumentCategorySearch();
+        
+        // Get data provider with search results
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
@@ -58,6 +61,12 @@ class DocumentCategoryController extends Controller
     public function actionCreate()
     {
         $model = new DocumentCategory();
+        
+        // Set default values
+        if ($model->isNewRecord) {
+            $model->status = DocumentCategory::STATUS_ACTIVE;
+            $model->is_required = 0;
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             Yii::$app->session->setFlash('success', 'Document category created successfully.');
