@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS `migration` (
 INSERT INTO `migration` (`version`, `apply_time`) VALUES
 	('m000000_000000_base', 1761095548),
 	('m251022_011107_add_document_categories_table', 1761096091),
+	('m251022_080000_create_teachers_education_table', 1761137894),
 	('m251023_010000_enhance_users_table', 1761122121),
 	('m251023_020000_rename_user_details_to_profiles', 1761122724),
 	('m251023_030000_rename_documents_table', 1761122905),
@@ -303,6 +304,22 @@ CREATE TABLE IF NOT EXISTS `partner_job_backup_20251023` (
 -- Dumping data for table ekafa_db.partner_job_backup_20251023: ~0 rows (approximately)
 INSERT INTO `partner_job_backup_20251023` (`partner_id`, `partner_job`, `partner_employer`, `partner_employer_address`, `partner_employer_phone_number`, `partner_gross_salary`, `partner_net_salary`) VALUES
 	(3, 'Lecturer', 'Universiti Malaysia Sabah', 'Universiti Malaysia Sabah, Jalan UMS, 88400 Kota Kinabalu, Sabah, Malaysia.', '0198008999', 5000.00, 4000.00);
+
+-- Dumping structure for table ekafa_db.teachers_education
+CREATE TABLE IF NOT EXISTS `teachers_education` (
+  `education_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `institution_name` varchar(255) DEFAULT NULL,
+  `degree_level` enum('Bachelor','Master','PhD','Diploma','Certificate') DEFAULT NULL,
+  `field_of_study` varchar(255) DEFAULT NULL,
+  `graduation_date` date DEFAULT NULL,
+  PRIMARY KEY (`education_id`),
+  KEY `idx-teachers_education-user_id` (`user_id`),
+  KEY `idx-teachers_education-degree_level` (`degree_level`),
+  CONSTRAINT `fk-teachers_education-user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Dumping data for table ekafa_db.teachers_education: ~0 rows (approximately)
 
 -- Dumping structure for table ekafa_db.users
 CREATE TABLE IF NOT EXISTS `users` (
