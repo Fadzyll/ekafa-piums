@@ -223,18 +223,23 @@ $this->params['hideTitle'] = true;
     gap: 0.5rem;
 }
 
-.status-completed {
+.status-approved {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
 }
 
-.status-incomplete {
+.status-rejected {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
 }
 
 .status-pending {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.status-expired {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white;
 }
 
@@ -333,6 +338,15 @@ $this->params['hideTitle'] = true;
     color: #111827;
 }
 
+.category-badge {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+}
+
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
@@ -389,21 +403,21 @@ $this->params['hideTitle'] = true;
                 </div>
                 <div class="stat-box completed">
                     <div class="stat-number">
-                        <?= UserDocuments::find()->where(['status' => 'Completed'])->count() ?>
+                        <?= UserDocuments::find()->where(['status' => UserDocuments::STATUS_APPROVED])->count() ?>
                     </div>
-                    <div class="stat-label">Completed</div>
+                    <div class="stat-label">Approved</div>
                 </div>
                 <div class="stat-box pending">
                     <div class="stat-number">
-                        <?= UserDocuments::find()->where(['status' => 'Pending Review'])->count() ?>
+                        <?= UserDocuments::find()->where(['status' => UserDocuments::STATUS_PENDING_REVIEW])->count() ?>
                     </div>
                     <div class="stat-label">Pending Review</div>
                 </div>
                 <div class="stat-box incomplete">
                     <div class="stat-number">
-                        <?= UserDocuments::find()->where(['status' => 'Incomplete'])->count() ?>
+                        <?= UserDocuments::find()->where(['status' => UserDocuments::STATUS_REJECTED])->count() ?>
                     </div>
-                    <div class="stat-label">Incomplete</div>
+                    <div class="stat-label">Rejected</div>
                 </div>
             </div>
 
@@ -426,9 +440,10 @@ $this->params['hideTitle'] = true;
 
                 <div class="filter-pills">
                     <button class="filter-pill active" data-status="">All Documents</button>
-                    <button class="filter-pill" data-status="completed">Completed</button>
+                    <button class="filter-pill" data-status="approved">Approved</button>
                     <button class="filter-pill" data-status="pending">Pending Review</button>
-                    <button class="filter-pill" data-status="incomplete">Incomplete</button>
+                    <button class="filter-pill" data-status="rejected">Rejected</button>
+                    <button class="filter-pill" data-status="expired">Expired</button>
                 </div>
             </div>
 
@@ -443,7 +458,7 @@ $this->params['hideTitle'] = true;
                     'columns' => [
                         [
                             'class' => 'yii\grid\SerialColumn',
-                            'header' => '#',
+                            'header' => 'No.',
                             'headerOptions' => ['style' => 'width: 60px; text-align: center;'],
                             'contentOptions' => ['style' => 'text-align: center; font-weight: 600;'],
                         ],
@@ -458,37 +473,56 @@ $this->params['hideTitle'] = true;
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
                         [
-                            'attribute' => 'document_type',
+                            'attribute' => 'document_name',
                             'label' => 'Document Name',
                             'format' => 'raw',
                             'value' => function ($model) {
-                                return '<div class="document-name">' . Html::encode($model->document_type) . '</div>';
+                                return '<div class="document-name">' . Html::encode($model->document_name) . '</div>';
                             },
+                        ],
+                        [
+                            'attribute' => 'document_type',
+                            'label' => 'Type',
+                            'format' => 'raw',
+                            'value' => function ($model) {
+                                return '<div style="color: #6b7280; font-size: 0.875rem;">' . Html::encode($model->document_type) . '</div>';
+                            },
+                            'headerOptions' => ['style' => 'width: 150px;'],
+                        ],
+                        [
+                            'attribute' => 'category_id',
+                            'label' => 'Category',
+                            'format' => 'raw',
+                            'value' => function ($model) {
+                                return $model->category 
+                                    ? '<span class="category-badge">' . Html::encode($model->category->category_name) . '</span>'
+                                    : '<span class="text-muted">-</span>';
+                            },
+                            'headerOptions' => ['style' => 'width: 140px;'],
+                            'contentOptions' => ['style' => 'text-align: center;'],
                         ],
                         [
                             'attribute' => 'status',
                             'format' => 'raw',
                             'value' => function ($model) {
                                 $statusClasses = [
-                                    'Completed' => 'status-completed',
-                                    'Incomplete' => 'status-incomplete',
-                                    'Pending Review' => 'status-pending',
+                                    UserDocuments::STATUS_APPROVED => 'status-approved',
+                                    UserDocuments::STATUS_REJECTED => 'status-rejected',
+                                    UserDocuments::STATUS_PENDING_REVIEW => 'status-pending',
+                                    UserDocuments::STATUS_EXPIRED => 'status-expired',
                                 ];
                                 $statusIcons = [
-                                    'Completed' => 'check-circle-fill',
-                                    'Incomplete' => 'x-circle-fill',
-                                    'Pending Review' => 'clock-fill',
+                                    UserDocuments::STATUS_APPROVED => 'check-circle-fill',
+                                    UserDocuments::STATUS_REJECTED => 'x-circle-fill',
+                                    UserDocuments::STATUS_PENDING_REVIEW => 'clock-fill',
+                                    UserDocuments::STATUS_EXPIRED => 'hourglass-bottom',
                                 ];
                                 return Html::tag('span', 
-                                    '<i class="bi bi-' . ($statusIcons[$model->status] ?? 'question-circle') . '"></i> ' . $model->status, 
-                                    ['class' => 'status-badge ' . ($statusClasses[$model->status] ?? '')]
+                                    '<i class="bi bi-' . ($statusIcons[$model->status] ?? 'question-circle') . '"></i> ' . $model->displayStatus(), 
+                                    ['class' => 'status-badge ' . ($statusClasses[$model->status] ?? 'status-pending')]
                                 );
                             },
-                            'filter' => [
-                                'Completed' => 'Completed',
-                                'Incomplete' => 'Incomplete',
-                                'Pending Review' => 'Pending Review',
-                            ],
+                            'filter' => UserDocuments::optsStatus(),
                             'headerOptions' => ['style' => 'width: 150px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
@@ -499,16 +533,16 @@ $this->params['hideTitle'] = true;
                             'value' => function ($model) {
                                 return $model->file_url
                                     ? Html::a(
-                                        '<i class="bi bi-file-earmark-pdf"></i> View File', 
+                                        '<i class="bi bi-file-earmark-pdf"></i> View', 
                                         Yii::getAlias('@web/' . $model->file_url), 
                                         [
                                             'target' => '_blank',
                                             'class' => 'file-link'
                                         ]
                                     )
-                                    : '<span class="no-file">No file uploaded</span>';
+                                    : '<span class="no-file">No file</span>';
                             },
-                            'headerOptions' => ['style' => 'width: 140px;'],
+                            'headerOptions' => ['style' => 'width: 100px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
                         [

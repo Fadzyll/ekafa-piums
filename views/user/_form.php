@@ -2,6 +2,7 @@
 
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
+use yii\helpers\Url;
 
 /** @var yii\web\View $this */
 /** @var app\models\Users $model */
@@ -135,6 +136,26 @@ use yii\bootstrap5\ActiveForm;
 .input-group-modern .toggle-password:hover {
     color: #764ba2;
     transform: translateY(-50%) scale(1.1);
+}
+
+.validation-feedback {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.validation-feedback.success {
+    color: #28a745;
+}
+
+.validation-feedback.error {
+    color: #dc3545;
+}
+
+.validation-feedback.checking {
+    color: #6c757d;
 }
 
 .restriction-notice {
@@ -306,13 +327,20 @@ use yii\bootstrap5\ActiveForm;
                 ],
             ]); ?>
 
+            <!-- Username Field with Real-time Validation -->
             <div class="form-group-modern">
                 <?= $form->field($model, 'username')->textInput([
                     'maxlength' => true,
-                    'placeholder' => 'Enter username'
+                    'placeholder' => 'Enter username',
+                    'id' => 'username-field'
                 ])->label('<i class="fas fa-user"></i> Username') ?>
+                <div class="validation-feedback" id="username-check" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span></span>
+                </div>
             </div>
 
+            <!-- Email Field -->
             <div class="form-group-modern">
                 <?php if ($isRestricted): ?>
                     <?= $form->field($model, 'email')->textInput([
@@ -323,11 +351,17 @@ use yii\bootstrap5\ActiveForm;
                     <?= $form->field($model, 'email')->textInput([
                         'maxlength' => true,
                         'type' => 'email',
-                        'placeholder' => 'Enter email address'
+                        'placeholder' => 'Enter email address',
+                        'id' => 'email-field'
                     ])->label('<i class="fas fa-envelope"></i> Email') ?>
+                    <div class="validation-feedback" id="email-check" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span></span>
+                    </div>
                 <?php endif; ?>
             </div>
 
+            <!-- Password Field -->
             <div class="form-group-modern">
                 <?php if (!$isRestricted): ?>
                     <label><i class="fas fa-lock"></i> Password</label>
@@ -338,7 +372,7 @@ use yii\bootstrap5\ActiveForm;
                             'placeholder' => $model->isNewRecord ? 'Enter password' : 'Leave blank to keep current password',
                             'style' => 'padding-right: 45px;'
                         ]) ?>
-                        <button class="toggle-password" type="button">
+                        <button class="toggle-password" type="button" data-target="password">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -367,6 +401,27 @@ use yii\bootstrap5\ActiveForm;
                 <?php endif; ?>
             </div>
 
+            <!-- Password Confirmation (Only for new records) -->
+            <?php if (!$isRestricted && $model->isNewRecord): ?>
+                <div class="form-group-modern">
+                    <label><i class="fas fa-lock"></i> Confirm Password</label>
+                    <div class="input-group-modern">
+                        <?= Html::passwordInput('password_confirm', '', [
+                            'class' => 'form-control form-control-modern',
+                            'id' => 'password-confirm',
+                            'placeholder' => 'Re-enter password',
+                            'style' => 'padding-right: 45px;'
+                        ]) ?>
+                        <button class="toggle-password" type="button" data-target="password-confirm">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">Must match the password above</small>
+                    <div class="validation-feedback" id="password-match" style="display: none;"></div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Role Field -->
             <div class="form-group-modern">
                 <?php if ($isRestricted): ?>
                     <?= $form->field($model, 'role')->dropDownList([
@@ -377,9 +432,9 @@ use yii\bootstrap5\ActiveForm;
                     ])->label('<i class="fas fa-user-tag"></i> Role') ?>
                 <?php else: ?>
                     <?= $form->field($model, 'role')->dropDownList([
-                        'Admin' => 'Admin',
-                        'Teacher' => 'Teacher',
-                        'Parent' => 'Parent',
+                        'Admin' => '🛡️ Admin',
+                        'Teacher' => '👨‍🏫 Teacher',
+                        'Parent' => '👨‍👩‍👧 Parent',
                     ], [
                         'prompt' => 'Select Role',
                         'class' => 'form-control form-control-modern'
@@ -389,7 +444,7 @@ use yii\bootstrap5\ActiveForm;
 
             <div class="btn-modern-group">
                 <?= Html::a('<i class="fas fa-arrow-left"></i> Back', ['index'], ['class' => 'btn btn-back btn-modern']) ?>
-                <?= Html::submitButton('<i class="fas fa-save"></i> Save', ['class' => 'btn btn-save btn-modern']) ?>
+                <?= Html::submitButton('<i class="fas fa-save"></i> Save', ['class' => 'btn btn-save btn-modern', 'id' => 'submit-btn']) ?>
             </div>
 
             <?php ActiveForm::end(); ?>
@@ -398,11 +453,17 @@ use yii\bootstrap5\ActiveForm;
 </div>
 
 <?php
+$checkUsernameUrl = Url::to(['user/check-username']);
+$checkEmailUrl = Url::to(['user/check-email']);
+$userId = $model->user_id ?? '';
+
 $this->registerJs(<<<JS
-    // Password toggle
+    // Password toggle functionality
     $('.toggle-password').on('click', function () {
-        const input = $('#password');
+        const targetId = $(this).data('target');
+        const input = $('#' + targetId);
         const icon = $(this).find('i');
+        
         if (input.attr('type') === 'password') {
             input.attr('type', 'text');
             icon.removeClass('bi-eye').addClass('bi-eye-slash');
@@ -412,11 +473,103 @@ $this->registerJs(<<<JS
         }
     });
     
+    // Real-time username availability check
+    let usernameTimeout;
+    $('#username-field').on('input', function() {
+        clearTimeout(usernameTimeout);
+        const username = $(this).val();
+        const checkDiv = $('#username-check');
+        
+        if (username.length < 3) {
+            checkDiv.hide();
+            return;
+        }
+        
+        // Show checking state
+        checkDiv.removeClass('success error').addClass('checking').show();
+        checkDiv.find('i').removeClass('fa-check-circle fa-times-circle').addClass('fa-spinner fa-spin');
+        checkDiv.find('span').text('Checking availability...');
+        
+        usernameTimeout = setTimeout(function() {
+            $.ajax({
+                url: '$checkUsernameUrl',
+                data: { username: username, id: '$userId' },
+                success: function(data) {
+                    checkDiv.removeClass('checking');
+                    checkDiv.find('i').removeClass('fa-spinner fa-spin');
+                    
+                    if (data.available) {
+                        checkDiv.addClass('success');
+                        checkDiv.find('i').addClass('fa-check-circle');
+                        checkDiv.find('span').text('Username available');
+                    } else {
+                        checkDiv.addClass('error');
+                        checkDiv.find('i').addClass('fa-times-circle');
+                        checkDiv.find('span').text('Username already taken');
+                    }
+                },
+                error: function() {
+                    checkDiv.hide();
+                }
+            });
+        }, 500);
+    });
+    
+    // Real-time email availability check
+    let emailTimeout;
+    $('#email-field').on('input', function() {
+        clearTimeout(emailTimeout);
+        const email = $(this).val();
+        const checkDiv = $('#email-check');
+        
+        // Basic email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            checkDiv.hide();
+            return;
+        }
+        
+        // Show checking state
+        checkDiv.removeClass('success error').addClass('checking').show();
+        checkDiv.find('i').removeClass('fa-check-circle fa-times-circle').addClass('fa-spinner fa-spin');
+        checkDiv.find('span').text('Checking availability...');
+        
+        emailTimeout = setTimeout(function() {
+            $.ajax({
+                url: '$checkEmailUrl',
+                data: { email: email, id: '$userId' },
+                success: function(data) {
+                    checkDiv.removeClass('checking');
+                    checkDiv.find('i').removeClass('fa-spinner fa-spin');
+                    
+                    if (data.available) {
+                        checkDiv.addClass('success');
+                        checkDiv.find('i').addClass('fa-check-circle');
+                        checkDiv.find('span').text('Email available');
+                    } else {
+                        checkDiv.addClass('error');
+                        checkDiv.find('i').addClass('fa-times-circle');
+                        checkDiv.find('span').text('Email already in use');
+                    }
+                },
+                error: function() {
+                    checkDiv.hide();
+                }
+            });
+        }, 500);
+    });
+    
     // Password strength checker
     $('#password').on('input', function() {
         const password = $(this).val();
         let strength = 0;
         const requirements = $('#password-requirements li');
+        
+        if (password.length === 0) {
+            $('.password-strength-bar').css('width', '0%');
+            requirements.removeClass('met').find('i').removeClass('fas fa-check-circle').addClass('far fa-circle');
+            return;
+        }
         
         // Check length
         if (password.length >= 8 && password.length <= 16) {
@@ -453,6 +606,44 @@ $this->registerJs(<<<JS
         } else {
             strengthBar.css('background', 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)');
         }
+    });
+    
+    // Password confirmation match check
+    $('#password-confirm').on('input', function() {
+        const password = $('#password').val();
+        const confirmPassword = $(this).val();
+        const matchDiv = $('#password-match');
+        
+        if (confirmPassword.length === 0) {
+            matchDiv.hide();
+            return;
+        }
+        
+        matchDiv.show();
+        
+        if (password === confirmPassword) {
+            matchDiv.removeClass('error').addClass('success');
+            matchDiv.html('<i class="fas fa-check-circle"></i><span>Passwords match</span>');
+        } else {
+            matchDiv.removeClass('success').addClass('error');
+            matchDiv.html('<i class="fas fa-times-circle"></i><span>Passwords do not match</span>');
+        }
+    });
+    
+    // Form submission validation
+    $('#user-form').on('submit', function(e) {
+        const password = $('#password').val();
+        const passwordConfirm = $('#password-confirm').val();
+        
+        // Check if new record and passwords don't match
+        if ($('#password-confirm').length && password !== passwordConfirm) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        $('#submit-btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
     });
 JS);
 

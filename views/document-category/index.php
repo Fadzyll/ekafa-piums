@@ -439,7 +439,7 @@ $this->params['hideTitle'] = true;
                     'columns' => [
                         [
                             'class' => 'yii\grid\SerialColumn',
-                            'header' => '#',
+                            'header' => 'No.',
                             'headerOptions' => ['style' => 'width: 60px; text-align: center;'],
                             'contentOptions' => ['style' => 'text-align: center; font-weight: 600;'],
                         ],

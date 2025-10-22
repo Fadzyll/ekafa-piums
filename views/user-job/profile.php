@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\UserJob $model */
+/** @var app\models\UserJobDetails $model */
 
 $this->title = 'Employment Information';
 $this->params['breadcrumbs'][] = ['label' => 'My Profile', 'url' => ['user-details/view']];
@@ -256,8 +256,17 @@ body {
     font-family: inherit;
 }
 
+.select-modern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23004135' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    padding-right: 3.5rem;
+    appearance: none;
+    cursor: pointer;
+}
+
 .error-message {
-    display: none; /* Hidden by default */
+    display: none;
     align-items: center;
     gap: 0.5rem;
     color: #dc2626;
@@ -271,7 +280,7 @@ body {
 }
 
 .error-message:not(:empty) {
-    display: flex; /* Show when it has content */
+    display: flex;
 }
 
 .error-message::before {
@@ -423,22 +432,58 @@ body {
             <i class="bi bi-building"></i>
             <h3>Employment Details</h3>
             <span class="required-badge">
-                <i class="bi bi-asterisk"></i> All Required
+                <i class="bi bi-asterisk"></i> Required
             </span>
         </div>
 
         <div class="form-row">
             <div>
                 <?= $form->field($model, 'job')->textInput([
-                    'placeholder' => 'e.g., Teacher, Engineer, Manager',
+                    'placeholder' => 'e.g., Teacher, Engineer, Doctor',
                     'maxlength' => true
-                ])->label('Job Title <span class="required-star">*</span>') ?>
+                ])->label('Job/Occupation') ?>
             </div>
+            <div>
+                <?= $form->field($model, 'job_title')->textInput([
+                    'placeholder' => 'e.g., Senior Lecturer, Project Manager',
+                    'maxlength' => true
+                ])->label('Job Title') ?>
+            </div>
+        </div>
+
+        <div class="form-row">
             <div>
                 <?= $form->field($model, 'employer')->textInput([
                     'placeholder' => 'e.g., Universiti Malaysia Sabah',
                     'maxlength' => true
-                ])->label('Employer Name <span class="required-star">*</span>') ?>
+                ])->label('Employer Name') ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'department')->textInput([
+                    'placeholder' => 'e.g., IT Department',
+                    'maxlength' => true
+                ])->label('Department') ?>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <?= $form->field($model, 'employment_type')->dropDownList(
+                    \app\models\UserJobDetails::optsEmploymentType(),
+                    [
+                        'prompt' => 'Select Employment Type',
+                        'class' => 'form-control-modern select-modern'
+                    ]
+                )->label('Employment Type') ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'employment_status')->dropDownList(
+                    \app\models\UserJobDetails::optsEmploymentStatus(),
+                    [
+                        'prompt' => 'Select Employment Status',
+                        'class' => 'form-control-modern select-modern'
+                    ]
+                )->label('Employment Status') ?>
             </div>
         </div>
 
@@ -448,7 +493,7 @@ body {
                     'rows' => 3,
                     'placeholder' => 'Enter complete employer address',
                     'class' => 'form-control-modern textarea-modern'
-                ])->label('Employer Address <span class="required-star">*</span>') ?>
+                ])->label('Employer Address') ?>
             </div>
         </div>
 
@@ -458,6 +503,27 @@ body {
                     'placeholder' => 'e.g., +60123456789',
                     'maxlength' => true
                 ])->label('Employer Phone') ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'working_hours_per_week')->textInput([
+                    'type' => 'number',
+                    'min' => 0,
+                    'max' => 168,
+                    'placeholder' => '40'
+                ])->label('Working Hours Per Week') ?>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <?= $form->field($model, 'start_date')->textInput([
+                    'type' => 'date',
+                ])->label('Employment Start Date') ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'end_date')->textInput([
+                    'type' => 'date',
+                ])->label('Employment End Date (if applicable)') ?>
             </div>
         </div>
     </div>
@@ -471,7 +537,7 @@ body {
 
         <div class="form-row">
             <div>
-                <label class="form-label-modern">Gross Salary (RM) <span class="required-star">*</span></label>
+                <label class="form-label-modern">Gross Salary (RM)</label>
                 <div class="currency-input-group">
                     <span class="currency-symbol">RM</span>
                     <?= Html::activeTextInput($model, 'gross_salary', [
@@ -486,7 +552,7 @@ body {
                 <?= Html::error($model, 'gross_salary', ['class' => 'error-message']) ?>
             </div>
             <div>
-                <label class="form-label-modern">Net Salary (RM) <span class="required-star">*</span></label>
+                <label class="form-label-modern">Net Salary (RM)</label>
                 <div class="currency-input-group">
                     <span class="currency-symbol">RM</span>
                     <?= Html::activeTextInput($model, 'net_salary', [
@@ -502,12 +568,67 @@ body {
             </div>
         </div>
 
+        <div class="form-row">
+            <div>
+                <label class="form-label-modern">Other Income (RM)</label>
+                <div class="currency-input-group">
+                    <span class="currency-symbol">RM</span>
+                    <?= Html::activeTextInput($model, 'other_income', [
+                        'class' => 'form-control-modern currency-input',
+                        'type' => 'number',
+                        'min' => 0,
+                        'step' => '0.01',
+                        'placeholder' => '0.00'
+                    ]) ?>
+                </div>
+                <?= Html::error($model, 'other_income', ['class' => 'error-message']) ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'other_income_source')->textInput([
+                    'placeholder' => 'e.g., Freelancing, Rental Income',
+                    'maxlength' => true
+                ])->label('Other Income Source') ?>
+            </div>
+        </div>
+
         <div class="salary-hint">
             <i class="bi bi-lightbulb-fill"></i>
             <div class="salary-hint-content">
                 <strong>💡 Salary Guidelines:</strong>
                 <div><strong>Gross Salary:</strong> Total salary before deductions (EPF, SOCSO, tax)</div>
                 <div><strong>Net Salary:</strong> Take-home salary after all deductions (typically 80-85% of gross)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information Card -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <i class="bi bi-card-list"></i>
+            <h3>Additional Information</h3>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <?= $form->field($model, 'tax_identification_number')->textInput([
+                    'placeholder' => 'e.g., SG1234567890',
+                    'maxlength' => true
+                ])->label('Tax ID Number') ?>
+            </div>
+            <div>
+                <?= $form->field($model, 'epf_number')->textInput([
+                    'placeholder' => 'e.g., 12345678',
+                    'maxlength' => true
+                ])->label('EPF Number') ?>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <?= $form->field($model, 'socso_number')->textInput([
+                    'placeholder' => 'e.g., 12345678',
+                    'maxlength' => true
+                ])->label('SOCSO Number') ?>
             </div>
         </div>
     </div>

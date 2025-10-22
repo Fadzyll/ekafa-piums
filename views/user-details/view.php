@@ -26,7 +26,7 @@ $fields = ['full_name', 'ic_number', 'age', 'gender', 'race', 'phone_number', 'c
 foreach ($fields as $field) {
     if (!empty($model->$field)) $completedFields++;
 }
-if ($model->userJob) $completedFields += 2;
+if ($model->userJobDetails) $completedFields += 2;
 if ($model->partnerDetails) $completedFields++;
 $completionPercentage = round(($completedFields / $totalFields) * 100);
 ?>
@@ -569,42 +569,68 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
 
         <!-- Employment Tab -->
         <div class="tab-pane fade" id="job" role="tabpanel">
-            <?php if ($model->userJob): ?>
+            <?php if ($model->userJobDetails): ?>
                 <div class="info-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="info-card-title mb-0">
                             <i class="bi bi-briefcase-fill"></i>
                             Employment Details
                         </h3>
-                        <?= Html::a('<i class="bi bi-pencil"></i> Edit', ['user-job/profile'], [
+                        <?= Html::a('<i class="bi bi-pencil"></i> Edit', ['user-job-details/profile'], [
                             'class' => 'btn-modern btn-secondary-modern'
                         ]) ?>
                     </div>
                     <div class="info-grid">
                         <div class="info-item">
+                            <div class="info-label">Job/Occupation</div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->job ?: '-') ?></div>
+                        </div>
+                        <div class="info-item">
                             <div class="info-label">Job Title</div>
-                            <div class="info-value"><?= Html::encode($model->userJob->job) ?></div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->job_title ?: '-') ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Department</div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->department ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Employer</div>
-                            <div class="info-value"><?= Html::encode($model->userJob->employer) ?></div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->employer ?: '-') ?></div>
                         </div>
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Employer Address</div>
-                            <div class="info-value"><?= Html::encode($model->userJob->employer_address) ?></div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->employer_address ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Employer Phone</div>
-                            <div class="info-value"><?= Html::encode($model->userJob->employer_phone_number) ?></div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->employer_phone_number ?: '-') ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Employment Type</div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->employment_type ?: '-') ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Employment Status</div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->employment_status ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Gross Salary</div>
-                            <div class="info-value">RM <?= number_format($model->userJob->gross_salary, 2) ?></div>
+                            <div class="info-value">RM <?= $model->userJobDetails->gross_salary ? number_format($model->userJobDetails->gross_salary, 2) : '-' ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Net Salary</div>
-                            <div class="info-value">RM <?= number_format($model->userJob->net_salary, 2) ?></div>
+                            <div class="info-value">RM <?= $model->userJobDetails->net_salary ? number_format($model->userJobDetails->net_salary, 2) : '-' ?></div>
                         </div>
+                        <?php if ($model->userJobDetails->other_income): ?>
+                        <div class="info-item">
+                            <div class="info-label">Other Income</div>
+                            <div class="info-value">RM <?= number_format($model->userJobDetails->other_income, 2) ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Other Income Source</div>
+                            <div class="info-value"><?= Html::encode($model->userJobDetails->other_income_source ?: '-') ?></div>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php else: ?>
@@ -612,7 +638,7 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                     <i class="bi bi-briefcase empty-state-icon"></i>
                     <h4>No Employment Information</h4>
                     <p>Add your employment details to complete your profile and improve verification.</p>
-                    <?= Html::a('<i class="bi bi-plus-circle"></i> Add Employment Info', ['user-job/profile'], [
+                    <?= Html::a('<i class="bi bi-plus-circle"></i> Add Employment Info', ['user-job-details/profile'], [
                         'class' => 'btn-modern btn-primary-modern'
                     ]) ?>
                 </div>
@@ -641,31 +667,31 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Phone Number</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_phone_number) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_phone_number ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Citizenship</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_citizenship) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_citizenship ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Marital Status</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_marital_status) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_marital_status ?: '-') ?></div>
                         </div>
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Address</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_address) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_address ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">City</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_city) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_city ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Postcode</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_postcode) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_postcode ?: '-') ?></div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">State</div>
-                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_state) ?></div>
+                            <div class="info-value"><?= Html::encode($model->partnerDetails->partner_state ?: '-') ?></div>
                         </div>
                     </div>
                 </div>
@@ -684,27 +710,27 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-label">Occupation</div>
-                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_job) ?></div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_job ?: '-') ?></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Employer</div>
-                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer) ?></div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer ?: '-') ?></div>
                             </div>
                             <div class="info-item" style="grid-column: 1 / -1;">
                                 <div class="info-label">Employer Address</div>
-                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_address) ?></div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_address ?: '-') ?></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Employer Phone</div>
-                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_phone_number) ?></div>
+                                <div class="info-value"><?= Html::encode($model->partnerDetails->partnerJob->partner_employer_phone_number ?: '-') ?></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Gross Salary</div>
-                                <div class="info-value">RM <?= number_format($model->partnerDetails->partnerJob->partner_gross_salary, 2) ?></div>
+                                <div class="info-value">RM <?= $model->partnerDetails->partnerJob->partner_gross_salary ? number_format($model->partnerDetails->partnerJob->partner_gross_salary, 2) : '-' ?></div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Net Salary</div>
-                                <div class="info-value">RM <?= number_format($model->partnerDetails->partnerJob->partner_net_salary, 2) ?></div>
+                                <div class="info-value">RM <?= $model->partnerDetails->partnerJob->partner_net_salary ? number_format($model->partnerDetails->partnerJob->partner_net_salary, 2) : '-' ?></div>
                             </div>
                         </div>
                     </div>

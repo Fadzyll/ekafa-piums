@@ -417,8 +417,16 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             ],
         ]);
     } else {
+        $user = Yii::$app->user->identity;
+        $userDetails = $user->userDetails ?? null;
+        $profilePic = ($userDetails && $userDetails->profile_picture_url) 
+            ? Html::img('@web/' . $userDetails->profile_picture_url, [
+                'style' => 'width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover;'
+            ])
+            : '<i class="bi bi-person-circle" style="font-size: 1.5rem; margin-right: 8px;"></i>';
+
         echo Html::tag('div',
-            '<i class="bi bi-bell-fill"></i>' . Html::encode(Yii::$app->user->identity->username ?? Yii::$app->user->identity->email),
+            $profilePic . Html::encode($user->username ?? $user->email),
             ['class' => 'ms-auto user-info-badge']
         );
     }

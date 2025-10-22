@@ -386,6 +386,33 @@ $this->params['hideTitle'] = true;
                     </div>
                     <div class="info-value"><?= Html::encode($model->role) ?></div>
                 </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-info-circle"></i>
+                        Account Status
+                    </div>
+                    <div class="info-value">
+                        <?php
+                        $statusLabels = [
+                            10 => '<span class="badge bg-success">Active</span>',
+                            9 => '<span class="badge bg-warning text-dark">Inactive</span>',
+                            0 => '<span class="badge bg-danger">Deleted</span>',
+                        ];
+                        echo $statusLabels[$model->status] ?? '<span class="badge bg-secondary">Unknown</span>';
+                        ?>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-edit"></i>
+                        Last Updated
+                    </div>
+                    <div class="info-value">
+                        <?= $model->updated_at ? Yii::$app->formatter->asRelativeTime($model->updated_at) : 'Never' ?>
+                    </div>
+                </div>
             </div>
 
             <div class="timeline-section">

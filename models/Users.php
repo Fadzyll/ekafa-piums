@@ -33,6 +33,7 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
     const STATUS_ACTIVE = 10;
 
     public $password;
+    public $password_confirm;
 
     public static function tableName()
     {
@@ -71,6 +72,10 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
                 'skipOnEmpty' => true
             ],
 
+            // Password confirmation (only on insert)
+            ['password_confirm', 'compare', 'compareAttribute' => 'password', 
+                'message' => 'Passwords do not match.', 'on' => 'insert'],
+
             // Role options
             ['role', 'in', 'range' => array_keys(self::optsRole())],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
@@ -100,6 +105,7 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
+            // Only hash password if it's provided and not empty
             if (!empty($this->password)) {
                 $this->password_hash = Yii::$app->security->generatePasswordHash($this->password);
             }

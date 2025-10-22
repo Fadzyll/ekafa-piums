@@ -338,6 +338,33 @@ $this->registerCssFile('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.
                         },
                     ],
                     [
+                        'attribute' => 'status',
+                        'format' => 'raw',
+                        'headerOptions' => ['style' => 'width: 120px; text-align: center;'],
+                        'contentOptions' => ['style' => 'text-align: center;'],
+                        'value' => function($model) {
+                            $statusLabels = [
+                                10 => ['label' => 'Active', 'class' => 'success'],
+                                9 => ['label' => 'Inactive', 'class' => 'warning'],
+                                0 => ['label' => 'Deleted', 'class' => 'danger'],
+                            ];
+                            $status = $statusLabels[$model->status] ?? ['label' => 'Unknown', 'class' => 'secondary'];
+                            return '<span class="badge bg-' . $status['class'] . '">' . $status['label'] . '</span>';
+                        },
+                    ],
+                    [
+                        'attribute' => 'last_login',
+                        'format' => 'raw',
+                        'headerOptions' => ['style' => 'width: 180px;'],
+                        'value' => function($model) {
+                            if (!$model->last_login) {
+                                return '<span class="text-muted"><em>Never</em></span>';
+                            }
+                            return '<i class="far fa-clock me-2" style="color: #667eea;"></i>' 
+                                . Yii::$app->formatter->asRelativeTime($model->last_login);
+                        },
+                    ],
+                    [
                         'attribute' => 'date_registered',
                         'format' => 'raw',
                         'value' => function($model) {

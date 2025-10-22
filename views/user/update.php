@@ -344,6 +344,12 @@ $this->params['hideTitle'] = true;
         <!-- Sidebar with User Info -->
         <div class="user-info-sidebar">
             <div class="sidebar-avatar">
+                <?php 
+                // Load userDetails relation if not loaded
+                if (!$model->isRelationPopulated('userDetails')) {
+                    $model->refresh();
+                }
+                ?>
                 <?php if ($model->userDetails && $model->userDetails->profile_picture_url): ?>
                     <img src="<?= Yii::getAlias('@web/' . $model->userDetails->profile_picture_url) ?>" alt="<?= Html::encode($model->username) ?>">
                 <?php else: ?>
@@ -388,6 +394,23 @@ $this->params['hideTitle'] = true;
             
             <div class="sidebar-info-item">
                 <div class="sidebar-info-label">
+                    <i class="fas fa-info-circle"></i>
+                    Account Status
+                </div>
+                <div class="sidebar-info-value">
+                    <?php
+                    $statusLabels = [
+                        10 => '<span class="badge bg-success">Active</span>',
+                        9 => '<span class="badge bg-warning text-dark">Inactive</span>',
+                        0 => '<span class="badge bg-danger">Deleted</span>',
+                    ];
+                    echo $statusLabels[$model->status] ?? '<span class="badge bg-secondary">Unknown</span>';
+                    ?>
+                </div>
+            </div>
+            
+            <div class="sidebar-info-item">
+                <div class="sidebar-info-label">
                     <i class="fas fa-calendar-plus"></i>
                     Joined
                 </div>
@@ -403,6 +426,16 @@ $this->params['hideTitle'] = true;
                 </div>
                 <div class="sidebar-info-value">
                     <?= $model->last_login ? Yii::$app->formatter->asRelativeTime($model->last_login) : 'Never' ?>
+                </div>
+            </div>
+            
+            <div class="sidebar-info-item">
+                <div class="sidebar-info-label">
+                    <i class="fas fa-edit"></i>
+                    Last Updated
+                </div>
+                <div class="sidebar-info-value">
+                    <?= $model->updated_at ? Yii::$app->formatter->asRelativeTime($model->updated_at) : 'N/A' ?>
                 </div>
             </div>
             

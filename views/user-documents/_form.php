@@ -3,6 +3,7 @@
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
 use app\models\DocumentCategory;
+use app\models\UserDocuments;
 use yii\helpers\ArrayHelper;
 
 /** @var yii\web\View $this */
@@ -259,21 +260,6 @@ use yii\helpers\ArrayHelper;
     color: #065f46;
 }
 
-.status-option.completed input:checked + label {
-    border-color: #10b981;
-    background: #d1fae5;
-}
-
-.status-option.incomplete input:checked + label {
-    border-color: #ef4444;
-    background: #fee2e2;
-}
-
-.status-option.pending input:checked + label {
-    border-color: #f59e0b;
-    background: #fef3c7;
-}
-
 .status-option input:checked + label i {
     color: inherit;
 }
@@ -403,7 +389,7 @@ use yii\helpers\ArrayHelper;
                 <div class="col-md-6 mb-4">
                     <?= $form->field($model, 'category_id')->dropDownList(
                         ArrayHelper::map(
-                            DocumentCategory::find()->where(['status' => 'Active'])->all(),
+                            DocumentCategory::find()->where(['status' => DocumentCategory::STATUS_ACTIVE])->all(),
                             'category_id',
                             'category_name'
                         ),
@@ -416,14 +402,44 @@ use yii\helpers\ArrayHelper;
                 </div>
             </div>
 
-            <div class="mb-0">
-                <?= $form->field($model, 'document_type')->textInput([
-                    'maxlength' => true,
-                    'placeholder' => 'e.g., Birth Certificate, Teaching License'
-                ])->label('<i class="bi bi-tag"></i> Document Name', ['class' => 'form-label']) ?>
-                <div class="input-helper">
-                    <i class="bi bi-lightbulb"></i>
-                    <span>Provide a descriptive name for this document</span>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <?= $form->field($model, 'document_type')->textInput([
+                        'maxlength' => true,
+                        'placeholder' => 'e.g., Birth Certificate, Teaching License'
+                    ])->label('<i class="bi bi-tag"></i> Document Type', ['class' => 'form-label']) ?>
+                    <div class="input-helper">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Specify the type of document</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <?= $form->field($model, 'document_name')->textInput([
+                        'maxlength' => true,
+                        'placeholder' => 'e.g., John Doe Birth Certificate'
+                    ])->label('<i class="bi bi-file-text"></i> Document Name', ['class' => 'form-label']) ?>
+                    <div class="input-helper">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Provide a descriptive name for this document</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <?= $form->field($model, 'owner_type')->dropDownList(
+                        UserDocuments::optsOwnerType(),
+                        ['prompt' => 'Select Owner Type']
+                    )->label('<i class="bi bi-person-badge"></i> Owner Type', ['class' => 'form-label']) ?>
+                </div>
+
+                <div class="col-md-6 mb-0">
+                    <?= $form->field($model, 'owner_id')->textInput([
+                        'type' => 'number',
+                        'min' => 0,
+                        'placeholder' => 'Enter owner ID'
+                    ])->label('<i class="bi bi-hash"></i> Owner ID', ['class' => 'form-label']) ?>
                 </div>
             </div>
         </div>
@@ -443,12 +459,12 @@ use yii\helpers\ArrayHelper;
                     Drag & Drop your file here
                 </div>
                 <div class="file-upload-hint">
-                    or click to browse • Supports PDF, JPG, PNG • Max 10MB
+                    or click to browse • Supports PDF, JPG, PNG, JPEG • Max 5MB
                 </div>
-                <?= Html::activeFileInput($model, 'file_url', [
+                <?= $form->field($model, 'file')->fileInput([
                     'id' => 'fileInput',
                     'accept' => '.pdf,.jpg,.jpeg,.png'
-                ]) ?>
+                ])->label(false) ?>
             </div>
 
             <div class="file-preview" id="filePreview">
@@ -470,10 +486,15 @@ use yii\helpers\ArrayHelper;
                 <div class="current-file-info">
                     <strong><i class="bi bi-paperclip"></i> Current File:</strong>
                     <?= Html::a(
-                        basename($model->file_url), 
+                        $model->original_filename ?: basename($model->file_url), 
                         Yii::getAlias('@web/' . $model->file_url), 
                         ['target' => '_blank', 'class' => 'text-primary fw-bold']
                     ) ?>
+                    <?php if ($model->file_size): ?>
+                        <span class="text-muted ms-2">
+                            (<?= Yii::$app->formatter->asShortSize($model->file_size) ?>)
+                        </span>
+                    <?php endif; ?>
                     <div class="mt-2 text-muted">
                         <small>Upload a new file to replace the current one</small>
                     </div>
@@ -481,48 +502,71 @@ use yii\helpers\ArrayHelper;
             <?php endif; ?>
         </div>
 
-        <!-- Status Selection -->
+        <!-- Status & Additional Info -->
         <div class="upload-section">
             <div class="section-header">
                 <i class="bi bi-check2-square"></i>
-                Document Status
+                Document Status & Details
             </div>
 
-            <div class="status-selector">
-                <div class="status-option completed">
-                    <?= Html::activeRadio($model, 'status', [
-                        'value' => 'Completed',
-                        'uncheck' => null,
-                        'id' => 'status-completed'
-                    ]) ?>
-                    <label for="status-completed">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>Completed</span>
-                    </label>
-                </div>
-                <div class="status-option pending">
-                    <?= Html::activeRadio($model, 'status', [
-                        'value' => 'Pending Review',
-                        'uncheck' => null,
-                        'id' => 'status-pending'
-                    ]) ?>
-                    <label for="status-pending">
-                        <i class="bi bi-clock-fill"></i>
-                        <span>Pending Review</span>
-                    </label>
-                </div>
-                <div class="status-option incomplete">
-                    <?= Html::activeRadio($model, 'status', [
-                        'value' => 'Incomplete',
-                        'uncheck' => null,
-                        'id' => 'status-incomplete'
-                    ]) ?>
-                    <label for="status-incomplete">
-                        <i class="bi bi-x-circle-fill"></i>
-                        <span>Incomplete</span>
-                    </label>
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="bi bi-flag"></i>
+                    Document Status
+                </label>
+                <div class="status-selector">
+                    <?php foreach (UserDocuments::optsStatus() as $value => $label): ?>
+                        <div class="status-option">
+                            <?= Html::activeRadio($model, 'status', [
+                                'value' => $value,
+                                'uncheck' => null,
+                                'id' => 'status-' . strtolower(str_replace(' ', '-', $value))
+                            ]) ?>
+                            <label for="status-<?= strtolower(str_replace(' ', '-', $value)) ?>">
+                                <i class="bi bi-<?= $value === UserDocuments::STATUS_APPROVED ? 'check-circle-fill' : ($value === UserDocuments::STATUS_REJECTED ? 'x-circle-fill' : 'clock-fill') ?>"></i>
+                                <span><?= $label ?></span>
+                            </label>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <?= $form->field($model, 'expiry_date')->textInput([
+                        'type' => 'date',
+                        'placeholder' => 'Select expiry date'
+                    ])->label('<i class="bi bi-calendar-x"></i> Expiry Date (Optional)', ['class' => 'form-label']) ?>
+                    <div class="input-helper">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Set an expiry date if the document is time-sensitive</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-0">
+                    <?= $form->field($model, 'uploaded_by')->textInput([
+                        'type' => 'number',
+                        'placeholder' => 'Auto-filled on save',
+                        'readonly' => true
+                    ])->label('<i class="bi bi-person-up"></i> Uploaded By', ['class' => 'form-label']) ?>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <?= $form->field($model, 'admin_notes')->textarea([
+                    'rows' => 3,
+                    'placeholder' => 'Add any administrative notes about this document...'
+                ])->label('<i class="bi bi-sticky"></i> Admin Notes (Optional)', ['class' => 'form-label']) ?>
+            </div>
+
+            <?php if (!$model->isNewRecord && $model->status === UserDocuments::STATUS_REJECTED): ?>
+                <div class="mb-0">
+                    <?= $form->field($model, 'rejection_reason')->textarea([
+                        'rows' => 3,
+                        'placeholder' => 'Specify the reason for rejection...'
+                    ])->label('<i class="bi bi-exclamation-triangle"></i> Rejection Reason', ['class' => 'form-label']) ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Form Actions -->
@@ -596,7 +640,9 @@ fileUploadZone.addEventListener('drop', function(e) {
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        fileInput.files = files;
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(files[0]);
+        fileInput.files = dataTransfer.files;
         handleFile(files[0]);
     }
 });
