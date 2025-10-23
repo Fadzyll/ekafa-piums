@@ -606,13 +606,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
                 <!-- Admin: Class Management -->
                 <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#adminClass" role="button">
-                        <i class="bi bi-door-open"></i> Class Management
-                    </a>
-                    <div class="collapse" id="adminClass">
-                        <?= Html::a('Manage Classes', ['/classroom/index'], ['class' => 'nav-link']) ?>
-                        <?= Html::a('Assign Teachers', ['/classroom/assign'], ['class' => 'nav-link']) ?>
-                    </div>
+                        <?= Html::a('<i class="bi bi-door-open"></i> Class Management', ['/classroom/index'], ['class' => 'nav-link']) ?>
                 </li>
 
                 <!-- Admin: Payment -->

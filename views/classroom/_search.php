@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\models\ClassroomModel;
 
 /** @var yii\web\View $this */
 /** @var app\models\ClassroomModelSearch $model */
@@ -9,36 +10,89 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="classroom-model-search">
-
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
         'options' => [
-            'data-pjax' => 1
+            'data-pjax' => 1,
+            'class' => 'needs-validation',
         ],
     ]); ?>
 
-    <?= $form->field($model, 'class_id') ?>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <?= $form->field($model, 'class_name')->textInput([
+                'placeholder' => 'Search by class name...',
+                'class' => 'form-control form-control-sm'
+            ]) ?>
+        </div>
 
-    <?= $form->field($model, 'class_name') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'year')->textInput([
+                'placeholder' => 'Year',
+                'class' => 'form-control form-control-sm',
+                'type' => 'number'
+            ]) ?>
+        </div>
 
-    <?= $form->field($model, 'year') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'session_type')->dropDownList(
+                ClassroomModel::optsSessionType(),
+                [
+                    'prompt' => 'All Sessions',
+                    'class' => 'form-control form-control-sm'
+                ]
+            ) ?>
+        </div>
 
-    <?= $form->field($model, 'session_type') ?>
+        <div class="col-md-2">
+            <?= $form->field($model, 'status')->dropDownList(
+                ClassroomModel::optsStatus(),
+                [
+                    'prompt' => 'All Statuses',
+                    'class' => 'form-control form-control-sm'
+                ]
+            ) ?>
+        </div>
 
-    <?= $form->field($model, 'user_id') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'grade_level')->dropDownList(
+                ClassroomModel::optsGradeLevel(),
+                [
+                    'prompt' => 'All Grade Levels',
+                    'class' => 'form-control form-control-sm'
+                ]
+            ) ?>
+        </div>
 
-    <?php // echo $form->field($model, 'quota') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'teacherName')->textInput([
+                'placeholder' => 'Teacher name...',
+                'class' => 'form-control form-control-sm'
+            ]) ?>
+        </div>
 
-    <?php // echo $form->field($model, 'current_enrollment') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'dateFrom')->input('date', [
+                'class' => 'form-control form-control-sm'
+            ]) ?>
+        </div>
 
-    <?php // echo $form->field($model, 'status') ?>
+        <div class="col-md-3">
+            <?= $form->field($model, 'dateTo')->input('date', [
+                'class' => 'form-control form-control-sm'
+            ]) ?>
+        </div>
+    </div>
 
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+    <div class="form-group mt-3">
+        <?= Html::submitButton('<i class="fas fa-search me-1"></i> Search', [
+            'class' => 'btn btn-primary btn-sm'
+        ]) ?>
+        <?= Html::a('<i class="fas fa-redo me-1"></i> Reset', ['index'], [
+            'class' => 'btn btn-outline-secondary btn-sm'
+        ]) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
-
 </div>
