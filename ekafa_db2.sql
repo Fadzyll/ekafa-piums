@@ -23,55 +23,25 @@ USE `ekafa_db`;
 CREATE TABLE IF NOT EXISTS `class` (
   `class_id` int unsigned NOT NULL AUTO_INCREMENT,
   `class_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `objectives` text COLLATE utf8mb4_unicode_ci,
-  `prerequisites` text COLLATE utf8mb4_unicode_ci,
-  `grade_level` enum('Pre-School','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `min_age` int DEFAULT NULL,
-  `max_age` int DEFAULT NULL,
+  `grade_level` enum('Year 1','Year 2','Year 3','Year 4','Year 5') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `year` int NOT NULL,
-  `session_id` int unsigned DEFAULT NULL,
   `session_type` enum('Morning','Evening') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `start_time` time DEFAULT NULL,
-  `end_time` time DEFAULT NULL,
-  `days_of_week` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `classroom_location` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `class_photo_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `building` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `floor` int DEFAULT NULL,
   `user_id` int unsigned NOT NULL,
-  `assistant_teacher_id` int unsigned DEFAULT NULL,
   `quota` int NOT NULL,
-  `minimum_enrollment` int DEFAULT '5',
-  `monthly_fee` decimal(10,2) DEFAULT NULL,
-  `registration_fee` decimal(10,2) DEFAULT NULL,
   `current_enrollment` int NOT NULL DEFAULT '0',
-  `waiting_list_count` int DEFAULT '0',
   `status` enum('Draft','Open','Closed','Full','In Progress','Completed','Cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'Draft',
-  `is_visible` tinyint(1) DEFAULT '1',
-  `admin_notes` text COLLATE utf8mb4_unicode_ci,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_by` int unsigned DEFAULT NULL,
-  `enrollment_start_date` date DEFAULT NULL,
-  `enrollment_end_date` date DEFAULT NULL,
   `class_start_date` date DEFAULT NULL,
   `class_end_date` date DEFAULT NULL,
   PRIMARY KEY (`class_id`),
   KEY `idx_class_user_id` (`user_id`),
-  KEY `fk_class_assistant_teacher` (`assistant_teacher_id`),
-  KEY `fk_class_created_by` (`created_by`),
-  KEY `idx_class_teacher` (`user_id`),
-  KEY `idx_class_session` (`session_id`),
   KEY `idx_class_year` (`year`),
   KEY `idx_class_status` (`status`),
-  KEY `idx_class_visible` (`is_visible`),
   KEY `idx_class_grade_level` (`grade_level`),
   KEY `idx_class_session_type` (`session_type`),
-  KEY `idx_class_enrollment` (`enrollment_start_date`,`enrollment_end_date`),
-  CONSTRAINT `fk_class_assistant_teacher` FOREIGN KEY (`assistant_teacher_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_class_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `fk_class_teacher` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_class_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table ekafa_db.class: ~0 rows (approximately)
@@ -128,9 +98,12 @@ CREATE TABLE IF NOT EXISTS `documents` (
   CONSTRAINT `fk_documents_uploaded_by` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_documents_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_documents_verified_by` FOREIGN KEY (`verified_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Dumping data for table ekafa_db.documents: ~0 rows (approximately)
+INSERT INTO `documents` (`document_id`, `user_id`, `uploaded_by`, `verified_by`, `verified_at`, `document_type`, `document_name`, `version`, `is_latest_version`, `original_filename`, `file_url`, `file_size`, `mime_type`, `file_hash`, `status`, `upload_date`, `updated_at`, `expiry_date`, `category_id`, `admin_notes`, `rejection_reason`, `owner_type`, `owner_id`) VALUES
+	(1, 1, 1, NULL, NULL, 'Birth Certificate', 'Birth Certificate', 1, 1, 'SIJIL LAHIR FADZIL.pdf', 'uploads/documents/doc_1_1_1761177345.pdf', 453436, 'application/pdf', '807cec761048994824d03e2a3a16bb524010e8e7edb27ba242e6b5a3c0b2c52b', 'Approved', '2025-10-22 23:55:45', '2025-10-23 02:12:57', NULL, 1, '', NULL, 'User', 1),
+	(2, 1, 1, NULL, NULL, 'Parent IC Copy', 'Parent IC Copy', 1, 1, 'SIJIL LAHIR AKU, MMY, ABAH.pdf', 'uploads/documents/doc_1_2_1761177374.pdf', 700007, 'application/pdf', '1b5026128ef7fc9396087544e49500640b98553b6175a1fa31f91145bbd71042', 'Pending Review', '2025-10-22 23:56:14', '2025-10-22 23:56:14', NULL, 2, NULL, NULL, 'User', 1);
 
 -- Dumping structure for table ekafa_db.document_categories
 CREATE TABLE IF NOT EXISTS `document_categories` (
@@ -151,8 +124,8 @@ INSERT INTO `document_categories` (`category_id`, `category_name`, `description`
 	(1, 'Birth Certificate', 'Student birth certificate', 'Parent', 1, 'Active', '2025-10-22 01:21:31', '2025-10-22 01:21:31'),
 	(2, 'Parent IC Copy', 'Copy of parent identification card', 'Parent', 1, 'Active', '2025-10-22 01:21:31', '2025-10-22 01:21:31'),
 	(3, 'Teaching Certificate', 'Professional teaching certificate', 'Teacher', 1, 'Active', '2025-10-22 01:21:31', '2025-10-22 01:21:31'),
-	(4, 'Academic Transcript', 'Latest academic transcript', 'Teacher', 0, 'Active', '2025-10-22 01:21:31', '2025-10-22 01:21:31'),
-	(5, 'Medical Report', 'Medical fitness report', 'Both', 0, 'Active', '2025-10-22 01:21:31', '2025-10-22 01:21:31');
+	(4, 'Academic Transcript', 'Latest academic transcript', 'Teacher', 1, 'Active', '2025-10-22 01:21:31', '2025-10-22 15:57:47'),
+	(5, 'Medical Report', 'Medical fitness report', 'Both', 1, 'Active', '2025-10-22 01:21:31', '2025-10-22 15:59:18');
 
 -- Dumping structure for table ekafa_db.migration
 CREATE TABLE IF NOT EXISTS `migration` (
@@ -161,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `migration` (
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Dumping data for table ekafa_db.migration: ~1 rows (approximately)
+-- Dumping data for table ekafa_db.migration: ~11 rows (approximately)
 INSERT INTO `migration` (`version`, `apply_time`) VALUES
 	('m000000_000000_base', 1761095548),
 	('m251022_011107_add_document_categories_table', 1761096091),
@@ -172,7 +145,8 @@ INSERT INTO `migration` (`version`, `apply_time`) VALUES
 	('m251023_040000_rename_user_jobs_table', 1761123305),
 	('m251023_050000_enhance_partner_details', 1761124466),
 	('m251023_060000_enhance_partner_job', 1761124500),
-	('m251023_070000_enhance_classes_table', 1761124535);
+	('m251023_070000_enhance_classes_table', 1761124535),
+	('m251023_080000_enhance_class_table', 1761186045);
 
 -- Dumping structure for table ekafa_db.partner_details
 CREATE TABLE IF NOT EXISTS `partner_details` (
@@ -286,7 +260,7 @@ CREATE TABLE IF NOT EXISTS `partner_job` (
   CONSTRAINT `fk_partner_job_verified_by` FOREIGN KEY (`verified_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table ekafa_db.partner_job: ~0 rows (approximately)
+-- Dumping data for table ekafa_db.partner_job: ~1 rows (approximately)
 INSERT INTO `partner_job` (`partner_id`, `partner_job`, `job_title`, `department`, `employment_type`, `working_hours_per_week`, `employment_status`, `partner_employer`, `start_date`, `end_date`, `partner_employer_address`, `employment_letter_url`, `latest_payslip_url`, `partner_employer_phone_number`, `partner_gross_salary`, `partner_net_salary`, `currency`, `other_income`, `other_income_source`, `tax_identification_number`, `epf_number`, `socso_number`, `is_verified`, `verified_by`, `verified_at`, `notes`, `created_at`, `updated_at`) VALUES
 	(3, 'Lecturer', 'Lecturer', NULL, 'Full-Time', 40, 'Active', 'Universiti Malaysia Sabah', NULL, NULL, 'Universiti Malaysia Sabah, Jalan UMS, 88400 Kota Kinabalu, Sabah, Malaysia.', NULL, NULL, '0198008999', 5000.00, 4000.00, 'MYR', 0.00, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, '2025-10-22 17:15:00', '2025-10-22 17:15:00');
 
@@ -347,9 +321,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- Dumping data for table ekafa_db.users: ~3 rows (approximately)
 INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `auth_key`, `password_reset_token`, `verification_token`, `role`, `status`, `date_registered`, `last_login`, `created_at`, `updated_at`) VALUES
-	(1, 'aqil bin sulaiman', 'aqil007@gmail.com', '$2y$13$/RHgEL8E0ThSMMm/ThtlWebpLzgk0oFJgULgzXnKYXwY6qQ7XUt9S', 'ba877fb5c7533ae6fc8a3e60cde37e33', NULL, NULL, 'Parent', 10, '2025-07-31 03:15:43', '2025-10-20 06:06:29', 1753902943, 1760911589),
-	(3, 'Fadzil Bin Ismail', 'fadzzf8@gmail.com', '$2y$13$Tf22tlTFZ0YM8EgbNqDbUeoWuGBFheBswn2Yz/K/JuH4SOFTA6iPa', '4efe3244f84ee21efd4cdf47bf6a2c3a', NULL, NULL, 'Admin', 10, '2025-07-31 09:37:58', '2025-10-22 01:57:55', 1753925878, 1761069475),
-	(4, 'Hakimi Bin Suffian', 'Hakimi007@gmail.com', '$2y$13$ni3ZT5.GtfoidTdZVBfOjuK7AIRDqyQznBTmXOm2Q/PE.mNiAocee', 'd303e2480e8c4922c672e369ce5b9a04', NULL, NULL, 'Teacher', 10, '2025-07-31 03:40:19', '2025-10-22 02:34:50', 1753904419, 1761071690);
+	(1, 'aqil bin sulaiman', 'aqil007@gmail.com', '$2y$13$/RHgEL8E0ThSMMm/ThtlWebpLzgk0oFJgULgzXnKYXwY6qQ7XUt9S', 'ba877fb5c7533ae6fc8a3e60cde37e33', NULL, NULL, 'Parent', 10, '2025-07-31 03:15:43', '2025-10-23 00:07:28', 1753902943, 1761178048),
+	(3, 'Fadzil Bin Ismail', 'fadzzf8@gmail.com', '$2y$13$Tf22tlTFZ0YM8EgbNqDbUeoWuGBFheBswn2Yz/K/JuH4SOFTA6iPa', '4efe3244f84ee21efd4cdf47bf6a2c3a', NULL, NULL, 'Admin', 10, '2025-07-31 09:37:58', '2025-10-23 02:11:39', 1753925878, 1761185499),
+	(4, 'Hakimi Bin Suffian', 'Hakimi007@gmail.com', '$2y$13$ni3ZT5.GtfoidTdZVBfOjuK7AIRDqyQznBTmXOm2Q/PE.mNiAocee', 'd303e2480e8c4922c672e369ce5b9a04', NULL, NULL, 'Teacher', 10, '2025-07-31 03:40:19', '2025-10-23 02:04:27', 1753904419, 1761185067);
 
 -- Dumping structure for table ekafa_db.users_backup_20251023
 CREATE TABLE IF NOT EXISTS `users_backup_20251023` (
