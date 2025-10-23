@@ -29,8 +29,52 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         /* ============================================================================
-           Modern Layout Styles - Matching ekafa-custom.css Design System
+           IMPROVED CONTRAST & READABILITY - Modern Layout Styles
            ============================================================================ */
+        
+        /* WCAG AA Compliant Color System */
+        :root {
+            /* Primary Colors - Enhanced Contrast */
+            --ekafa-primary: #003829;
+            --ekafa-primary-light: #00563d;
+            --ekafa-primary-dark: #001f15;
+            --ekafa-accent: #00b377;
+            
+            /* Text Colors - High Contrast */
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6b7280;
+            --text-white: #ffffff;
+            --text-white-soft: #f9fafb;
+            
+            /* Background Colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --bg-dark: #1f2937;
+            
+            /* Sidebar Colors - Darker for Better Contrast */
+            --sidebar-bg: #001f15;
+            --sidebar-text: #e5e7eb;
+            --sidebar-text-hover: #ffffff;
+            --sidebar-active: #00b377;
+            --sidebar-hover-bg: rgba(0, 179, 119, 0.15);
+            
+            /* Navbar Colors - Darker */
+            --navbar-bg: #003829;
+            --navbar-text: #ffffff;
+            
+            /* Status Colors - High Contrast */
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0284c7;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+        }
         
         html, body {
             height: 100%;
@@ -48,9 +92,12 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             background-position: center;
             position: relative;
             min-height: 100vh;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.6;
         }
 
-        /* Dark overlay for better content visibility */
+        /* Darker overlay for better content visibility */
         body::before {
             content: "";
             position: fixed;
@@ -58,27 +105,28 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             left: 0;
             height: 100%;
             width: 100%;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.5));
+            background: linear-gradient(135deg, rgba(0, 56, 41, 0.85), rgba(0, 31, 21, 0.9));
             z-index: -1;
         }
 
-        /* Modern Navbar */
+        /* Enhanced Navbar - Better Contrast */
         .navbar-custom {
-            background: linear-gradient(135deg, #004135, #11684d) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background: var(--navbar-bg) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid rgba(0, 179, 119, 0.3);
             height: 70px;
         }
 
         .navbar-custom .navbar-brand {
-            color: white !important;
+            color: var(--navbar-text) !important;
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             transition: transform 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .navbar-custom .navbar-brand:hover {
@@ -86,71 +134,73 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         }
 
         .navbar-custom .navbar-brand img {
-            height: 35px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            height: 38px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .navbar-custom .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 500;
+            color: var(--navbar-text) !important;
+            font-weight: 600;
             padding: 0.5rem 1rem !important;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
             position: relative;
+            font-size: 1rem;
         }
 
         .navbar-custom .nav-link:hover {
-            color: white !important;
-            background: rgba(255, 255, 255, 0.1);
+            color: var(--navbar-text) !important;
+            background: rgba(0, 179, 119, 0.2);
             transform: translateY(-2px);
         }
 
         .navbar-custom .nav-link::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: 5px;
             left: 50%;
             width: 0;
-            height: 2px;
-            background: white;
+            height: 3px;
+            background: var(--ekafa-accent);
             transition: all 0.3s ease;
             transform: translateX(-50%);
         }
 
         .navbar-custom .nav-link:hover::after {
-            width: 80%;
+            width: 70%;
         }
 
         .user-info-badge {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1.25rem;
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 2rem;
-            color: white;
-            font-size: 0.875rem;
+            color: var(--text-white);
+            font-size: 0.95rem;
+            font-weight: 600;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.25);
         }
 
         .user-info-badge i {
-            font-size: 1.25rem;
+            font-size: 1.4rem;
         }
 
-        /* Modern Sidebar */
+        /* Enhanced Sidebar - Much Better Contrast */
         .sidebar {
             width: 260px;
             height: calc(100vh - 70px);
             position: fixed;
             top: 70px;
             left: 0;
-            background: linear-gradient(180deg, #004135 0%, #002820 100%);
+            background: var(--sidebar-bg);
             padding: 1.5rem 0;
             overflow-y: auto;
-            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
             z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 2px solid rgba(0, 179, 119, 0.2);
         }
 
         /* Custom Scrollbar for Sidebar */
@@ -163,12 +213,12 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 179, 119, 0.4);
             border-radius: 3px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 179, 119, 0.6);
         }
 
         .sidebar .nav-item {
@@ -176,17 +226,23 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         }
 
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 0.875rem 1.5rem;
+            color: var(--sidebar-text);
+            padding: 0.95rem 1.5rem;
             border-radius: 0;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 0.9375rem;
+            gap: 0.85rem;
+            font-size: 1rem;
             font-weight: 500;
             border-left: 3px solid transparent;
             position: relative;
+        }
+
+        .sidebar .nav-link i {
+            font-size: 1.25rem;
+            min-width: 24px;
+            text-align: center;
         }
 
         .sidebar .nav-link::before {
@@ -196,14 +252,14 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             top: 0;
             height: 100%;
             width: 0;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--sidebar-hover-bg);
             transition: width 0.3s ease;
         }
 
         .sidebar .nav-link:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
-            border-left-color: #00a86b;
+            color: var(--sidebar-text-hover);
+            background: var(--sidebar-hover-bg);
+            border-left-color: var(--sidebar-active);
         }
 
         .sidebar .nav-link:hover::before {
@@ -211,40 +267,46 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         }
 
         .sidebar .nav-link.active {
-            color: white;
-            background: rgba(0, 168, 107, 0.2);
-            border-left-color: #00a86b;
+            color: var(--sidebar-text-hover);
+            background: var(--sidebar-hover-bg);
+            border-left-color: var(--sidebar-active);
             font-weight: 600;
+            box-shadow: inset 0 0 0 1px rgba(0, 179, 119, 0.2);
         }
 
-        /* Collapsible Menu */
+        /* Collapsible Menu - Improved Visibility */
         .sidebar .collapse .nav-link {
-            padding-left: 3rem;
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.7);
+            padding-left: 3.5rem;
+            font-size: 0.95rem;
+            color: rgba(229, 231, 235, 0.85);
         }
 
         .sidebar .collapse .nav-link::before {
             content: '→';
             position: absolute;
-            left: 2rem;
+            left: 2.5rem;
             opacity: 0;
             transition: all 0.3s ease;
+            font-weight: bold;
         }
 
         .sidebar .collapse .nav-link:hover::before {
             opacity: 1;
-            left: 2.25rem;
+            left: 2.75rem;
+        }
+
+        .sidebar .collapse .nav-link:hover {
+            color: var(--sidebar-text-hover);
         }
 
         /* Section Divider */
         .sidebar-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 179, 119, 0.25);
             margin: 1rem 1.5rem;
         }
 
-        /* Content Wrapper */
+        /* Content Wrapper - Better Background */
         .content-wrapper {
             margin-left: 260px;
             padding: 2rem;
@@ -261,71 +323,76 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             padding: 2rem;
         }
 
-        /* Modern Footer */
+        /* Enhanced Footer */
         footer#footer {
-            background: linear-gradient(135deg, #004135, #002820);
-            color: white;
-            padding: 1.5rem 0;
+            background: var(--sidebar-bg);
+            color: var(--text-white);
+            padding: 1.75rem 0;
             margin-top: auto;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            border-top: 2px solid rgba(0, 179, 119, 0.2);
         }
 
         footer .container {
             max-width: 1200px;
             margin: 0 auto;
             text-align: center;
-            font-size: 0.875rem;
-            opacity: 0.9;
+            font-size: 0.95rem;
         }
 
         footer .container p {
             margin: 0;
-            color: white;
+            color: var(--text-white);
+            font-weight: 500;
         }
 
         .footer-logged-in {
             margin-left: 260px;
         }
 
-        /* Breadcrumbs */
+        /* Breadcrumbs - Higher Contrast */
         .breadcrumbs-wrapper {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             margin-bottom: 1.5rem;
             border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .breadcrumb {
             background: transparent;
             margin-bottom: 0;
-            font-size: 0.875rem;
+            font-size: 0.95rem;
+            font-weight: 500;
         }
 
         .breadcrumb-item a {
-            color: #004135;
+            color: var(--ekafa-primary);
             text-decoration: none;
             transition: color 0.3s ease;
+            font-weight: 600;
         }
 
         .breadcrumb-item a:hover {
-            color: #00a86b;
+            color: var(--ekafa-accent);
         }
 
         .breadcrumb-item.active {
-            color: #6b7280;
+            color: var(--text-secondary);
+            font-weight: 600;
         }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             body {
                 background-attachment: scroll;
+                font-size: 15px;
             }
             
             body::before {
-                background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.75));
+                background: linear-gradient(135deg, rgba(0, 31, 21, 0.95), rgba(0, 15, 10, 0.95));
             }
 
             .sidebar {
@@ -345,8 +412,12 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             }
 
             .user-info-badge {
-                font-size: 0.75rem;
-                padding: 0.375rem 0.75rem;
+                font-size: 0.85rem;
+                padding: 0.5rem 0.85rem;
+            }
+
+            .navbar-custom .navbar-brand {
+                font-size: 1.15rem;
             }
         }
 
@@ -357,12 +428,38 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             min-height: 100vh;
         }
 
-        /* Alert Animations */
+        /* Enhanced Alert Animations */
         .alert {
             animation: slideInDown 0.3s ease-out;
             border-radius: 0.75rem;
             border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #1e40af;
+            border-left: 4px solid var(--info);
         }
 
         @keyframes slideInDown {
@@ -383,7 +480,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             left: 0;
             width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, #00a86b, #004135);
+            background: linear-gradient(90deg, var(--ekafa-accent), var(--ekafa-primary));
             z-index: 9999;
             animation: loading 1.5s ease-in-out infinite;
         }
@@ -391,6 +488,30 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         @keyframes loading {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
+        }
+
+        /* Improved Link Styles */
+        a {
+            color: var(--ekafa-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--ekafa-accent);
+        }
+
+        /* Better Button Contrast */
+        .btn-primary {
+            background: var(--ekafa-primary);
+            border-color: var(--ekafa-primary);
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: var(--ekafa-primary-dark);
+            border-color: var(--ekafa-primary-dark);
         }
     </style>
 </head>
@@ -413,6 +534,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             'items' => [
                 ['label' => 'Home', 'url' => ['/site/index']],
                 ['label' => 'About', 'url' => ['/site/about']],
+                ['label' => 'Contact', 'url' => ['/site/contact']],
                 ['label' => 'Login', 'url' => ['/site/select-role']],
             ],
         ]);
@@ -421,9 +543,9 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $userDetails = $user->userDetails ?? null;
         $profilePic = ($userDetails && $userDetails->profile_picture_url) 
             ? Html::img('@web/' . $userDetails->profile_picture_url, [
-                'style' => 'width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; object-fit: cover;'
+                'style' => 'width: 34px; height: 34px; border-radius: 50%; margin-right: 8px; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3);'
             ])
-            : '<i class="bi bi-person-circle" style="font-size: 1.5rem; margin-right: 8px;"></i>';
+            : '<i class="bi bi-person-circle" style="font-size: 1.75rem; margin-right: 8px;"></i>';
 
         echo Html::tag('div',
             $profilePic . Html::encode($user->username ?? $user->email),
@@ -650,7 +772,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                     [
                         'data-method' => 'post',
                         'class' => 'nav-link',
-                        'style' => 'color: rgba(255, 107, 107, 0.9);'
+                        'style' => 'color: #fca5a5;'
                     ]
                 ) ?>
             </li>

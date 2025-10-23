@@ -9,30 +9,43 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <style>
     /* ==========================
-       Modern About Page Styles
+       IMPROVED READABILITY - Modern About Page Styles
        ========================== */
     
     :root {
-        --ekafa-primary: #004135;
-        --ekafa-primary-light: #11684d;
-        --ekafa-secondary: #00a86b;
-        --ekafa-gradient: linear-gradient(135deg, #004135 0%, #11684d 100%);
-        --text-dark: #1f2937;
-        --text-light: #6b7280;
-        --white: #ffffff;
+        /* High Contrast Color System */
+        --ekafa-primary: #003829;
+        --ekafa-primary-light: #00563d;
+        --ekafa-primary-dark: #001f15;
+        --ekafa-secondary: #00b377;
+        --ekafa-accent: #10d890;
+        --ekafa-gradient: linear-gradient(135deg, #003829 0%, #00563d 100%);
+        
+        /* Text Colors - High Contrast */
+        --text-primary: #111827;
+        --text-secondary: #374151;
+        --text-tertiary: #4b5563;
+        --text-white: #ffffff;
+        --text-white-soft: #f9fafb;
+        
+        /* Background Colors */
+        --bg-white: #ffffff;
+        --bg-light: #f3f4f6;
+        --bg-lighter: #f9fafb;
     }
 
     .about-page {
-        background: white;
+        background: var(--bg-white);
         padding-bottom: 60px;
+        font-size: 16px;
     }
 
-    /* Hero Section */
+    /* Hero Section - Better Contrast */
     .about-hero {
         background: var(--ekafa-gradient);
         padding: 100px 20px 80px;
         text-align: center;
-        color: white;
+        color: var(--text-white);
         position: relative;
         overflow: hidden;
     }
@@ -57,27 +70,32 @@ $this->params['breadcrumbs'][] = $this->title;
 
     .about-badge {
         display: inline-block;
-        padding: 0.5rem 1.5rem;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
+        padding: 0.625rem 1.5rem;
+        background: var(--text-white);
+        color: var(--ekafa-primary);
         border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.875rem;
+        font-weight: 700;
+        font-size: 0.9375rem;
         margin-bottom: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid var(--text-white);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .about-hero h1 {
-        font-size: 3rem;
-        font-weight: 800;
+        font-size: 3.25rem;
+        font-weight: 900;
         margin-bottom: 1.5rem;
         line-height: 1.2;
+        color: var(--text-white);
+        text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .about-hero p {
-        font-size: 1.25rem;
-        opacity: 0.95;
+        font-size: 1.375rem;
+        font-weight: 500;
         line-height: 1.8;
+        color: var(--text-white);
+        text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.15);
     }
 
     /* Image Section */
@@ -90,11 +108,12 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .about-image-card {
-        background: white;
+        background: var(--bg-white);
         border-radius: 24px;
         padding: 2rem;
-        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
         overflow: hidden;
+        border: 2px solid rgba(0, 179, 119, 0.2);
     }
 
     .about-image-card img {
@@ -104,7 +123,7 @@ $this->params['breadcrumbs'][] = $this->title;
         display: block;
     }
 
-    /* Content Section */
+    /* Content Section - Enhanced Readability */
     .about-content {
         max-width: 1200px;
         margin: 0 auto 80px;
@@ -119,32 +138,35 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .content-text h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--text-dark);
+        font-size: 2.75rem;
+        font-weight: 900;
+        color: var(--text-primary);
         margin-bottom: 1.5rem;
+        line-height: 1.2;
     }
 
     .content-text p {
         font-size: 1.125rem;
-        color: var(--text-light);
+        color: var(--text-secondary);
         line-height: 1.8;
         margin-bottom: 1.5rem;
         text-align: justify;
+        font-weight: 400;
     }
 
     .highlight-box {
-        background: linear-gradient(135deg, #dcfce7 0%, #a7f3d0 100%);
-        padding: 2rem;
+        background: var(--bg-white);
+        padding: 2.5rem;
         border-radius: 16px;
-        border-left: 4px solid var(--ekafa-primary);
+        border: 2px solid var(--ekafa-secondary);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
     .highlight-box h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
+        font-size: 1.75rem;
+        font-weight: 800;
         color: var(--ekafa-primary);
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .highlight-box ul {
@@ -154,22 +176,30 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .highlight-box li {
-        padding: 0.75rem 0;
-        color: var(--text-dark);
-        font-size: 1rem;
+        padding: 0.875rem 0;
+        color: var(--text-primary);
+        font-size: 1.0625rem;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
+        font-weight: 500;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .highlight-box li:last-child {
+        border-bottom: none;
     }
 
     .highlight-box li i {
         color: var(--ekafa-secondary);
-        font-size: 1.25rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        flex-shrink: 0;
     }
 
-    /* Mission & Vision Section */
+    /* Mission & Vision Section - Better Contrast */
     .mission-vision-section {
-        background: linear-gradient(180deg, #f9fafb 0%, white 100%);
+        background: var(--bg-lighter);
         padding: 80px 20px;
     }
 
@@ -182,13 +212,14 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .mv-card {
-        background: white;
+        background: var(--bg-white);
         padding: 3rem;
         border-radius: 24px;
         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         position: relative;
         overflow: hidden;
         transition: transform 0.3s ease;
+        border: 2px solid #e5e7eb;
     }
 
     .mv-card::before {
@@ -203,39 +234,43 @@ $this->params['breadcrumbs'][] = $this->title;
 
     .mv-card:hover {
         transform: translateY(-10px);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+        border-color: var(--ekafa-secondary);
     }
 
     .mv-icon {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #dcfce7 0%, #a7f3d0 100%);
+        background: var(--ekafa-gradient);
         border-radius: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 2rem;
-        color: var(--ekafa-primary);
+        color: var(--text-white);
         font-size: 2.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .mv-card h3 {
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--text-dark);
+        font-size: 2.25rem;
+        font-weight: 900;
+        color: var(--text-primary);
         margin-bottom: 1.5rem;
     }
 
     .mv-card p {
         font-size: 1.125rem;
-        color: var(--text-light);
+        color: var(--text-secondary);
         line-height: 1.8;
         text-align: justify;
+        font-weight: 400;
     }
 
-    /* Timeline Section */
+    /* Timeline Section - Enhanced Visibility */
     .timeline-section {
         padding: 80px 20px;
-        background: white;
+        background: var(--bg-white);
     }
 
     .timeline-header {
@@ -245,15 +280,16 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .timeline-header h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--text-dark);
+        font-size: 2.75rem;
+        font-weight: 900;
+        color: var(--text-primary);
         margin-bottom: 1rem;
     }
 
     .timeline-header p {
-        font-size: 1.125rem;
-        color: var(--text-light);
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        font-weight: 500;
     }
 
     .timeline {
@@ -269,7 +305,7 @@ $this->params['breadcrumbs'][] = $this->title;
         top: 0;
         bottom: 0;
         width: 4px;
-        background: linear-gradient(180deg, var(--ekafa-primary), var(--ekafa-secondary));
+        background: var(--ekafa-gradient);
         transform: translateX(-50%);
     }
 
@@ -289,11 +325,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     .timeline-content {
         width: calc(50% - 40px);
-        background: white;
-        padding: 2rem;
+        background: var(--bg-white);
+        padding: 2.5rem;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         position: relative;
+        border: 2px solid #e5e7eb;
+    }
+
+    .timeline-item:hover .timeline-content {
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+        border-color: var(--ekafa-secondary);
     }
 
     .timeline-item:nth-child(odd) .timeline-content {
@@ -305,46 +347,47 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .timeline-marker {
-        width: 24px;
-        height: 24px;
-        background: white;
-        border: 4px solid var(--ekafa-primary);
+        width: 28px;
+        height: 28px;
+        background: var(--bg-white);
+        border: 5px solid var(--ekafa-primary);
         border-radius: 50%;
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
         z-index: 2;
-        box-shadow: 0 0 0 8px rgba(0, 65, 53, 0.1);
+        box-shadow: 0 0 0 8px rgba(0, 56, 41, 0.1);
     }
 
     .timeline-phase {
         display: inline-block;
         padding: 0.5rem 1rem;
         background: var(--ekafa-gradient);
-        color: white;
+        color: var(--text-white);
         border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.875rem;
+        font-weight: 700;
+        font-size: 0.9375rem;
         margin-bottom: 1rem;
     }
 
     .timeline-content h4 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-dark);
+        font-size: 1.625rem;
+        font-weight: 800;
+        color: var(--text-primary);
         margin-bottom: 0.75rem;
     }
 
     .timeline-content p {
-        color: var(--text-light);
+        color: var(--text-secondary);
         line-height: 1.7;
-        font-size: 1rem;
+        font-size: 1.0625rem;
+        font-weight: 400;
     }
 
-    /* Features Grid */
+    /* Features Grid - Better Contrast */
     .features-overview {
         padding: 80px 20px;
-        background: linear-gradient(180deg, #f9fafb 0%, white 100%);
+        background: var(--bg-lighter);
     }
 
     .features-overview-header {
@@ -354,58 +397,68 @@ $this->params['breadcrumbs'][] = $this->title;
     }
 
     .features-overview-header h2 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--text-dark);
+        font-size: 2.75rem;
+        font-weight: 900;
+        color: var(--text-primary);
         margin-bottom: 1rem;
+    }
+
+    .features-overview-header p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        font-weight: 500;
     }
 
     .features-grid-about {
         max-width: 1200px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 2rem;
     }
 
     .feature-item {
-        background: white;
-        padding: 2rem;
+        background: var(--bg-white);
+        padding: 2.5rem;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         text-align: center;
         transition: all 0.3s ease;
+        border: 2px solid #e5e7eb;
     }
 
     .feature-item:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+        border-color: var(--ekafa-secondary);
     }
 
     .feature-item-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #dcfce7 0%, #a7f3d0 100%);
-        border-radius: 12px;
+        width: 72px;
+        height: 72px;
+        background: var(--ekafa-gradient);
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem;
-        color: var(--ekafa-primary);
-        font-size: 1.75rem;
+        margin: 0 auto 1.5rem;
+        color: var(--text-white);
+        font-size: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .feature-item h4 {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 0.5rem;
+        font-size: 1.375rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
     }
 
     .feature-item p {
-        font-size: 0.9375rem;
-        color: var(--text-light);
-        line-height: 1.6;
+        font-size: 1.0625rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-weight: 400;
     }
 
     /* Animations */
@@ -417,12 +470,20 @@ $this->params['breadcrumbs'][] = $this->title;
     /* Responsive Design */
     @media (max-width: 768px) {
         .about-hero h1 {
-            font-size: 2rem;
+            font-size: 2.25rem;
+        }
+
+        .about-hero p {
+            font-size: 1.125rem;
         }
 
         .content-grid {
             grid-template-columns: 1fr;
             gap: 40px;
+        }
+
+        .content-text h2 {
+            font-size: 2.25rem;
         }
 
         .mission-vision-container {
@@ -452,6 +513,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
         .features-grid-about {
             grid-template-columns: 1fr;
+        }
+
+        .mv-card,
+        .feature-item,
+        .highlight-box {
+            padding: 2rem;
         }
     }
 </style>
