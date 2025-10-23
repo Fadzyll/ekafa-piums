@@ -19,17 +19,49 @@ $partnerImageUrl = $model->partnerDetails && $model->partnerDetails->profile_pic
 
 $userRole = Yii::$app->user->identity->role ?? 'User';
 $isTeacher = $userRole === 'Teacher';
+$isParent = $userRole === 'Parent';
+$isAdmin = $userRole === 'Admin';
 
-// Calculate profile completion percentage
-$totalFields = 15; // Total expected fields
+// Calculate profile completion percentage based on role
+$totalFields = 0;
 $completedFields = 0;
-$fields = ['full_name', 'ic_number', 'age', 'gender', 'race', 'phone_number', 'citizenship', 'marital_status', 'address', 'city', 'postcode', 'state'];
-foreach ($fields as $field) {
+
+// Base fields for all roles
+$baseFields = ['full_name', 'ic_number', 'age', 'gender', 'race', 'phone_number', 'citizenship', 'marital_status', 'address', 'city', 'postcode', 'state'];
+$totalFields += count($baseFields);
+foreach ($baseFields as $field) {
     if (!empty($model->$field)) $completedFields++;
 }
-if ($model->userJobDetails) $completedFields += 2;
-if ($model->partnerDetails) $completedFields++;
-$completionPercentage = round(($completedFields / $totalFields) * 100);
+
+// Role-specific fields
+if ($isParent) {
+    if ($model->userJobDetails) {
+        $completedFields += 1;
+        $totalFields += 1;
+    } else {
+        $totalFields += 1;
+    }
+    if ($model->partnerDetails) {
+        $completedFields += 1;
+        $totalFields += 1;
+    } else {
+        $totalFields += 1;
+    }
+}
+
+if ($isTeacher) {
+    $teacherEducations = \app\models\TeachersEducation::find()
+        ->where(['user_id' => Yii::$app->user->id])
+        ->count();
+    if ($teacherEducations > 0) {
+        $completedFields += 1;
+        $totalFields += 1;
+    } else {
+        $totalFields += 1;
+    }
+}
+
+$completionPercentage = $totalFields > 0 ? round(($completedFields / $totalFields) * 100) : 0;
 
 // Get teacher education records if user is a teacher
 $teacherEducations = [];
@@ -568,18 +600,25 @@ if ($isTeacher) {
         </div>
     </div>
 
-    <!-- Enhanced Tab Navigation -->
+    <!-- Enhanced Tab Navigation - UPDATED WITH ROLE-BASED ACCESS -->
     <ul class="nav nav-tabs-modern" id="profileTabs" role="tablist">
+        <!-- Personal Info - Available to ALL roles (Admin, Teacher, Parent) -->
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button">
                 <i class="bi bi-person-fill"></i> Personal Info
             </button>
         </li>
+        
+        <!-- Employment - Only for Parents -->
+        <?php if ($isParent): ?>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="job-tab" data-bs-toggle="tab" data-bs-target="#job" type="button">
                 <i class="bi bi-briefcase-fill"></i> Employment
             </button>
         </li>
+        <?php endif; ?>
+        
+        <!-- Education - Only for Teachers -->
         <?php if ($isTeacher): ?>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button">
@@ -587,22 +626,30 @@ if ($isTeacher) {
             </button>
         </li>
         <?php endif; ?>
+        
+        <!-- Partner Info - Only for Parents -->
+        <?php if ($isParent): ?>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="partner-tab" data-bs-toggle="tab" data-bs-target="#partner" type="button">
                 <i class="bi bi-people-fill"></i> Partner Info
             </button>
         </li>
+        <?php endif; ?>
+        
+        <!-- Documents - Only for Teachers and Parents -->
+        <?php if ($isTeacher || $isParent): ?>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button">
                 <i class="bi bi-file-earmark-text-fill"></i> My Documents
             </button>
         </li>
+        <?php endif; ?>
     </ul>
 
     <!-- Tab Content -->
     <div class="tab-content" id="profileTabsContent">
         
-        <!-- Personal Information Tab -->
+        <!-- Personal Information Tab - AVAILABLE TO ALL ROLES -->
         <div class="tab-pane fade show active" id="personal" role="tabpanel">
             <div class="info-card">
                 <h3 class="info-card-title">
@@ -671,7 +718,8 @@ if ($isTeacher) {
             </div>
         </div>
 
-        <!-- Employment Tab -->
+        <!-- Employment Tab - ONLY FOR PARENTS -->
+        <?php if ($isParent): ?>
         <div class="tab-pane fade" id="job" role="tabpanel">
             <?php if ($model->userJobDetails): ?>
                 <div class="info-card">
@@ -741,16 +789,17 @@ if ($isTeacher) {
                 <div class="empty-state-card">
                     <i class="bi bi-briefcase empty-state-icon"></i>
                     <h4>No Employment Information</h4>
-                    <p>Add your employment details to complete your profile and improve verification.</p>
+                    <p>Add your employment details to complete your profile.</p>
                     <?= Html::a('<i class="bi bi-plus-circle"></i> Add Employment Info', ['user-job-details/profile'], [
                         'class' => 'btn-modern btn-primary-modern'
                     ]) ?>
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
+        <!-- Teacher Education Tab - ONLY FOR TEACHERS -->
         <?php if ($isTeacher): ?>
-        <!-- Teacher Education Tab -->
         <div class="tab-pane fade" id="education" role="tabpanel">
             <div class="info-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -820,7 +869,8 @@ if ($isTeacher) {
         </div>
         <?php endif; ?>
 
-        <!-- Partner Tab -->
+        <!-- Partner Tab - ONLY FOR PARENTS -->
+        <?php if ($isParent): ?>
         <div class="tab-pane fade" id="partner" role="tabpanel">
             <?php if ($model->partnerDetails): ?>
                 <div class="info-card">
@@ -924,19 +974,20 @@ if ($isTeacher) {
                 <div class="empty-state-card">
                     <i class="bi bi-people empty-state-icon"></i>
                     <h4>No Partner Information</h4>
-                    <p>Add your partner's details to complete your family profile and enable family-related features.</p>
+                    <p>Add your partner's details to complete your family profile.</p>
                     <?= Html::a('<i class="bi bi-plus-circle"></i> Add Partner Info', ['partner-details/profile'], [
                         'class' => 'btn-modern btn-primary-modern'
                     ]) ?>
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
-        <!-- Documents Tab -->
+        <!-- Documents Tab - ONLY FOR TEACHERS AND PARENTS -->
+        <?php if ($isTeacher || $isParent): ?>
         <div class="tab-pane fade" id="documents" role="tabpanel">
             <?php
             $userId = Yii::$app->user->id;
-            $userRole = Yii::$app->user->identity->role;
             $categories = \app\models\DocumentCategory::getActiveCategories($userRole);
             $uploadedDocuments = \app\models\UserDocuments::find()
                 ->where(['user_id' => $userId])
@@ -995,6 +1046,7 @@ if ($isTeacher) {
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
 
     </div>
 </div>

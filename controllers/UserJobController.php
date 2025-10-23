@@ -20,8 +20,16 @@ class UserJobController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            // ✅ Only allow Parents to access employment details
+                            return Yii::$app->user->identity->role === 'Parent';
+                        },
                     ],
                 ],
+                'denyCallback' => function ($rule, $action) {
+                    Yii::$app->session->setFlash('error', 'Employment information is only available for Parents.');
+                    return Yii::$app->response->redirect(['user-details/view']);
+                },
             ],
             'verbs' => [
                 'class' => VerbFilter::class,

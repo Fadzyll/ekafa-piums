@@ -13,7 +13,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
 /**
- * ✅ UPDATED: UserDocumentsController with support for new document table structure
+ * ✅ UPDATED: UserDocumentsController with role-based access control
  */
 class UserDocumentsController extends Controller
 {
@@ -31,8 +31,17 @@ class UserDocumentsController extends Controller
                         [
                             'allow' => true,
                             'roles' => ['@'],
+                            'matchCallback' => function ($rule, $action) {
+                                // ✅ Only allow Teachers and Parents to access documents
+                                $role = Yii::$app->user->identity->role;
+                                return in_array($role, ['Teacher', 'Parent']);
+                            },
                         ],
                     ],
+                    'denyCallback' => function ($rule, $action) {
+                        Yii::$app->session->setFlash('error', 'Document management is only available for Teachers and Parents.');
+                        return Yii::$app->response->redirect(['user-details/view']);
+                    },
                 ],
                 'verbs' => [
                     'class' => VerbFilter::class,

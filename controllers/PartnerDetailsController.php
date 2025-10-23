@@ -21,8 +21,16 @@ class PartnerDetailsController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            // ✅ Only allow Parents to access partner details
+                            return Yii::$app->user->identity->role === 'Parent';
+                        },
                     ],
                 ],
+                'denyCallback' => function ($rule, $action) {
+                    Yii::$app->session->setFlash('error', 'Partner information is only available for Parents.');
+                    return Yii::$app->response->redirect(['user-details/view']);
+                },
             ],
         ];
     }
