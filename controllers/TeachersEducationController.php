@@ -4,7 +4,6 @@ namespace app\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\web\UploadedFile;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -38,108 +37,47 @@ class TeachersEducationController extends Controller
     }
 
     /**
-     * Lists all education records for the logged-in teacher
+     * Profile action - handles both create and update
      */
-    public function actionIndex()
+    public function actionProfile($id = null)
     {
-        $userId = Yii::$app->user->id;
-        $educations = TeachersEducation::find()
-            ->byUser($userId)
-            ->latest()
-            ->all();
-
-        return $this->render('index', [
-            'educations' => $educations,
-        ]);
-    }
-
-    /**
-     * View a single education record
-     */
-    public function actionView($id)
-    {
-        $model = $this->findModel($id);
-        
-        // Ensure the education record belongs to the logged-in user
-        if ($model->user_id !== Yii::$app->user->id) {
-            throw new NotFoundHttpException('The requested education record does not exist.');
+        if ($id !== null) {
+            // Update mode
+            $model = $this->findModel($id);
+            
+            // Ensure the education record belongs to the logged-in user
+            if ($model->user_id !== Yii::$app->user->id) {
+                throw new NotFoundHttpException('The requested education record does not exist.');
+            }
+        } else {
+            // Create mode
+            $model = new TeachersEducation();
+            $model->user_id = Yii::$app->user->id;
         }
 
-        return $this->render('view', [
-            'model' => $model,
-        ]);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $message = $id !== null ? 'Education record updated successfully!' : 'Education record added successfully!';
+            Yii::$app->session->setFlash('success', $message);
+            return $this->redirect(['user-details/view']);
+        }
+
+        return $this->render('profile', ['model' => $model]);
     }
 
     /**
-     * Create a new education record
+     * Create a new education record (redirects to profile)
      */
     public function actionCreate()
     {
-        $model = new TeachersEducation();
-        $model->user_id = Yii::$app->user->id;
-
-        if ($model->load(Yii::$app->request->post())) {
-            $model->certificateFile = UploadedFile::getInstance($model, 'certificateFile');
-            $model->transcriptFile = UploadedFile::getInstance($model, 'transcriptFile');
-
-            // ✅ Validate BEFORE processing
-            if (!$model->validate()) {
-                Yii::$app->session->setFlash('error', 'Please correct the errors below.');
-                return $this->render('create', ['model' => $model]);
-            }
-
-            // Handle file uploads
-            $model->uploadCertificate();
-            $model->uploadTranscript();
-
-            // ✅ Save without re-validation
-            if ($model->save(false)) {
-                Yii::$app->session->setFlash('success', 'Education record added successfully!');
-                return $this->redirect(['index']);
-            } else {
-                Yii::$app->session->setFlash('error', 'Failed to save education record.');
-            }
-        }
-
-        return $this->render('create', ['model' => $model]);
+        return $this->redirect(['profile']);
     }
 
     /**
-     * Update an existing education record
+     * Update an existing education record (redirects to profile with id)
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-        
-        // Ensure the education record belongs to the logged-in user
-        if ($model->user_id !== Yii::$app->user->id) {
-            throw new NotFoundHttpException('The requested education record does not exist.');
-        }
-
-        if ($model->load(Yii::$app->request->post())) {
-            $model->certificateFile = UploadedFile::getInstance($model, 'certificateFile');
-            $model->transcriptFile = UploadedFile::getInstance($model, 'transcriptFile');
-
-            // ✅ Validate BEFORE processing
-            if (!$model->validate()) {
-                Yii::$app->session->setFlash('error', 'Please correct the errors below.');
-                return $this->render('update', ['model' => $model]);
-            }
-
-            // Handle file uploads
-            $model->uploadCertificate();
-            $model->uploadTranscript();
-
-            // ✅ Save without re-validation
-            if ($model->save(false)) {
-                Yii::$app->session->setFlash('success', 'Education record updated successfully!');
-                return $this->redirect(['index']);
-            } else {
-                Yii::$app->session->setFlash('error', 'Failed to update education record.');
-            }
-        }
-
-        return $this->render('update', ['model' => $model]);
+        return $this->redirect(['profile', 'id' => $id]);
     }
 
     /**
@@ -154,28 +92,13 @@ class TeachersEducationController extends Controller
             throw new NotFoundHttpException('The requested education record does not exist.');
         }
 
-        // Delete associated files
-        if (!empty($model->certificate_url)) {
-            $certPath = Yii::getAlias('@webroot/' . ltrim($model->certificate_url, '/'));
-            if (file_exists($certPath)) {
-                @unlink($certPath);
-            }
-        }
-
-        if (!empty($model->transcript_url)) {
-            $transcriptPath = Yii::getAlias('@webroot/' . ltrim($model->transcript_url, '/'));
-            if (file_exists($transcriptPath)) {
-                @unlink($transcriptPath);
-            }
-        }
-
         if ($model->delete()) {
             Yii::$app->session->setFlash('success', 'Education record deleted successfully!');
         } else {
             Yii::$app->session->setFlash('error', 'Failed to delete education record.');
         }
 
-        return $this->redirect(['index']);
+        return $this->redirect(['user-details/view']);
     }
 
     /**

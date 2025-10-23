@@ -18,6 +18,7 @@ $partnerImageUrl = $model->partnerDetails && $model->partnerDetails->profile_pic
     : $defaultImage;
 
 $userRole = Yii::$app->user->identity->role ?? 'User';
+$isTeacher = $userRole === 'Teacher';
 
 // Calculate profile completion percentage
 $totalFields = 15; // Total expected fields
@@ -29,6 +30,15 @@ foreach ($fields as $field) {
 if ($model->userJobDetails) $completedFields += 2;
 if ($model->partnerDetails) $completedFields++;
 $completionPercentage = round(($completedFields / $totalFields) * 100);
+
+// Get teacher education records if user is a teacher
+$teacherEducations = [];
+if ($isTeacher) {
+    $teacherEducations = \app\models\TeachersEducation::find()
+        ->where(['user_id' => Yii::$app->user->id])
+        ->orderBy(['graduation_date' => SORT_DESC])
+        ->all();
+}
 ?>
 
 <style>
@@ -363,6 +373,89 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
     margin: 0;
 }
 
+/* Education Record Card */
+.education-record {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border: 2px solid #e9d5ff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.education-record::before {
+    content: '🎓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 6rem;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+}
+
+.education-record:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.2);
+    border-color: #c4b5fd;
+}
+
+.education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.education-institution {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #5b21b6;
+    margin-bottom: 0.25rem;
+}
+
+.education-degree {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    background: white;
+    border: 2px solid #c4b5fd;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6d28d9;
+}
+
+.education-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.education-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b21a8;
+    font-size: 0.9375rem;
+}
+
+.education-detail-item i {
+    color: #7c3aed;
+}
+
+.education-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
 /* Action Buttons Enhancement */
 .btn-modern {
     transition: all 0.3s ease;
@@ -424,6 +517,10 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
     .info-card {
         padding: 1.5rem;
     }
+    
+    .education-details {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Animation Classes */
@@ -483,6 +580,13 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                 <i class="bi bi-briefcase-fill"></i> Employment
             </button>
         </li>
+        <?php if ($isTeacher): ?>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button">
+                <i class="bi bi-mortarboard-fill"></i> Education
+            </button>
+        </li>
+        <?php endif; ?>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="partner-tab" data-bs-toggle="tab" data-bs-target="#partner" type="button">
                 <i class="bi bi-people-fill"></i> Partner Info
@@ -644,6 +748,77 @@ $completionPercentage = round(($completedFields / $totalFields) * 100);
                 </div>
             <?php endif; ?>
         </div>
+
+        <?php if ($isTeacher): ?>
+        <!-- Teacher Education Tab -->
+        <div class="tab-pane fade" id="education" role="tabpanel">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="info-card-title mb-0">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        Educational Qualifications
+                    </h3>
+                    <?= Html::a('<i class="bi bi-plus-circle"></i> Add Education', ['teachers-education/create'], [
+                        'class' => 'btn-modern btn-primary-modern'
+                    ]) ?>
+                </div>
+
+                <?php if (!empty($teacherEducations)): ?>
+                    <?php foreach ($teacherEducations as $education): ?>
+                        <div class="education-record">
+                            <div class="education-header">
+                                <div>
+                                    <div class="education-institution">
+                                        <?= Html::encode($education->institution_name) ?>
+                                    </div>
+                                    <span class="education-degree">
+                                        <i class="bi bi-award-fill"></i>
+                                        <?= Html::encode($education->displayDegreeLevel()) ?>
+                                    </span>
+                                </div>
+                                <div class="education-actions">
+                                    <?= Html::a('<i class="bi bi-pencil"></i>', ['teachers-education/update', 'id' => $education->education_id], [
+                                        'class' => 'btn btn-sm btn-outline-primary',
+                                        'title' => 'Edit'
+                                    ]) ?>
+                                    <?= Html::a('<i class="bi bi-trash"></i>', ['teachers-education/delete', 'id' => $education->education_id], [
+                                        'class' => 'btn btn-sm btn-outline-danger',
+                                        'title' => 'Delete',
+                                        'data' => [
+                                            'confirm' => 'Are you sure you want to delete this education record?',
+                                            'method' => 'post',
+                                        ],
+                                    ]) ?>
+                                </div>
+                            </div>
+                            
+                            <div class="education-details">
+                                <div class="education-detail-item">
+                                    <i class="bi bi-book-fill"></i>
+                                    <span><strong>Field:</strong> <?= Html::encode($education->field_of_study) ?></span>
+                                </div>
+                                <?php if ($education->graduation_date): ?>
+                                <div class="education-detail-item">
+                                    <i class="bi bi-calendar-check-fill"></i>
+                                    <span><strong>Graduated:</strong> <?= Yii::$app->formatter->asDate($education->graduation_date, 'php:F Y') ?></span>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state-card">
+                        <i class="bi bi-mortarboard empty-state-icon"></i>
+                        <h4>No Education Records</h4>
+                        <p>Add your educational qualifications to verify your teaching credentials.</p>
+                        <?= Html::a('<i class="bi bi-plus-circle"></i> Add Education', ['teachers-education/create'], [
+                            'class' => 'btn-modern btn-primary-modern'
+                        ]) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Partner Tab -->
         <div class="tab-pane fade" id="partner" role="tabpanel">
@@ -836,7 +1011,7 @@ document.querySelectorAll('.nav-tabs-modern .nav-link').forEach(tab => {
 document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
     tab.addEventListener('shown.bs.tab', function (event) {
         const target = document.querySelector(event.target.getAttribute('data-bs-target'));
-        const cards = target.querySelectorAll('.info-card, .empty-state-card');
+        const cards = target.querySelectorAll('.info-card, .empty-state-card, .education-record');
         
         cards.forEach((card, index) => {
             card.style.opacity = '0';
