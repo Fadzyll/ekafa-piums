@@ -20,27 +20,29 @@ use app\models\ClassroomModel;
     ]); ?>
 
     <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <?= $form->field($model, 'class_name')->textInput([
                 'placeholder' => 'Search by class name...',
                 'class' => 'form-control form-control-sm'
             ]) ?>
         </div>
 
-        <div class="col-md-3">
-            <?= $form->field($model, 'year')->textInput([
-                'placeholder' => 'Year',
-                'class' => 'form-control form-control-sm',
-                'type' => 'number'
-            ]) ?>
+        <div class="col-md-2">
+            <?= $form->field($model, 'grade_level')->dropDownList(
+                ClassroomModel::optsGradeLevel(),
+                [
+                    'prompt' => 'All Grade Levels',
+                    'class' => 'form-select form-select-sm'
+                ]
+            ) ?>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
             <?= $form->field($model, 'session_type')->dropDownList(
                 ClassroomModel::optsSessionType(),
                 [
                     'prompt' => 'All Sessions',
-                    'class' => 'form-control form-control-sm'
+                    'class' => 'form-select form-select-sm'
                 ]
             ) ?>
         </div>
@@ -50,17 +52,7 @@ use app\models\ClassroomModel;
                 ClassroomModel::optsStatus(),
                 [
                     'prompt' => 'All Statuses',
-                    'class' => 'form-control form-control-sm'
-                ]
-            ) ?>
-        </div>
-
-        <div class="col-md-3">
-            <?= $form->field($model, 'grade_level')->dropDownList(
-                ClassroomModel::optsGradeLevel(),
-                [
-                    'prompt' => 'All Grade Levels',
-                    'class' => 'form-control form-control-sm'
+                    'class' => 'form-select form-select-sm'
                 ]
             ) ?>
         </div>
@@ -73,13 +65,28 @@ use app\models\ClassroomModel;
         </div>
 
         <div class="col-md-3">
-            <?= $form->field($model, 'dateFrom')->input('date', [
+            <?= $form->field($model, 'classroom_location')->textInput([
+                'placeholder' => 'Location...',
                 'class' => 'form-control form-control-sm'
             ]) ?>
         </div>
 
         <div class="col-md-3">
-            <?= $form->field($model, 'dateTo')->input('date', [
+            <?= $form->field($model, 'class_start_date')->input('date', [
+                'class' => 'form-control form-control-sm'
+            ])->label('Start Date From') ?>
+        </div>
+
+        <div class="col-md-3">
+            <?= $form->field($model, 'class_end_date')->input('date', [
+                'class' => 'form-control form-control-sm'
+            ])->label('End Date To') ?>
+        </div>
+
+        <div class="col-md-3">
+            <?= $form->field($model, 'year')->textInput([
+                'type' => 'number',
+                'placeholder' => 'Year',
                 'class' => 'form-control form-control-sm'
             ]) ?>
         </div>

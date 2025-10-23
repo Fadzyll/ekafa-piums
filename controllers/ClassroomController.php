@@ -11,11 +11,10 @@ use yii\filters\AccessControl;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\helpers\Json;
 
 /**
  * ClassroomController implements the CRUD actions for ClassroomModel.
- * Enhanced with modern features and AJAX support.
+ * Updated to match E-Kafa Database Data Dictionary v1.0 - Table #4
  */
 class ClassroomController extends Controller
 {
@@ -73,7 +72,7 @@ class ClassroomController extends Controller
     }
 
     /**
-     * Displays a single ClassroomModel model with enhanced details.
+     * Displays a single ClassroomModel model.
      * @param int $class_id Class ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -88,15 +87,14 @@ class ClassroomController extends Controller
     }
 
     /**
-     * Creates a new ClassroomModel with enhanced form.
+     * Creates a new ClassroomModel.
      * @return string|Response
      */
     public function actionCreate()
     {
         $model = new ClassroomModel();
-        $model->created_by = Yii::$app->user->id;
 
-        // Fetch teachers for dropdown as [user_id => username]
+        // Fetch teachers for dropdown
         $teachers = Users::find()
             ->where(['role' => 'Teacher'])
             ->select(['username'])
@@ -120,7 +118,7 @@ class ClassroomController extends Controller
     }
 
     /**
-     * Updates an existing ClassroomModel with enhanced form.
+     * Updates an existing ClassroomModel.
      * @param int $class_id Class ID
      * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
@@ -129,7 +127,7 @@ class ClassroomController extends Controller
     {
         $model = $this->findModel($class_id);
 
-        // Fetch teachers for dropdown as [user_id => username]
+        // Fetch teachers for dropdown
         $teachers = Users::find()
             ->where(['role' => 'Teacher'])
             ->select(['username'])
@@ -240,9 +238,9 @@ class ClassroomController extends Controller
             return [
                 'success' => true,
                 'data' => [
-                    'enrollment_percentage' => $model->quota > 0 ? round(($model->current_enrollment / $model->quota) * 100, 2) : 0,
-                    'available_slots' => max(0, $model->quota - $model->current_enrollment),
-                    'is_full' => $model->current_enrollment >= $model->quota,
+                    'enrollment_percentage' => $model->getEnrollmentPercentage(),
+                    'available_slots' => $model->getAvailableSlots(),
+                    'is_full' => $model->isFull(),
                 ],
             ];
         } catch (\Exception $e) {
@@ -277,14 +275,16 @@ class ClassroomController extends Controller
             'ID',
             'Class Name',
             'Year',
+            'Grade Level',
             'Session Type',
             'Teacher',
             'Quota',
             'Current Enrollment',
+            'Available Slots',
             'Status',
-            'Grade Level',
-            'Start Time',
-            'End Time',
+            'Classroom Location',
+            'Start Date',
+            'End Date',
         ]);
         
         // Data
@@ -293,14 +293,16 @@ class ClassroomController extends Controller
                 $model->class_id,
                 $model->class_name,
                 $model->year,
+                $model->grade_level,
                 $model->session_type,
                 $model->user ? $model->user->username : 'N/A',
                 $model->quota,
                 $model->current_enrollment,
+                $model->getAvailableSlots(),
                 $model->status,
-                $model->grade_level,
-                $model->start_time,
-                $model->end_time,
+                $model->classroom_location,
+                $model->class_start_date,
+                $model->class_end_date,
             ]);
         }
         
