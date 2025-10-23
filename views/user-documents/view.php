@@ -439,14 +439,6 @@ $this->params['hideTitle'] = true;
             <div class="info-grid">
                 <div class="info-card">
                     <div class="info-label">
-                        <i class="bi bi-hash"></i>
-                        Document ID
-                    </div>
-                    <div class="info-value"><?= Html::encode($model->document_id) ?></div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
                         <i class="bi bi-person"></i>
                         User
                     </div>
@@ -455,14 +447,6 @@ $this->params['hideTitle'] = true;
                             <?= $model->user ? Html::encode($model->user->username ?? 'User #' . $model->user_id) : 'User #' . $model->user_id ?>
                         </span>
                     </div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
-                        <i class="bi bi-tag"></i>
-                        Document Type
-                    </div>
-                    <div class="info-value"><?= Html::encode($model->document_type) ?></div>
                 </div>
 
                 <div class="info-card">
@@ -507,45 +491,6 @@ $this->params['hideTitle'] = true;
                     </div>
                     <div class="info-value">
                         <?= $model->category ? Html::encode($model->category->category_name) : '<em class="text-muted">Uncategorized</em>' ?>
-                    </div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
-                        <i class="bi bi-person-badge"></i>
-                        Owner Type
-                    </div>
-                    <div class="info-value"><?= Html::encode($model->owner_type) ?></div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
-                        <i class="bi bi-hash"></i>
-                        Owner ID
-                    </div>
-                    <div class="info-value"><?= Html::encode($model->owner_id) ?></div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
-                        <i class="bi bi-upload"></i>
-                        Version
-                    </div>
-                    <div class="info-value">
-                        v<?= Html::encode($model->version) ?>
-                        <?php if ($model->is_latest_version): ?>
-                            <span class="badge bg-success ms-2">Latest</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-label">
-                        <i class="bi bi-person-up"></i>
-                        Uploaded By
-                    </div>
-                    <div class="info-value">
-                        <?= $model->uploadedBy ? Html::encode($model->uploadedBy->username ?? 'User #' . $model->uploaded_by) : '<em class="text-muted">N/A</em>' ?>
                     </div>
                 </div>
 

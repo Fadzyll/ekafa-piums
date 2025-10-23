@@ -638,15 +638,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                     </div>
                 </li>
 
-                <!-- Parent: Activities -->
-                <li class="nav-item">
-                    <?= Html::a(
-                        '<i class="bi bi-calendar-event"></i> Activities',
-                        ['/activity/view'],
-                        ['class' => 'nav-link']
-                    ) ?>
-                </li>
-
             <?php endif; ?>
 
             <div class="sidebar-divider"></div>
