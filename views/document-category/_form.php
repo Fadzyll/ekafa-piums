@@ -224,6 +224,7 @@ textarea.form-control {
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
+    position: relative;
 }
 
 .role-option label i {
@@ -239,17 +240,37 @@ textarea.form-control {
     font-size: 0.9375rem;
 }
 
-.role-option input:checked + label {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    color: white;
+/* SELECTED STATE FOR ROLE */
+.role-option.selected label {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    color: white !important;
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
 }
 
-.role-option input:checked + label i,
-.role-option input:checked + label span {
-    color: white;
+.role-option.selected label i,
+.role-option.selected label span {
+    color: white !important;
+}
+
+/* Check indicator badge */
+.check-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: white;
+    color: #667eea;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
 }
 
 .status-toggle {
@@ -279,18 +300,49 @@ textarea.form-control {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    position: relative;
+    min-height: 56px;
 }
 
-.status-option input:checked + label {
-    border-color: #10b981;
-    background: #d1fae5;
-    color: #065f46;
+/* SELECTED STATE FOR STATUS - ACTIVE */
+.status-option.selected label {
+    border-color: #10b981 !important;
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.status-option.inactive input:checked + label {
-    border-color: #6b7280;
-    background: #f3f4f6;
-    color: #374151;
+/* SELECTED STATE FOR STATUS - INACTIVE */
+.status-option.inactive.selected label {
+    border-color: #6b7280 !important;
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+/* Status check badge */
+.status-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #10b981;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.status-option.inactive .status-badge {
+    background: #6b7280;
 }
 
 .invalid-feedback {
@@ -411,7 +463,7 @@ textarea.form-control {
                     Required For Role
                 </label>
                 <div class="role-selector">
-                    <div class="role-option">
+                    <div class="role-option" id="role-option-teacher">
                         <?= Html::activeRadio($model, 'required_for_role', [
                             'value' => DocumentCategory::ROLE_TEACHER,
                             'uncheck' => null,
@@ -422,7 +474,7 @@ textarea.form-control {
                             <span>Teacher Only</span>
                         </label>
                     </div>
-                    <div class="role-option">
+                    <div class="role-option" id="role-option-parent">
                         <?= Html::activeRadio($model, 'required_for_role', [
                             'value' => DocumentCategory::ROLE_PARENT,
                             'uncheck' => null,
@@ -433,7 +485,7 @@ textarea.form-control {
                             <span>Parent Only</span>
                         </label>
                     </div>
-                    <div class="role-option">
+                    <div class="role-option" id="role-option-both">
                         <?= Html::activeRadio($model, 'required_for_role', [
                             'value' => DocumentCategory::ROLE_BOTH,
                             'uncheck' => null,
@@ -481,7 +533,7 @@ textarea.form-control {
                     Category Status
                 </label>
                 <div class="status-toggle">
-                    <div class="status-option">
+                    <div class="status-option" id="status-option-active">
                         <?= Html::activeRadio($model, 'status', [
                             'value' => DocumentCategory::STATUS_ACTIVE,
                             'uncheck' => null,
@@ -492,7 +544,7 @@ textarea.form-control {
                             <span>Active</span>
                         </label>
                     </div>
-                    <div class="status-option inactive">
+                    <div class="status-option inactive" id="status-option-inactive">
                         <?= Html::activeRadio($model, 'status', [
                             'value' => DocumentCategory::STATUS_INACTIVE,
                             'uncheck' => null,
@@ -527,6 +579,99 @@ textarea.form-control {
         <?php ActiveForm::end(); ?>
     </div>
 </div>
+
+<script>
+// Pure JavaScript - no jQuery dependency
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, initializing indicators...');
+    
+    // Function to update role indicators
+    function updateRoleIndicators() {
+        console.log('Updating role indicators...');
+        
+        // Remove all selected classes and badges
+        document.querySelectorAll('.role-option').forEach(function(option) {
+            option.classList.remove('selected');
+            var existingBadge = option.querySelector('.check-badge');
+            if (existingBadge) {
+                existingBadge.remove();
+            }
+        });
+        
+        // Add selected class and badge to checked option
+        document.querySelectorAll('.role-option input[type="radio"]:checked').forEach(function(input) {
+            console.log('Found checked role radio:', input.id);
+            var parentOption = input.closest('.role-option');
+            var label = parentOption.querySelector('label');
+            
+            parentOption.classList.add('selected');
+            console.log('Added selected class to', parentOption.id);
+            
+            // Create and add badge
+            var badge = document.createElement('div');
+            badge.className = 'check-badge';
+            badge.innerHTML = '✓';
+            label.appendChild(badge);
+            console.log('Added badge to role option');
+        });
+    }
+    
+    // Function to update status indicators
+    function updateStatusIndicators() {
+        console.log('Updating status indicators...');
+        
+        // Remove all selected classes and badges
+        document.querySelectorAll('.status-option').forEach(function(option) {
+            option.classList.remove('selected');
+            var existingBadge = option.querySelector('.status-badge');
+            if (existingBadge) {
+                existingBadge.remove();
+            }
+        });
+        
+        // Add selected class and badge to checked option
+        document.querySelectorAll('.status-option input[type="radio"]:checked').forEach(function(input) {
+            console.log('Found checked status radio:', input.id);
+            var parentOption = input.closest('.status-option');
+            var label = parentOption.querySelector('label');
+            
+            parentOption.classList.add('selected');
+            console.log('Added selected class to', parentOption.id);
+            
+            // Create and add badge
+            var badge = document.createElement('div');
+            badge.className = 'status-badge';
+            badge.innerHTML = '✓';
+            label.appendChild(badge);
+            console.log('Added badge to status option');
+        });
+    }
+    
+    // Initialize on page load
+    setTimeout(function() {
+        updateRoleIndicators();
+        updateStatusIndicators();
+    }, 100);
+    
+    // Add event listeners to role options
+    document.querySelectorAll('.role-option input[type="radio"]').forEach(function(input) {
+        input.addEventListener('change', function() {
+            console.log('Role radio changed:', this.id);
+            updateRoleIndicators();
+        });
+    });
+    
+    // Add event listeners to status options
+    document.querySelectorAll('.status-option input[type="radio"]').forEach(function(input) {
+        input.addEventListener('change', function() {
+            console.log('Status radio changed:', this.id);
+            updateStatusIndicators();
+        });
+    });
+    
+    console.log('Selection indicators initialized successfully!');
+});
+</script>
 
 <?php
 $script = <<< JS
