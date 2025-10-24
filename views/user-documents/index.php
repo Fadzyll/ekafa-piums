@@ -18,7 +18,7 @@ $this->params['hideTitle'] = true;
 
 <style>
 .documents-header {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 20px 20px 0 0;
     padding: 2rem;
     color: white;
@@ -54,13 +54,13 @@ $this->params['hideTitle'] = true;
 .stat-box:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    border-color: #3b82f6;
+    border-color: #667eea;
 }
 
 .stat-number {
     font-size: 2rem;
     font-weight: 800;
-    color: #3b82f6;
+    color: #667eea;
     margin-bottom: 0.25rem;
 }
 
@@ -82,32 +82,25 @@ $this->params['hideTitle'] = true;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.search-bar {
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-.search-bar input {
-    padding-left: 3rem;
-    border-radius: 50px;
-    border: 2px solid #e5e7eb;
+    overflow: hidden;
     transition: all 0.3s ease;
 }
 
-.search-bar input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+.filter-section.show {
+    animation: slideDown 0.3s ease;
 }
 
-.search-bar i {
-    position: absolute;
-    left: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    font-size: 1.25rem;
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding: 0 1.5rem;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+        padding: 1.5rem;
+    }
 }
 
 .filter-pills {
@@ -129,13 +122,14 @@ $this->params['hideTitle'] = true;
 }
 
 .filter-pill:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-2px);
 }
 
 .filter-pill.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-color: #3b82f6;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
     color: white;
 }
 
@@ -143,6 +137,14 @@ $this->params['hideTitle'] = true;
     display: flex;
     gap: 0.75rem;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-bar-left {
+    display: flex;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
@@ -168,16 +170,37 @@ $this->params['hideTitle'] = true;
 
 .btn-secondary-action {
     background: white;
-    color: #3b82f6;
+    color: #667eea;
     padding: 0.875rem 1.75rem;
     border-radius: 12px;
     font-weight: 600;
-    border: 2px solid #3b82f6;
+    border: 2px solid #667eea;
     transition: all 0.3s ease;
 }
 
 .btn-secondary-action:hover {
-    background: #3b82f6;
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-filter-toggle {
+    background: white;
+    color: #667eea;
+    padding: 0.875rem 1.75rem;
+    border-radius: 12px;
+    font-weight: 600;
+    border: 2px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.btn-filter-toggle:hover {
+    background: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.btn-filter-toggle.active {
+    background: #667eea;
     color: white;
 }
 
@@ -205,7 +228,7 @@ $this->params['hideTitle'] = true;
 
 .table tbody tr:hover {
     background: #f9fafb;
-    transform: scale(1.005);
+    transform: scale(1.002);
 }
 
 .table tbody td {
@@ -360,6 +383,25 @@ $this->params['hideTitle'] = true;
     margin-bottom: 1rem;
 }
 
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    padding: 0.625rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -375,6 +417,11 @@ $this->params['hideTitle'] = true;
     }
     
     .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-bar-left {
         flex-direction: column;
     }
     
@@ -425,28 +472,135 @@ $this->params['hideTitle'] = true;
 
             <!-- Action Bar -->
             <div class="action-bar">
-                <?= Html::a('<i class="bi bi-plus-circle"></i> Upload Document', ['create'], ['class' => 'btn btn-primary-action']) ?>
-                <?= Html::a('<i class="bi bi-download"></i> Export', ['export'], ['class' => 'btn btn-secondary-action']) ?>
-                <?= Html::a('<i class="bi bi-funnel"></i> Advanced Filter', '#', ['class' => 'btn btn-secondary-action', 'id' => 'toggleFilter']) ?>
+                <div class="action-bar-left">
+                    <?= Html::a('<i class="bi bi-plus-circle"></i> Upload Document', ['create'], ['class' => 'btn btn-primary-action']) ?>
+                    <?= Html::a('<i class="bi bi-download"></i> Export', ['export'], ['class' => 'btn btn-secondary-action']) ?>
+                </div>
+                <button type="button" class="btn btn-filter-toggle" id="toggleFilter">
+                    <i class="bi bi-funnel"></i> <span id="filterText">Search & Filter</span>
+                </button>
             </div>
 
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <div class="search-bar">
-                    <i class="bi bi-search"></i>
-                    <input type="text" 
-                           class="form-control" 
-                           id="searchDocuments" 
-                           placeholder="Search by user ID, document name, or status...">
+            <!-- Filter Section (Initially Hidden) -->
+            <div class="filter-section" id="filterSection" style="display: none;">
+                <!-- Quick Filters -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-lightning-fill me-2" style="color: #667eea;"></i>
+                        <strong>Quick Filters:</strong>
+                    </div>
+                    <div class="filter-pills">
+                        <button class="filter-pill active" data-filter="all">All</button>
+                        <button class="filter-pill" data-filter="approved">Active Only</button>
+                        <button class="filter-pill" data-filter="pending">Pending Only</button>
+                        <button class="filter-pill" data-filter="rejected">Rejected</button>
+                        <button class="filter-pill" data-filter="expired">Expired</button>
+                    </div>
                 </div>
 
-                <div class="filter-pills">
-                    <button class="filter-pill active" data-status="">All Documents</button>
-                    <button class="filter-pill" data-status="approved">Approved</button>
-                    <button class="filter-pill" data-status="pending">Pending Review</button>
-                    <button class="filter-pill" data-status="rejected">Rejected</button>
-                    <button class="filter-pill" data-status="expired">Expired</button>
+                <!-- Advanced Search Form -->
+                <?php $form = \yii\widgets\ActiveForm::begin([
+                    'action' => ['index'],
+                    'method' => 'get',
+                    'options' => ['data-pjax' => 1, 'id' => 'search-form'],
+                ]); ?>
+
+                <div class="row g-3">
+                    <!-- Document Name -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-folder me-2"></i>
+                            Document Name
+                        </label>
+                        <?= Html::activeTextInput($searchModel, 'document_name', [
+                            'class' => 'form-control',
+                            'placeholder' => 'Search by document name...'
+                        ]) ?>
+                    </div>
+
+                    <!-- Document Type -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-list-ul me-2"></i>
+                            Document Type
+                        </label>
+                        <?= Html::activeTextInput($searchModel, 'document_type', [
+                            'class' => 'form-control',
+                            'placeholder' => 'Search in type...'
+                        ]) ?>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-tags me-2"></i>
+                            Category
+                        </label>
+                        <?= Html::activeDropDownList($searchModel, 'category_id', 
+                            \yii\helpers\ArrayHelper::map(
+                                \app\models\DocumentCategory::find()->all(), 
+                                'category_id', 
+                                'category_name'
+                            ),
+                            [
+                                'class' => 'form-select',
+                                'prompt' => 'All Categories'
+                            ]
+                        ) ?>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            Status
+                        </label>
+                        <?= Html::activeDropDownList($searchModel, 'status', 
+                            UserDocuments::optsStatus(),
+                            [
+                                'class' => 'form-select',
+                                'prompt' => 'All Status'
+                            ]
+                        ) ?>
+                    </div>
+
+                    <!-- User ID -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-person me-2"></i>
+                            User ID
+                        </label>
+                        <?= Html::activeTextInput($searchModel, 'user_id', [
+                            'class' => 'form-control',
+                            'placeholder' => 'Enter user ID...'
+                        ]) ?>
+                    </div>
+
+                    <!-- Document ID -->
+                    <div class="col-md-6">
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-hash me-2"></i>
+                            Document ID
+                        </label>
+                        <?= Html::activeTextInput($searchModel, 'document_id', [
+                            'class' => 'form-control',
+                            'placeholder' => 'Enter document ID...'
+                        ]) ?>
+                    </div>
                 </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 mt-4">
+                    <?= Html::submitButton('<i class="bi bi-search me-2"></i>Search', [
+                        'class' => 'btn btn-primary px-4',
+                        'style' => 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;'
+                    ]) ?>
+                    <?= Html::a('<i class="bi bi-arrow-clockwise me-2"></i>Reset', ['index'], [
+                        'class' => 'btn btn-outline-secondary px-4'
+                    ]) ?>
+                </div>
+
+                <?php \yii\widgets\ActiveForm::end(); ?>
             </div>
 
             <!-- Data Table -->
@@ -455,7 +609,7 @@ $this->params['hideTitle'] = true;
             <div class="documents-table-card">
                 <?= GridView::widget([
                     'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
+                    'filterModel' => null, // We'll use custom filters
                     'tableOptions' => ['class' => 'table table-hover'],
                     'columns' => [
                         [
@@ -524,7 +678,6 @@ $this->params['hideTitle'] = true;
                                     ['class' => 'status-badge ' . ($statusClasses[$model->status] ?? 'status-pending')]
                                 );
                             },
-                            'filter' => UserDocuments::optsStatus(),
                             'headerOptions' => ['style' => 'width: 150px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
@@ -533,15 +686,18 @@ $this->params['hideTitle'] = true;
                             'label' => 'File',
                             'format' => 'raw',
                             'value' => function ($model) {
-                                return Html::a(
-                                    '<i class="bi bi-file-earmark-pdf"></i> View', 
-                                    \yii\helpers\Url::to(['download', 'document_id' => $model->document_id, 'inline' => 1]),
-                                    [
-                                        'target' => '_blank',
-                                        'class' => 'file-link',
-                                        'data-pjax' => '0', // ✅ Prevent PJAX from interfering
-                                    ]
-                                ); '<span class="no-file">No file</span>';
+                                if ($model->file_url) {
+                                    return Html::a(
+                                        '<i class="bi bi-file-earmark-pdf"></i> View', 
+                                        \yii\helpers\Url::to(['download', 'document_id' => $model->document_id, 'inline' => 1]),
+                                        [
+                                            'target' => '_blank',
+                                            'class' => 'file-link',
+                                            'data-pjax' => '0',
+                                        ]
+                                    );
+                                }
+                                return '<span class="no-file">No file</span>';
                             },
                             'headerOptions' => ['style' => 'width: 100px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
@@ -597,42 +753,69 @@ $this->params['hideTitle'] = true;
 
 <?php
 $script = <<< JS
-// Search functionality
-$('#searchDocuments').on('keyup', function() {
-    var value = $(this).val().toLowerCase();
-    $('.table tbody tr').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-    });
+// Toggle Filter Section
+$('#toggleFilter').on('click', function() {
+    var filterSection = $('#filterSection');
+    var button = $(this);
+    
+    if (filterSection.is(':visible')) {
+        filterSection.slideUp(300);
+        button.removeClass('active');
+        $('#filterText').text('Search & Filter');
+    } else {
+        filterSection.slideDown(300).addClass('show');
+        button.addClass('active');
+        $('#filterText').text('Hide Search');
+    }
 });
 
-// Filter pills
+// Quick Filter Pills
 $('.filter-pill').on('click', function() {
     $('.filter-pill').removeClass('active');
     $(this).addClass('active');
     
-    var status = $(this).data('status').toLowerCase();
+    var filter = $(this).data('filter');
     
-    if (status === '') {
-        $('.table tbody tr').show();
-    } else {
-        $('.table tbody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(status) > -1);
-        });
+    // Update the status dropdown in the form
+    if (filter === 'all') {
+        $('#userdocumentssearch-status').val('').trigger('change');
+    } else if (filter === 'approved') {
+        $('#userdocumentssearch-status').val('<?= UserDocuments::STATUS_APPROVED ?>').trigger('change');
+    } else if (filter === 'pending') {
+        $('#userdocumentssearch-status').val('<?= UserDocuments::STATUS_PENDING_REVIEW ?>').trigger('change');
+    } else if (filter === 'rejected') {
+        $('#userdocumentssearch-status').val('<?= UserDocuments::STATUS_REJECTED ?>').trigger('change');
+    } else if (filter === 'expired') {
+        $('#userdocumentssearch-status').val('<?= UserDocuments::STATUS_EXPIRED ?>').trigger('change');
     }
+    
+    // Auto-submit the form
+    $('#search-form').submit();
 });
 
-// Smooth animations
+// Smooth animations for table rows
 $('.table tbody tr').each(function(index) {
     $(this).css('animation', 'fadeInUp 0.3s ease ' + (index * 0.05) + 's forwards');
     $(this).css('opacity', '0');
 });
 
 // Pagination smooth scroll
-$('.pagination a').on('click', function() {
+$(document).on('click', '.pagination a', function() {
     $('html, body').animate({
         scrollTop: $('.user-documents-index').offset().top - 20
     }, 300);
 });
+
+// Auto-hide filter section on mobile after search
+if ($(window).width() < 768) {
+    $('#search-form').on('submit', function() {
+        setTimeout(function() {
+            $('#filterSection').slideUp(300);
+            $('#toggleFilter').removeClass('active');
+            $('#filterText').text('Search & Filter');
+        }, 500);
+    });
+}
 JS;
 $this->registerJs($script);
 ?>
