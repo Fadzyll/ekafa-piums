@@ -53,21 +53,15 @@ class ClassroomController extends Controller
      */
     public function actionIndex()
     {
+        // Create search model instance
         $searchModel = new ClassroomModelSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
 
-        // Get statistics for dashboard cards
-        $stats = [
-            'total' => ClassroomModel::find()->count(),
-            'active' => ClassroomModel::find()->where(['status' => ClassroomModel::STATUS_OPEN])->count(),
-            'full' => ClassroomModel::find()->where(['status' => ClassroomModel::STATUS_FULL])->count(),
-            'inProgress' => ClassroomModel::find()->where(['status' => ClassroomModel::STATUS_IN_PROGRESS])->count(),
-        ];
+        // Get data provider with search results
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'stats' => $stats,
         ]);
     }
 

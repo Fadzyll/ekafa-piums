@@ -525,11 +525,227 @@ $isTeacherOrParent = in_array(Yii::$app->user->identity->role, ['Teacher', 'Pare
             <?php endif; ?>
         </div>
 
-        <!-- Content - Include all the original content from views/user-documents/view.php -->
-        <!-- Information Grid, File Preview, Notes, Timeline, etc. -->
-        <!-- (Copy the rest from the original view.php file) -->
-        
-        <!-- The rest of the content remains the same as the original view.php -->
-        
+        <!-- Content -->
+        <div class="document-content">
+            <!-- Information Grid -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-person"></i>
+                        User ID
+                    </div>
+                    <div class="info-value"><?= Html::encode($model->user_id) ?></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-file-text"></i>
+                        Document Name
+                    </div>
+                    <div class="info-value"><?= Html::encode($model->document_name) ?></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-tag"></i>
+                        Document Type
+                    </div>
+                    <div class="info-value"><?= Html::encode($model->document_type) ?></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-folder"></i>
+                        Category
+                    </div>
+                    <div class="info-value">
+                        <?= $model->category ? Html::encode($model->category->category_name) : '<em class="text-muted">No category</em>' ?>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-toggle-on"></i>
+                        Status
+                    </div>
+                    <div class="info-value">
+                        <?php
+                        $statusClasses = [
+                            \app\models\UserDocuments::STATUS_APPROVED => 'status-approved',
+                            \app\models\UserDocuments::STATUS_REJECTED => 'status-rejected',
+                            \app\models\UserDocuments::STATUS_PENDING_REVIEW => 'status-pending',
+                            \app\models\UserDocuments::STATUS_EXPIRED => 'status-expired',
+                        ];
+                        $statusIcons = [
+                            \app\models\UserDocuments::STATUS_APPROVED => 'check-circle-fill',
+                            \app\models\UserDocuments::STATUS_REJECTED => 'x-circle-fill',
+                            \app\models\UserDocuments::STATUS_PENDING_REVIEW => 'clock-fill',
+                            \app\models\UserDocuments::STATUS_EXPIRED => 'hourglass-bottom',
+                        ];
+                        ?>
+                        <span class="status-badge <?= $statusClasses[$model->status] ?? 'status-pending' ?>">
+                            <i class="bi bi-<?= $statusIcons[$model->status] ?? 'question-circle' ?>"></i>
+                            <?= $model->displayStatus() ?>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-calendar-plus"></i>
+                        Upload Date
+                    </div>
+                    <div class="info-value">
+                        <?= Yii::$app->formatter->asDatetime($model->upload_date, 'php:M d, Y h:i A') ?>
+                    </div>
+                </div>
+
+                <?php if ($model->expiry_date): ?>
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-calendar-x"></i>
+                        Expiry Date
+                    </div>
+                    <div class="info-value">
+                        <?= Yii::$app->formatter->asDate($model->expiry_date, 'php:M d, Y') ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($model->reviewed_date): ?>
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="bi bi-check-square"></i>
+                        Reviewed Date
+                    </div>
+                    <div class="info-value">
+                        <?= Yii::$app->formatter->asDatetime($model->reviewed_date, 'php:M d, Y h:i A') ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- File Preview -->
+            <div class="file-preview-card">
+                <h4>
+                    <i class="bi bi-paperclip"></i>
+                    Attached File
+                </h4>
+                <?php if ($model->file_url): ?>
+                <div class="file-preview-content">
+                    <div class="file-icon-large">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name-large">
+                            <?= basename($model->file_url) ?>
+                        </div>
+                        <div class="file-meta">
+                            Document file • Uploaded on <?= Yii::$app->formatter->asDate($model->upload_date, 'php:M d, Y') ?>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <?= Html::a(
+                            '<i class="bi bi-eye"></i> View File',
+                            ['download', 'document_id' => $model->document_id, 'inline' => 1],
+                            [
+                                'class' => 'btn-file-action btn-view-file',
+                                'target' => '_blank',
+                                'data-pjax' => '0'
+                            ]
+                        ) ?>
+                        <?= Html::a(
+                            '<i class="bi bi-download"></i> Download',
+                            ['download', 'document_id' => $model->document_id],
+                            [
+                                'class' => 'btn-file-action btn-download-file',
+                                'data-pjax' => '0'
+                            ]
+                        ) ?>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="no-file-message">
+                    <i class="bi bi-file-earmark-x"></i>
+                    <p>No file attached to this document</p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Rejection Notes -->
+            <?php if ($model->status === \app\models\UserDocuments::STATUS_REJECTED && $model->rejection_notes): ?>
+            <div class="notes-card rejection">
+                <h4>
+                    <i class="bi bi-exclamation-triangle-fill" style="color: #ef4444;"></i>
+                    Rejection Notes
+                </h4>
+                <div class="notes-content">
+                    <?= nl2br(Html::encode($model->rejection_notes)) ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Additional Notes -->
+            <?php if ($model->notes): ?>
+            <div class="notes-card">
+                <h4>
+                    <i class="bi bi-sticky"></i>
+                    Additional Notes
+                </h4>
+                <div class="notes-content">
+                    <?= nl2br(Html::encode($model->notes)) ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Timeline -->
+            <div class="timeline-card">
+                <h4>
+                    <i class="bi bi-clock-history"></i>
+                    Document Timeline
+                </h4>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="bi bi-upload"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Document Uploaded</div>
+                        <div class="timeline-time">
+                            <?= Yii::$app->formatter->asDatetime($model->upload_date, 'php:M d, Y \a\t h:i A') ?>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if ($model->reviewed_date): ?>
+                <div class="timeline-item">
+                    <div class="timeline-icon" style="background: linear-gradient(135deg, <?= $model->status === \app\models\UserDocuments::STATUS_APPROVED ? '#10b981 0%, #059669 100%' : '#ef4444 0%, #dc2626 100%' ?>);">
+                        <i class="bi bi-<?= $model->status === \app\models\UserDocuments::STATUS_APPROVED ? 'check-circle-fill' : 'x-circle-fill' ?>"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">
+                            Document <?= $model->status === \app\models\UserDocuments::STATUS_APPROVED ? 'Approved' : 'Rejected' ?>
+                        </div>
+                        <div class="timeline-time">
+                            <?= Yii::$app->formatter->asDatetime($model->reviewed_date, 'php:M d, Y \a\t h:i A') ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($model->expiry_date): ?>
+                <div class="timeline-item">
+                    <div class="timeline-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Expiry Date</div>
+                        <div class="timeline-time">
+                            <?= Yii::$app->formatter->asDate($model->expiry_date, 'php:M d, Y') ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>

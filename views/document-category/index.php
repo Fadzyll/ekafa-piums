@@ -12,7 +12,7 @@ $this->params['hideTitle'] = true;
 
 <style>
 .category-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #004135 0%, #11684d 50%, #00a86b 100%);
     border-radius: 20px 20px 0 0;
     padding: 2rem;
     color: white;
@@ -29,6 +29,7 @@ $this->params['hideTitle'] = true;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    color: white;
 }
 
 .header-actions {
@@ -40,7 +41,7 @@ $this->params['hideTitle'] = true;
 .filter-toggle-btn,
 .btn-create-category {
     background: white;
-    color: #667eea;
+    color: #003829;
     border: none;
     border-radius: 10px;
     padding: 0.6rem 1.2rem;
@@ -63,14 +64,15 @@ $this->params['hideTitle'] = true;
 }
 
 .btn-create-category {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+    background: white;
+    color: #003829;
 }
 
 .btn-create-category:hover {
+    background: rgba(255, 255, 255, 0.9);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #003829;
 }
 
 .stats-container {
@@ -92,13 +94,13 @@ $this->params['hideTitle'] = true;
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    border-color: #667eea;
+    border-color: #00b377;
 }
 
 .stat-value {
     font-size: 2rem;
     font-weight: 800;
-    color: #667eea;
+    color: #00b377;
     margin: 0;
 }
 
@@ -167,7 +169,7 @@ $this->params['hideTitle'] = true;
 
 .search-form-modern label i {
     margin-right: 0.5rem;
-    color: #667eea;
+    color: #00b377;
     font-size: 0.95rem;
 }
 
@@ -180,8 +182,8 @@ $this->params['hideTitle'] = true;
 }
 
 .search-form-modern .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    border-color: #00b377;
+    box-shadow: 0 0 0 0.2rem rgba(0, 179, 119, 0.15);
 }
 
 .search-buttons {
@@ -206,13 +208,13 @@ $this->params['hideTitle'] = true;
 }
 
 .btn-search-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #003829 0%, #00563d 100%);
     color: white;
 }
 
 .btn-search-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(0, 179, 119, 0.4);
 }
 
 .btn-search-secondary {
@@ -248,13 +250,13 @@ $this->params['hideTitle'] = true;
 }
 
 .quick-filter-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #00b377;
+    color: #00b377;
 }
 
 .quick-filter-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #003829 0%, #00563d 100%);
+    border-color: #00b377;
     color: white;
 }
 
@@ -437,7 +439,7 @@ $this->params['hideTitle'] = true;
 </style>
 
 <div class="document-category-index">
-    <div class="card shadow-lg border-0">
+    <div class="card shadow-lg" style="border: none; overflow: hidden;">
         <div class="category-header">
             <h3>
                 <i class="bi bi-folder-fill"></i>
@@ -564,13 +566,13 @@ $this->params['hideTitle'] = true;
                             'contentOptions' => ['class' => 'action-buttons-cell'],
                             'buttons' => [
                                 'view' => function ($url, $model) {
-                                    return Html::a('<i class="bi bi-eye"></i> View', $url, [
+                                    return Html::a('<i class="bi bi-eye"></i>', $url, [
                                         'class' => 'btn btn-action btn-view btn-sm',
                                         'title' => 'View Details',
                                     ]);
                                 },
                                 'update' => function ($url, $model) {
-                                    return Html::a('<i class="bi bi-pencil"></i> Edit', $url, [
+                                    return Html::a('<i class="bi bi-pencil"></i>', $url, [
                                         'class' => 'btn btn-action btn-edit btn-sm',
                                         'title' => 'Edit Category',
                                     ]);

@@ -1,503 +1,512 @@
 <?php
 
 use yii\helpers\Html;
+use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
 /** @var app\models\ClassroomModel $model */
 
 $this->title = $model->class_name;
-$this->params['breadcrumbs'][] = ['label' => 'Classroom Management', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Classrooms', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-
+$this->params['hideTitle'] = true;
 \yii\web\YiiAsset::register($this);
-
-// Register CSS
-$this->registerCss("
-    .classroom-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 15px 15px 0 0;
-        margin-bottom: 2rem;
-    }
-    .classroom-header h1 {
-        margin: 0;
-        font-weight: 700;
-    }
-    .classroom-header .subtitle {
-        opacity: 0.9;
-        margin-top: 0.5rem;
-    }
-    .info-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    .info-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-    }
-    .card-header-custom {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-bottom: 3px solid #667eea;
-        padding: 1rem 1.5rem;
-        font-weight: 600;
-        color: #495057;
-    }
-    .card-header-custom i {
-        margin-right: 0.5rem;
-        color: #667eea;
-    }
-    .detail-row {
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-    }
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-    .detail-label {
-        font-weight: 600;
-        color: #6c757d;
-        min-width: 200px;
-        display: flex;
-        align-items: center;
-    }
-    .detail-label i {
-        margin-right: 0.5rem;
-        width: 20px;
-        text-align: center;
-    }
-    .detail-value {
-        color: #495057;
-        flex: 1;
-    }
-    .status-badge-large {
-        padding: 0.75rem 1.5rem;
-        border-radius: 25px;
-        font-weight: 600;
-        font-size: 0.875rem;
-        display: inline-block;
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-box {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        text-align: center;
-    }
-    .stat-box-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-    .stat-box-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0.5rem 0;
-    }
-    .stat-box-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin: 0;
-    }
-    .action-bar {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
-    }
-    .progress-enrollment {
-        height: 30px;
-        border-radius: 15px;
-        background-color: #e9ecef;
-    }
-    .progress-enrollment .progress-bar {
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-    }
-    .btn-action {
-        padding: 0.75rem 1.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        margin: 0.25rem;
-    }
-    .btn-action:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .empty-value {
-        color: #adb5bd;
-        font-style: italic;
-    }
-");
 ?>
 
-<div class="classroom-view-container">
-    <!-- Header Section -->
-    <div class="classroom-header shadow">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h1>
-                    <i class="fas fa-school me-2"></i>
-                    <?= Html::encode($model->class_name) ?>
-                </h1>
-                <div class="subtitle">
-                    <?php if ($model->grade_level): ?>
-                        <i class="fas fa-graduation-cap me-2"></i>
-                        <?= Html::encode($model->grade_level) ?> • 
-                    <?php endif; ?>
-                    <i class="fas fa-calendar me-2"></i>
-                    Year <?= Html::encode($model->year) ?> • 
-                    <i class="fas fa-<?= $model->isSessionTypeMorning() ? 'sun' : 'moon' ?> me-2"></i>
-                    <?= Html::encode($model->session_type) ?> Session
+<style>
+.view-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 2.5rem;
+    color: white;
+    margin-bottom: 0;
+}
+
+.view-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.view-subtitle {
+    opacity: 0.9;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.action-bar {
+    background: white;
+    padding: 1.5rem;
+    border-bottom: 2px solid #f3f4f6;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-action-bar {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-back:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    color: white;
+}
+
+.btn-edit-action {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.btn-edit-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    color: white;
+}
+
+.btn-delete-action {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.btn-delete-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    color: white;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.info-card {
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.info-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.stats-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 0 2rem 2rem 2rem;
+    border: 2px solid #e5e7eb;
+}
+
+.stats-section h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    font-weight: 600;
+}
+
+.enrollment-progress {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 0 2rem 2rem 2rem;
+    border: 2px solid #e5e7eb;
+}
+
+.progress-bar-custom {
+    height: 40px;
+    border-radius: 20px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    transition: width 0.6s ease;
+}
+
+.progress-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.progress-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.progress-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.status-open {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.status-closed {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.status-full {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.status-progress {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.status-draft {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+}
+
+.session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.session-morning {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+}
+
+.session-afternoon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-card, .stats-section, .enrollment-progress {
+    animation: slideInUp 0.5s ease;
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .btn-action-bar {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<div class="classroom-view">
+    <div class="card shadow-lg border-0">
+        <!-- Header -->
+        <div class="view-header">
+            <div class="view-title">
+                <i class="bi bi-door-open-fill"></i>
+                <?= Html::encode($this->title) ?>
+            </div>
+            <p class="view-subtitle">
+                Complete details and information about this classroom
+            </p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <?= Html::a('<i class="bi bi-arrow-left"></i> Back to List', ['index'], ['class' => 'btn btn-action-bar btn-back']) ?>
+            <?= Html::a('<i class="bi bi-pencil-square"></i> Edit Classroom', ['update', 'class_id' => $model->class_id], ['class' => 'btn btn-action-bar btn-edit-action']) ?>
+            <?= Html::a('<i class="bi bi-trash"></i> Delete', ['delete', 'class_id' => $model->class_id], [
+                'class' => 'btn btn-action-bar btn-delete-action',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete this classroom? This action cannot be undone.',
+                    'method' => 'post',
+                ],
+            ]) ?>
+        </div>
+
+        <!-- Enrollment Progress -->
+        <div class="enrollment-progress">
+            <h4>
+                <i class="bi bi-graph-up"></i>
+                Enrollment Progress
+            </h4>
+            <?php
+            $percentage = $model->getEnrollmentPercentage();
+            $progressClass = $percentage >= 90 ? 'progress-danger' : ($percentage >= 70 ? 'progress-warning' : 'progress-success');
+            ?>
+            <div class="progress-bar-custom">
+                <div class="progress-bar-fill <?= $progressClass ?>" style="width: <?= $percentage ?>%">
+                    <?= $model->current_enrollment ?> / <?= $model->quota ?> Students (<?= $percentage ?>%)
                 </div>
             </div>
-            <div>
-                <?php
-                $statusColors = [
-                    'Draft' => 'secondary',
-                    'Open' => 'success',
-                    'Closed' => 'danger',
-                    'Full' => 'warning',
-                    'In Progress' => 'info',
-                    'Completed' => 'primary',
-                    'Cancelled' => 'dark',
-                ];
-                $color = $statusColors[$model->status] ?? 'secondary';
-                ?>
-                <span class="status-badge-large bg-<?= $color ?> text-white">
-                    <?= Html::encode($model->status) ?>
+            <div class="mt-3 d-flex justify-content-between">
+                <span><i class="bi bi-people"></i> <strong>Available Slots:</strong> <?= $model->getAvailableSlots() ?></span>
+                <span>
+                    <?php if ($model->isFull()): ?>
+                        <span class="badge bg-danger">CLASS FULL</span>
+                    <?php else: ?>
+                        <span class="badge bg-success">ACCEPTING STUDENTS</span>
+                    <?php endif; ?>
                 </span>
             </div>
         </div>
-    </div>
 
-    <!-- Statistics Grid -->
-    <div class="stats-grid">
-        <div class="stat-box">
-            <div class="stat-box-icon text-primary">
-                <i class="fas fa-users"></i>
+        <!-- Information Grid -->
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-hash"></i> Class ID
+                </div>
+                <div class="info-value"><?= Html::encode($model->class_id) ?></div>
             </div>
-            <div class="stat-box-value text-primary">
-                <?= $model->current_enrollment ?>/<?= $model->quota ?>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-door-open"></i> Class Name
+                </div>
+                <div class="info-value"><?= Html::encode($model->class_name) ?></div>
             </div>
-            <p class="stat-box-label">Current Enrollment</p>
-            <div class="progress progress-enrollment mt-2">
-                <?php
-                $percentage = $model->getEnrollmentPercentage();
-                $progressColor = $percentage >= 90 ? 'danger' : ($percentage >= 70 ? 'warning' : 'success');
-                ?>
-                <div class="progress-bar bg-<?= $progressColor ?>" style="width: <?= $percentage ?>%">
-                    <?= $percentage ?>%
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-calendar"></i> Year
+                </div>
+                <div class="info-value"><?= Html::encode($model->year) ?></div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-mortarboard"></i> Grade Level
+                </div>
+                <div class="info-value">
+                    <?= $model->grade_level ? Html::encode($model->grade_level) : '<em class="text-muted">Not specified</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-clock"></i> Session Type
+                </div>
+                <div class="info-value">
+                    <?php
+                    $isMorning = strtolower($model->session_type) === 'morning';
+                    $badgeClass = $isMorning ? 'session-morning' : 'session-afternoon';
+                    $icon = $isMorning ? 'bi-sun-fill' : 'bi-moon-fill';
+                    ?>
+                    <span class="session-badge <?= $badgeClass ?>">
+                        <i class="bi <?= $icon ?>"></i>
+                        <?= Html::encode($model->session_type) ?>
+                    </span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-toggle-on"></i> Status
+                </div>
+                <div class="info-value">
+                    <?php
+                    $statusMap = [
+                        'Open' => ['status-open', 'bi-door-open'],
+                        'Closed' => ['status-closed', 'bi-door-closed'],
+                        'Full' => ['status-full', 'bi-people-fill'],
+                        'In Progress' => ['status-progress', 'bi-hourglass-split'],
+                        'Draft' => ['status-draft', 'bi-file-earmark'],
+                    ];
+                    $statusInfo = $statusMap[$model->status] ?? ['status-draft', 'bi-circle'];
+                    ?>
+                    <span class="status-badge <?= $statusInfo[0] ?>">
+                        <i class="bi <?= $statusInfo[1] ?>"></i>
+                        <?= Html::encode($model->status) ?>
+                    </span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-person-fill"></i> Assigned Teacher
+                </div>
+                <div class="info-value">
+                    <?= $model->user ? Html::encode($model->user->username) : '<em class="text-muted">Not assigned</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-geo-alt"></i> Classroom Location
+                </div>
+                <div class="info-value">
+                    <?= $model->classroom_location ? Html::encode($model->classroom_location) : '<em class="text-muted">Not specified</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-calendar-check"></i> Start Date
+                </div>
+                <div class="info-value">
+                    <?= $model->class_start_date ? Yii::$app->formatter->asDate($model->class_start_date, 'long') : '<em class="text-muted">Not set</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-calendar-x"></i> End Date
+                </div>
+                <div class="info-value">
+                    <?= $model->class_end_date ? Yii::$app->formatter->asDate($model->class_end_date, 'long') : '<em class="text-muted">Not set</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-calendar-plus"></i> Created At
+                </div>
+                <div class="info-value">
+                    <?= $model->created_at ? Yii::$app->formatter->asDatetime($model->created_at) : '<em class="text-muted">Unknown</em>' ?>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="bi bi-clock-history"></i> Last Updated
+                </div>
+                <div class="info-value">
+                    <?= $model->updated_at ? Yii::$app->formatter->asDatetime($model->updated_at) : '<em class="text-muted">Unknown</em>' ?>
                 </div>
             </div>
         </div>
 
-        <div class="stat-box">
-            <div class="stat-box-icon text-success">
-                <i class="fas fa-chair"></i>
-            </div>
-            <div class="stat-box-value text-success">
-                <?= $model->getAvailableSlots() ?>
-            </div>
-            <p class="stat-box-label">Available Slots</p>
-        </div>
-
-        <div class="stat-box">
-            <div class="stat-box-icon text-<?= $model->isFull() ? 'danger' : 'info' ?>">
-                <i class="fas fa-<?= $model->isFull() ? 'lock' : 'unlock' ?>"></i>
-            </div>
-            <div class="stat-box-value text-<?= $model->isFull() ? 'danger' : 'info' ?>">
-                <?= $model->isFull() ? 'FULL' : 'OPEN' ?>
-            </div>
-            <p class="stat-box-label">Enrollment Status</p>
-        </div>
-    </div>
-
-    <!-- Action Bar -->
-    <div class="action-bar">
-        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-            <div>
-                <?= Html::a('<i class="fas fa-arrow-left me-2"></i>Back to List', ['index'], [
-                    'class' => 'btn btn-outline-secondary btn-action'
-                ]) ?>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <?= Html::a('<i class="fas fa-edit me-2"></i>Edit', ['update', 'class_id' => $model->class_id], [
-                    'class' => 'btn btn-primary btn-action'
-                ]) ?>
-                <?= Html::a('<i class="fas fa-trash me-2"></i>Delete', ['delete', 'class_id' => $model->class_id], [
-                    'class' => 'btn btn-danger btn-action',
-                    'data' => [
-                        'confirm' => 'Are you sure you want to delete this classroom? This action cannot be undone.',
-                        'method' => 'post',
-                    ],
-                ]) ?>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Left Column -->
-        <div class="col-lg-6">
-            <!-- Basic Information Card -->
-            <div class="card info-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-info-circle"></i>Basic Information
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h4>
+                <i class="bi bi-bar-chart-fill"></i>
+                Classroom Statistics
+            </h4>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">
+                        <?= $model->quota ?>
+                    </div>
+                    <div class="stat-label">Student Quota</div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-hashtag text-primary"></i>
-                            Class ID
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= Html::encode($model->class_id) ?></strong>
-                        </div>
+                <div class="stat-item" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="stat-number">
+                        <?= $model->current_enrollment ?>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-book text-primary"></i>
-                            Class Name
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= Html::encode($model->class_name) ?></strong>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-calendar text-primary"></i>
-                            Year
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= Html::encode($model->year) ?></strong>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-graduation-cap text-primary"></i>
-                            Grade Level
-                        </div>
-                        <div class="detail-value">
-                            <?= $model->grade_level ? Html::encode($model->grade_level) : '<span class="empty-value">Not specified</span>' ?>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-<?= $model->isSessionTypeMorning() ? 'sun' : 'moon' ?> text-warning"></i>
-                            Session Type
-                        </div>
-                        <div class="detail-value">
-                            <span class="badge bg-<?= $model->isSessionTypeMorning() ? 'warning' : 'info' ?>">
-                                <?= Html::encode($model->session_type) ?>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-toggle-<?= $model->status === 'Draft' ? 'off' : 'on' ?> text-info"></i>
-                            Status
-                        </div>
-                        <div class="detail-value">
-                            <span class="badge bg-<?= $color ?>">
-                                <?= Html::encode($model->status) ?>
-                            </span>
-                        </div>
-                    </div>
+                    <div class="stat-label">Currently Enrolled</div>
                 </div>
-            </div>
-
-            <!-- Schedule Card -->
-            <div class="card info-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-calendar-alt"></i>Class Schedule
-                </div>
-                <div class="card-body p-0">
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-play-circle text-success"></i>
-                            Class Start Date
-                        </div>
-                        <div class="detail-value">
-                            <?= $model->class_start_date ? Yii::$app->formatter->asDate($model->class_start_date, 'long') : '<span class="empty-value">Not set</span>' ?>
-                        </div>
+                <div class="stat-item" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="stat-number">
+                        <?= $model->getAvailableSlots() ?>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-stop-circle text-danger"></i>
-                            Class End Date
-                        </div>
-                        <div class="detail-value">
-                            <?= $model->class_end_date ? Yii::$app->formatter->asDate($model->class_end_date, 'long') : '<span class="empty-value">Not set</span>' ?>
-                        </div>
+                    <div class="stat-label">Available Slots</div>
+                </div>
+                <div class="stat-item" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    <div class="stat-number">
+                        <?= number_format($model->getEnrollmentPercentage(), 1) ?>%
                     </div>
-                    <?php if ($model->class_start_date && $model->class_end_date): ?>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-clock text-info"></i>
-                            Duration
-                        </div>
-                        <div class="detail-value">
-                            <?php
-                            $start = new DateTime($model->class_start_date);
-                            $end = new DateTime($model->class_end_date);
-                            $interval = $start->diff($end);
-                            $days = $interval->days;
-                            $weeks = floor($days / 7);
-                            $months = floor($days / 30);
-                            
-                            if ($months > 0) {
-                                echo $months . ' month' . ($months > 1 ? 's' : '');
-                            } elseif ($weeks > 0) {
-                                echo $weeks . ' week' . ($weeks > 1 ? 's' : '');
-                            } else {
-                                echo $days . ' day' . ($days > 1 ? 's' : '');
-                            }
-                            ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column -->
-        <div class="col-lg-6">
-            <!-- Teacher Card -->
-            <div class="card info-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-chalkboard-teacher"></i>Teacher Information
-                </div>
-                <div class="card-body p-0">
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-user-tie text-primary"></i>
-                            Teacher Name
-                        </div>
-                        <div class="detail-value">
-                            <?= $model->user ? '<strong>' . Html::encode($model->user->username) . '</strong>' : '<span class="empty-value">Not assigned</span>' ?>
-                        </div>
-                    </div>
-                    <?php if ($model->user && $model->user->email): ?>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-envelope text-info"></i>
-                            Email
-                        </div>
-                        <div class="detail-value">
-                            <a href="mailto:<?= Html::encode($model->user->email) ?>">
-                                <?= Html::encode($model->user->email) ?>
-                            </a>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Location Card -->
-            <div class="card info-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-map-marker-alt"></i>Location
-                </div>
-                <div class="card-body p-0">
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-door-open text-primary"></i>
-                            Classroom Location
-                        </div>
-                        <div class="detail-value">
-                            <?= $model->classroom_location ? '<strong>' . Html::encode($model->classroom_location) . '</strong>' : '<span class="empty-value">Not specified</span>' ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Enrollment Card -->
-            <div class="card info-card">
-                <div class="card-header-custom">
-                    <i class="fas fa-user-graduate"></i>Enrollment Details
-                </div>
-                <div class="card-body p-0">
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-users text-primary"></i>
-                            Maximum Capacity
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= $model->quota ?> students</strong>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-user-check text-success"></i>
-                            Currently Enrolled
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= $model->current_enrollment ?> students</strong>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-chair text-info"></i>
-                            Available Slots
-                        </div>
-                        <div class="detail-value">
-                            <strong class="text-<?= $model->getAvailableSlots() > 0 ? 'success' : 'danger' ?>">
-                                <?= $model->getAvailableSlots() ?> slots
-                            </strong>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">
-                            <i class="fas fa-percentage text-warning"></i>
-                            Enrollment Rate
-                        </div>
-                        <div class="detail-value">
-                            <strong><?= $model->getEnrollmentPercentage() ?>%</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Timestamps Card -->
-    <div class="card info-card">
-        <div class="card-header-custom">
-            <i class="fas fa-clock"></i>Record Information
-        </div>
-        <div class="card-body p-0">
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="fas fa-plus-circle text-success"></i>
-                    Created At
-                </div>
-                <div class="detail-value">
-                    <?= $model->created_at ? Yii::$app->formatter->asDatetime($model->created_at, 'long') : '<span class="empty-value">Unknown</span>' ?>
-                </div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">
-                    <i class="fas fa-sync text-info"></i>
-                    Last Updated
-                </div>
-                <div class="detail-value">
-                    <?= $model->updated_at ? Yii::$app->formatter->asDatetime($model->updated_at, 'long') : '<span class="empty-value">Unknown</span>' ?>
+                    <div class="stat-label">Enrollment Rate</div>
                 </div>
             </div>
         </div>

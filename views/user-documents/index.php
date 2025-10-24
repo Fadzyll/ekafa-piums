@@ -18,11 +18,14 @@ $this->params['hideTitle'] = true;
 
 <style>
 .documents-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #004135 0%, #11684d 50%, #00a86b 100%);
     border-radius: 20px 20px 0 0;
     padding: 2rem;
     color: white;
     margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .documents-header h3 {
@@ -32,6 +35,13 @@ $this->params['hideTitle'] = true;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    color: white;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 .documents-stats {
@@ -54,13 +64,13 @@ $this->params['hideTitle'] = true;
 .stat-box:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    border-color: #667eea;
+    border-color: #00b377;
 }
 
 .stat-number {
     font-size: 2rem;
     font-weight: 800;
-    color: #667eea;
+    color: #00b377;
     margin-bottom: 0.25rem;
 }
 
@@ -76,30 +86,61 @@ $this->params['hideTitle'] = true;
 .stat-box.pending .stat-number { color: #f59e0b; }
 .stat-box.incomplete .stat-number { color: #ef4444; }
 
+.filter-toggle-btn {
+    background: white;
+    color: #003829;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-toggle-btn i {
+    font-size: 1.1rem;
+}
+
 .filter-section {
     background: white;
     border-radius: 16px;
-    padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     overflow: hidden;
     transition: all 0.3s ease;
 }
 
-.filter-section.show {
+.filter-section.collapsed {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.filter-content.show {
+    display: block;
     animation: slideDown 0.3s ease;
 }
 
 @keyframes slideDown {
     from {
         opacity: 0;
-        max-height: 0;
-        padding: 0 1.5rem;
+        transform: translateY(-10px);
     }
     to {
         opacity: 1;
-        max-height: 1000px;
-        padding: 1.5rem;
+        transform: translateY(0);
     }
 }
 
@@ -122,87 +163,17 @@ $this->params['hideTitle'] = true;
 }
 
 .filter-pill:hover {
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #00b377;
+    color: #00b377;
     transform: translateY(-2px);
 }
 
 .filter-pill.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #003829 0%, #00563d 100%);
+    border-color: #00b377;
     color: white;
 }
 
-.action-bar {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.action-bar-left {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.btn-primary-action {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    padding: 0.875rem 1.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: none;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-primary-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-    color: white;
-}
-
-.btn-secondary-action {
-    background: white;
-    color: #667eea;
-    padding: 0.875rem 1.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: 2px solid #667eea;
-    transition: all 0.3s ease;
-}
-
-.btn-secondary-action:hover {
-    background: #667eea;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.btn-filter-toggle {
-    background: white;
-    color: #667eea;
-    padding: 0.875rem 1.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: 2px solid #667eea;
-    transition: all 0.3s ease;
-}
-
-.btn-filter-toggle:hover {
-    background: #f3f4f6;
-    transform: translateY(-2px);
-}
-
-.btn-filter-toggle.active {
-    background: #667eea;
-    color: white;
-}
 
 .documents-table-card {
     background: white;
@@ -398,8 +369,8 @@ $this->params['hideTitle'] = true;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #00b377;
+    box-shadow: 0 0 0 3px rgba(0, 179, 119, 0.1);
 }
 
 @keyframes fadeInUp {
@@ -415,16 +386,18 @@ $this->params['hideTitle'] = true;
     .documents-stats {
         grid-template-columns: 1fr;
     }
-    
-    .action-bar {
+
+    .documents-header {
         flex-direction: column;
-        align-items: stretch;
+        gap: 1rem;
+        align-items: flex-start;
     }
 
-    .action-bar-left {
-        flex-direction: column;
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
     }
-    
+
     .filter-pills {
         flex-direction: column;
     }
@@ -432,15 +405,23 @@ $this->params['hideTitle'] = true;
 </style>
 
 <div class="user-documents-index">
-    <div class="card shadow-lg border-0">
+    <div class="card shadow-lg" style="border: none; overflow: hidden;">
         <div class="documents-header">
-            <h3>
-                <i class="bi bi-files"></i>
-                User Documents Management
-            </h3>
-            <p class="mb-0 mt-2" style="opacity: 0.9; font-size: 0.95rem;">
-                Track and manage all user document submissions
-            </p>
+            <div>
+                <h3>
+                    <i class="bi bi-files"></i>
+                    User Documents Management
+                </h3>
+                <p class="mb-0 mt-2" style="opacity: 0.9; font-size: 0.95rem; color: white;">
+                    Track and manage all user document submissions
+                </p>
+            </div>
+            <div class="header-actions">
+                <button class="filter-toggle-btn" id="toggleFilter">
+                    <i class="bi bi-funnel"></i>
+                    <span>Search & Filter</span>
+                </button>
+            </div>
         </div>
 
         <div class="card-body p-4">
@@ -470,23 +451,13 @@ $this->params['hideTitle'] = true;
                 </div>
             </div>
 
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <div class="action-bar-left">
-                    <?= Html::a('<i class="bi bi-plus-circle"></i> Upload Document', ['create'], ['class' => 'btn btn-primary-action']) ?>
-                    <?= Html::a('<i class="bi bi-download"></i> Export', ['export'], ['class' => 'btn btn-secondary-action']) ?>
-                </div>
-                <button type="button" class="btn btn-filter-toggle" id="toggleFilter">
-                    <i class="bi bi-funnel"></i> <span id="filterText">Search & Filter</span>
-                </button>
-            </div>
-
             <!-- Filter Section (Initially Hidden) -->
-            <div class="filter-section" id="filterSection" style="display: none;">
+            <div class="filter-section collapsed" id="filterSection">
+                <div class="filter-content" id="filterContent">
                 <!-- Quick Filters -->
                 <div class="mb-4">
                     <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-lightning-fill me-2" style="color: #667eea;"></i>
+                        <i class="bi bi-lightning-fill me-2" style="color: #00b377;"></i>
                         <strong>Quick Filters:</strong>
                     </div>
                     <div class="filter-pills">
@@ -593,7 +564,7 @@ $this->params['hideTitle'] = true;
                 <div class="d-flex gap-2 mt-4">
                     <?= Html::submitButton('<i class="bi bi-search me-2"></i>Search', [
                         'class' => 'btn btn-primary px-4',
-                        'style' => 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;'
+                        'style' => 'background: linear-gradient(135deg, #003829 0%, #00563d 100%); border: none;'
                     ]) ?>
                     <?= Html::a('<i class="bi bi-arrow-clockwise me-2"></i>Reset', ['index'], [
                         'class' => 'btn btn-outline-secondary px-4'
@@ -601,6 +572,7 @@ $this->params['hideTitle'] = true;
                 </div>
 
                 <?php \yii\widgets\ActiveForm::end(); ?>
+                </div>
             </div>
 
             <!-- Data Table -->
@@ -755,17 +727,21 @@ $this->params['hideTitle'] = true;
 $script = <<< JS
 // Toggle Filter Section
 $('#toggleFilter').on('click', function() {
-    var filterSection = $('#filterSection');
-    var button = $(this);
-    
-    if (filterSection.is(':visible')) {
-        filterSection.slideUp(300);
-        button.removeClass('active');
-        $('#filterText').text('Search & Filter');
+    var container = $('#filterSection');
+    var content = $('#filterContent');
+    var icon = $(this).find('i');
+    var text = $(this).find('span');
+
+    if (content.hasClass('show')) {
+        content.removeClass('show').slideUp(300);
+        container.addClass('collapsed');
+        icon.removeClass('bi-x-lg').addClass('bi-funnel');
+        text.text('Search & Filter');
     } else {
-        filterSection.slideDown(300).addClass('show');
-        button.addClass('active');
-        $('#filterText').text('Hide Search');
+        content.addClass('show').slideDown(300);
+        container.removeClass('collapsed');
+        icon.removeClass('bi-funnel').addClass('bi-x-lg');
+        text.text('Hide Search');
     }
 });
 
@@ -810,12 +786,28 @@ $(document).on('click', '.pagination a', function() {
 if ($(window).width() < 768) {
     $('#search-form').on('submit', function() {
         setTimeout(function() {
-            $('#filterSection').slideUp(300);
-            $('#toggleFilter').removeClass('active');
-            $('#filterText').text('Search & Filter');
+            var content = $('#filterContent');
+            var container = $('#filterSection');
+            var icon = $('#toggleFilter').find('i');
+            var text = $('#toggleFilter').find('span');
+
+            content.removeClass('show').slideUp(300);
+            container.addClass('collapsed');
+            icon.removeClass('bi-x-lg').addClass('bi-funnel');
+            text.text('Search & Filter');
         }, 500);
     });
 }
+
+// Handle PJAX updates
+$(document).on('pjax:success', function() {
+    // Re-attach pagination event after PJAX update
+    $('.pagination a').on('click', function() {
+        $('html, body').animate({
+            scrollTop: $('.user-documents-index').offset().top - 20
+        }, 300);
+    });
+});
 JS;
 $this->registerJs($script);
 ?>
