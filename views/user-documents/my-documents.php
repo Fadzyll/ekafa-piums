@@ -589,7 +589,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <div class="file-actions">
                                         <?= Html::a(
                                             '<i class="bi bi-eye"></i> View',
-                                            ['download', 'document_id' => $model->document_id, 'inline' => 1],  // ✅ NEW,
+                                            ['download', 'document_id' => $uploaded->document_id, 'inline' => 1],  // ✅ NEW,
                                             ['class' => 'btn-modern btn-view', 'target' => '_blank']
                                         ) ?>
                                         <button class="btn-modern btn-replace" 

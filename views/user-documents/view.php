@@ -523,14 +523,6 @@ $isTeacherOrParent = in_array(Yii::$app->user->identity->role, ['Teacher', 'Pare
                     ],
                 ]) ?>
             <?php endif; ?>
-            
-            <?php if ($model->file_url): ?>
-                <?= Html::a('<i class="bi bi-download"></i> Download', ['download', 'document_id' => $model->document_id, 'inline' => 1], [
-                    'class' => 'btn btn-action btn-download',
-                    'target' => '_blank',
-                    'download' => $model->original_filename ?: basename($model->file_url)
-                ]) ?>
-            <?php endif; ?>
         </div>
 
         <!-- Content - Include all the original content from views/user-documents/view.php -->

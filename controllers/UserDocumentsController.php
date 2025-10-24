@@ -95,7 +95,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * ✅ NEW: Properly download/view document files
+     * ✅ FIXED: Properly download/view document files with correct MIME types
      * @param int $document_id Document ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException
@@ -117,31 +117,40 @@ class UserDocumentsController extends Controller
         // Get the file extension
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         
-        // Determine MIME type
-        $mimeTypes = [
-            'pdf' => 'application/pdf',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ];
+        // ✅ Try to detect MIME type automatically first
+        $mimeType = mime_content_type($filePath);
         
-        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        // ✅ Fallback to manual mapping if detection fails
+        if (!$mimeType || $mimeType === 'application/octet-stream') {
+            $mimeTypes = [
+                'pdf' => 'application/pdf',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'doc' => 'application/msword',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'xls' => 'application/vnd.ms-excel',
+                'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ];
+            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        }
         
         // Get original filename or create one
         $filename = $model->original_filename ?: basename($model->file_url);
         
         // Check if we should display inline or force download
-        $inline = Yii::$app->request->get('inline', 1); // Default to inline (view in browser)
+        $inline = Yii::$app->request->get('inline', 0); // Default to download
         
-        return Yii::$app->response->sendFile($filePath, $filename, [
-            'mimeType' => $mimeType,
-            'inline' => $inline ? true : false, // true = view in browser, false = force download
-        ]);
+        // ✅ Return file with proper configuration
+        return Yii::$app->response->sendFile(
+            $filePath,
+            $inline ? null : $filename, // Don't send filename for inline viewing
+            [
+                'mimeType' => $mimeType,
+                'inline' => (bool)$inline, // Cast to boolean for clarity
+            ]
+        );
     }
 
     /**

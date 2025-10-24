@@ -17,6 +17,9 @@ $this->params['hideTitle'] = true;
     padding: 2rem;
     color: white;
     margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .category-header h3 {
@@ -26,6 +29,48 @@ $this->params['hideTitle'] = true;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-toggle-btn,
+.btn-create-category {
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-toggle-btn i {
+    font-size: 1.1rem;
+}
+
+.btn-create-category {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-create-category:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    color: white;
 }
 
 .stats-container {
@@ -65,106 +110,151 @@ $this->params['hideTitle'] = true;
     letter-spacing: 0.05em;
 }
 
-.search-filter-section {
+/* Search Section Styles */
+.search-filter-container {
     background: white;
     border-radius: 16px;
-    padding: 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.filter-tabs {
+.search-filter-container.collapsed {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.search-content.show {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-form-modern .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-form-modern .form-group {
+    margin-bottom: 0;
+}
+
+.search-form-modern label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.search-form-modern label i {
+    margin-right: 0.5rem;
+    color: #667eea;
+    font-size: 0.95rem;
+}
+
+.search-form-modern .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.search-form-modern .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+.search-buttons {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-search-modern {
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-search-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-search-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-search-secondary {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.btn-search-secondary:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+}
+
+.quick-filters {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 10px;
 }
 
-.filter-tab {
-    padding: 0.625rem 1.25rem;
+.quick-filter-btn {
+    padding: 0.5rem 1rem;
     border-radius: 50px;
     border: 2px solid #e5e7eb;
     background: white;
     color: #6b7280;
     font-weight: 600;
+    font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.filter-tab:hover {
+.quick-filter-btn:hover {
     border-color: #667eea;
     color: #667eea;
 }
 
-.filter-tab.active {
+.quick-filter-btn.active {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-color: #667eea;
-    color: white;
-}
-
-.search-box {
-    position: relative;
-}
-
-.search-box input {
-    padding-left: 3rem;
-    border-radius: 50px;
-    border: 2px solid #e5e7eb;
-    transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.search-box i {
-    position: absolute;
-    left: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    font-size: 1.25rem;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-
-.btn-create {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    padding: 0.875rem 1.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: none;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-create:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-    color: white;
-}
-
-.btn-export {
-    background: white;
-    color: #667eea;
-    padding: 0.875rem 1.75rem;
-    border-radius: 12px;
-    font-weight: 600;
-    border: 2px solid #667eea;
-    transition: all 0.3s ease;
-}
-
-.btn-export:hover {
-    background: #667eea;
     color: white;
 }
 
@@ -328,26 +418,20 @@ $this->params['hideTitle'] = true;
     white-space: nowrap;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.category-table-card {
-    animation: fadeIn 0.5s ease;
-}
-
 @media (max-width: 768px) {
     .stats-container {
         grid-template-columns: 1fr;
     }
     
-    .action-buttons {
+    .category-header {
         flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
     }
     
-    .filter-tabs {
-        flex-direction: column;
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 </style>
@@ -359,9 +443,13 @@ $this->params['hideTitle'] = true;
                 <i class="bi bi-folder-fill"></i>
                 Document Categories Management
             </h3>
-            <p class="mb-0 mt-2" style="opacity: 0.9; font-size: 0.95rem;">
-                Manage and organize document categories for your institution
-            </p>
+            <div class="header-actions">
+                <button class="filter-toggle-btn" id="searchToggle">
+                    <i class="bi bi-funnel"></i>
+                    <span>Search & Filter</span>
+                </button>
+                <?= Html::a('<i class="bi bi-plus-circle"></i> Create New Category', ['create'], ['class' => 'btn-create-category']) ?>
+            </div>
         </div>
 
         <div class="card-body p-4">
@@ -391,40 +479,10 @@ $this->params['hideTitle'] = true;
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <?= Html::a('<i class="bi bi-plus-circle"></i> Create New Category', ['create'], ['class' => 'btn btn-create']) ?>
-                <?= Html::a('<i class="bi bi-download"></i> Export', ['export'], ['class' => 'btn btn-export']) ?>
-            </div>
-
-            <!-- Search and Filter Section -->
-            <div class="search-filter-section">
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <div class="search-box">
-                            <i class="bi bi-search"></i>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="searchInput" 
-                                   placeholder="Search categories by name or description...">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select" id="statusFilter" style="border-radius: 50px; border: 2px solid #e5e7eb;">
-                            <option value="">All Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-filter="all">All Categories</button>
-                    <button class="filter-tab" data-filter="teacher">Teacher Only</button>
-                    <button class="filter-tab" data-filter="parent">Parent Only</button>
-                    <button class="filter-tab" data-filter="both">Both Roles</button>
-                    <button class="filter-tab" data-filter="required">Required</button>
-                    <button class="filter-tab" data-filter="optional">Optional</button>
+            <!-- Search & Filter Section (Collapsible) -->
+            <div class="search-filter-container collapsed" id="searchContainer">
+                <div class="search-content" id="searchContent">
+                    <?php echo $this->render('_search', ['model' => $searchModel]); ?>
                 </div>
             </div>
 
@@ -434,7 +492,7 @@ $this->params['hideTitle'] = true;
             <div class="category-table-card">
                 <?= GridView::widget([
                     'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
+                    'filterModel' => null, // Disable inline filters since we have collapsible search
                     'tableOptions' => ['class' => 'table table-hover'],
                     'columns' => [
                         [
@@ -472,11 +530,6 @@ $this->params['hideTitle'] = true;
                                 ];
                                 return $badges[$model->required_for_role] ?? $model->required_for_role;
                             },
-                            'filter' => [
-                                'Teacher' => 'Teacher',
-                                'Parent' => 'Parent',
-                                'Both' => 'Both',
-                            ],
                             'headerOptions' => ['style' => 'width: 150px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
@@ -489,7 +542,6 @@ $this->params['hideTitle'] = true;
                                     ? '<span class="badge badge-required"><i class="bi bi-exclamation-circle"></i> Mandatory</span>' 
                                     : '<span class="badge badge-optional"><i class="bi bi-check-circle"></i> Optional</span>';
                             },
-                            'filter' => [1 => 'Required', 0 => 'Optional'],
                             'headerOptions' => ['style' => 'width: 130px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
@@ -501,10 +553,6 @@ $this->params['hideTitle'] = true;
                                     ? '<span class="badge badge-active"><i class="bi bi-check-circle-fill"></i> Active</span>' 
                                     : '<span class="badge badge-inactive"><i class="bi bi-x-circle-fill"></i> Inactive</span>';
                             },
-                            'filter' => [
-                                'Active' => 'Active',
-                                'Inactive' => 'Inactive',
-                            ],
                             'headerOptions' => ['style' => 'width: 120px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
                         ],
@@ -558,56 +606,41 @@ $this->params['hideTitle'] = true;
 
 <?php
 $script = <<< JS
-// Search functionality
-$('#searchInput').on('keyup', function() {
-    var value = $(this).val().toLowerCase();
-    $('.table tbody tr').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-    });
-});
-
-// Status filter
-$('#statusFilter').on('change', function() {
-    var status = $(this).val().toLowerCase();
-    if (status === '') {
-        $('.table tbody tr').show();
+// Toggle search section
+$('#searchToggle').on('click', function() {
+    var container = $('#searchContainer');
+    var content = $('#searchContent');
+    var icon = $(this).find('i');
+    var text = $(this).find('span');
+    
+    if (content.hasClass('show')) {
+        content.removeClass('show').slideUp(300);
+        container.addClass('collapsed');
+        icon.removeClass('bi-x-lg').addClass('bi-funnel');
+        text.text('Search & Filter');
     } else {
-        $('.table tbody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(status) > -1);
-        });
+        content.addClass('show').slideDown(300);
+        container.removeClass('collapsed');
+        icon.removeClass('bi-funnel').addClass('bi-x-lg');
+        text.text('Hide Search');
     }
 });
 
-// Filter tabs
-$('.filter-tab').on('click', function() {
-    $('.filter-tab').removeClass('active');
-    $(this).addClass('active');
-    
-    var filter = $(this).data('filter');
-    
-    if (filter === 'all') {
-        $('.table tbody tr').show();
-    } else {
-        var filterText = '';
-        switch(filter) {
-            case 'teacher': filterText = 'teacher'; break;
-            case 'parent': filterText = 'parent'; break;
-            case 'both': filterText = 'both'; break;
-            case 'required': filterText = 'mandatory'; break;
-            case 'optional': filterText = 'optional'; break;
-        }
-        
-        $('.table tbody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(filterText) > -1);
-        });
-    }
-});
-
-// Add smooth scroll to top on pagination
+// Smooth scroll on pagination
 $('.pagination a').on('click', function() {
     $('html, body').animate({
         scrollTop: $('.document-category-index').offset().top - 20
     }, 300);
+});
+
+// Handle PJAX updates
+$(document).on('pjax:success', function() {
+    // Re-attach pagination event after PJAX update
+    $('.pagination a').on('click', function() {
+        $('html, body').animate({
+            scrollTop: $('.document-category-index').offset().top - 20
+        }, 300);
+    });
 });
 JS;
 $this->registerJs($script);

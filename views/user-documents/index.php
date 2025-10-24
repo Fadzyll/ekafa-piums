@@ -331,6 +331,7 @@ $this->params['hideTitle'] = true;
     border-radius: 6px;
     font-weight: 700;
     font-size: 0.875rem;
+    display: inline-block;
 }
 
 .document-name {
@@ -345,6 +346,7 @@ $this->params['hideTitle'] = true;
     border-radius: 6px;
     font-weight: 600;
     font-size: 0.8125rem;
+    display: inline-block;
 }
 
 .empty-state {
@@ -531,16 +533,15 @@ $this->params['hideTitle'] = true;
                             'label' => 'File',
                             'format' => 'raw',
                             'value' => function ($model) {
-                                return $model->file_url
-                                    ? Html::a(
-                                        '<i class="bi bi-file-earmark-pdf"></i> View', 
-                                        ['download', 'document_id' => $model->document_id, 'inline' => 1],  // ✅ NEW 
-                                        [
-                                            'target' => '_blank',
-                                            'class' => 'file-link'
-                                        ]
-                                    )
-                                    : '<span class="no-file">No file</span>';
+                                return Html::a(
+                                    '<i class="bi bi-file-earmark-pdf"></i> View', 
+                                    \yii\helpers\Url::to(['download', 'document_id' => $model->document_id, 'inline' => 1]),
+                                    [
+                                        'target' => '_blank',
+                                        'class' => 'file-link',
+                                        'data-pjax' => '0', // ✅ Prevent PJAX from interfering
+                                    ]
+                                ); '<span class="no-file">No file</span>';
                             },
                             'headerOptions' => ['style' => 'width: 100px;'],
                             'contentOptions' => ['style' => 'text-align: center;'],
@@ -557,16 +558,10 @@ $this->params['hideTitle'] = true;
                             'header' => 'Actions',
                             'headerOptions' => ['style' => 'width: 200px; text-align: center;'],
                             'contentOptions' => ['class' => 'action-btn-group'],
-                            'template' => '{view} {update} {delete}',
+                            'template' => '{update} {delete}',
                             'buttons' => [
-                                'view' => function ($url, $model) {
-                                    return Html::a('<i class="bi bi-eye"></i> View', $url, [
-                                        'class' => 'btn btn-table-action btn-view-action',
-                                        'title' => 'View Details',
-                                    ]);
-                                },
                                 'update' => function ($url, $model) {
-                                    return Html::a('<i class="bi bi-pencil"></i> Edit', $url, [
+                                    return Html::a('<i class="bi bi-pencil"></i>', $url, [
                                         'class' => 'btn btn-table-action btn-edit-action',
                                         'title' => 'Edit Document',
                                     ]);

@@ -121,7 +121,14 @@ $isAdmin = Yii::$app->user->identity->role === 'Admin';
                 Document Status
             </label>
             <div class="status-selector">
-                <?php foreach (UserDocuments::optsStatus() as $value => $label): ?>
+                <?php 
+                // ✅ Filter out Replaced and Deleted statuses
+                $allowedStatuses = UserDocuments::optsStatus();
+                unset($allowedStatuses[UserDocuments::STATUS_REPLACED]);
+                unset($allowedStatuses[UserDocuments::STATUS_DELETED]);
+                
+                foreach ($allowedStatuses as $value => $label): 
+                ?>
                     <div class="status-option">
                         <?= Html::activeRadio($model, 'status', [
                             'value' => $value,
@@ -129,7 +136,7 @@ $isAdmin = Yii::$app->user->identity->role === 'Admin';
                             'id' => 'status-' . strtolower(str_replace(' ', '-', $value))
                         ]) ?>
                         <label for="status-<?= strtolower(str_replace(' ', '-', $value)) ?>">
-                            <i class="bi bi-<?= $value === UserDocuments::STATUS_APPROVED ? 'check-circle-fill' : ($value === UserDocuments::STATUS_REJECTED ? 'x-circle-fill' : 'clock-fill') ?>"></i>
+                            <i class="bi bi-<?= $value === UserDocuments::STATUS_APPROVED ? 'check-circle-fill' : ($value === UserDocuments::STATUS_REJECTED ? 'x-circle-fill' : ($value === UserDocuments::STATUS_EXPIRED ? 'hourglass-bottom' : 'clock-fill')) ?>"></i>
                             <span><?= $label ?></span>
                         </label>
                     </div>
