@@ -534,7 +534,7 @@ $this->params['hideTitle'] = true;
                                 return $model->file_url
                                     ? Html::a(
                                         '<i class="bi bi-file-earmark-pdf"></i> View', 
-                                        Yii::getAlias('@web/' . $model->file_url), 
+                                        ['download', 'document_id' => $model->document_id, 'inline' => 1],  // ✅ NEW 
                                         [
                                             'target' => '_blank',
                                             'class' => 'file-link'

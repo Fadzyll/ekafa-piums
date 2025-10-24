@@ -13,7 +13,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
 /**
- * ✅ UPDATED: UserDocumentsController with role-based access control
+ * ✅ UPDATED: UserDocumentsController with proper file viewing
  */
 class UserDocumentsController extends Controller
 {
@@ -29,24 +29,37 @@ class UserDocumentsController extends Controller
                     'class' => AccessControl::class,
                     'rules' => [
                         [
+                            // ✅ Admin can access index, view, download, approve, reject, update (for status changes only)
+                            'actions' => ['index', 'view', 'download', 'approve', 'reject', 'update'],
                             'allow' => true,
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
-                                // ✅ Only allow Teachers and Parents to access documents
+                                $role = Yii::$app->user->identity->role;
+                                return $role === 'Admin';
+                            },
+                        ],
+                        [
+                            // ✅ Teachers and Parents can upload and manage their documents
+                            'actions' => ['index', 'view', 'download', 'create', 'my-documents', 'update', 'delete'],
+                            'allow' => true,
+                            'roles' => ['@'],
+                            'matchCallback' => function ($rule, $action) {
                                 $role = Yii::$app->user->identity->role;
                                 return in_array($role, ['Teacher', 'Parent']);
                             },
                         ],
                     ],
                     'denyCallback' => function ($rule, $action) {
-                        Yii::$app->session->setFlash('error', 'Document management is only available for Teachers and Parents.');
-                        return Yii::$app->response->redirect(['user-details/view']);
+                        Yii::$app->session->setFlash('error', 'You do not have permission to access this page.');
+                        return Yii::$app->response->redirect(['site/dashboard']);
                     },
                 ],
                 'verbs' => [
                     'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
+                        'approve' => ['POST'],
+                        'reject' => ['POST'],
                     ],
                 ],
             ]
@@ -82,11 +95,68 @@ class UserDocumentsController extends Controller
     }
 
     /**
+     * ✅ NEW: Properly download/view document files
+     * @param int $document_id Document ID
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionDownload($document_id)
+    {
+        $model = $this->findModel($document_id);
+        
+        if (!$model->file_url) {
+            throw new NotFoundHttpException('File not found.');
+        }
+
+        $filePath = Yii::getAlias('@webroot/' . $model->file_url);
+        
+        if (!file_exists($filePath)) {
+            throw new NotFoundHttpException('File not found on server.');
+        }
+
+        // Get the file extension
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        
+        // Determine MIME type
+        $mimeTypes = [
+            'pdf' => 'application/pdf',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+        
+        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        
+        // Get original filename or create one
+        $filename = $model->original_filename ?: basename($model->file_url);
+        
+        // Check if we should display inline or force download
+        $inline = Yii::$app->request->get('inline', 1); // Default to inline (view in browser)
+        
+        return Yii::$app->response->sendFile($filePath, $filename, [
+            'mimeType' => $mimeType,
+            'inline' => $inline ? true : false, // true = view in browser, false = force download
+        ]);
+    }
+
+    /**
      * ✅ UPDATED: Creates a new UserDocuments model with new fields support
+     * Only accessible by Teachers and Parents
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
+        // ✅ Prevent Admin from creating documents
+        if (Yii::$app->user->identity->role === 'Admin') {
+            Yii::$app->session->setFlash('error', 'Admins cannot upload documents. Only Teachers and Parents can upload.');
+            return $this->redirect(['index']);
+        }
+
         $model = new UserDocuments();
 
         if (Yii::$app->request->isPost) {
@@ -143,10 +213,17 @@ class UserDocumentsController extends Controller
 
     /**
      * ✅ UPDATED: User document upload page for logged-in users with new fields
+     * Only accessible by Teachers and Parents
      * @return string|\yii\web\Response
      */
     public function actionMyDocuments()
     {
+        // ✅ Prevent Admin from accessing my-documents
+        if (Yii::$app->user->identity->role === 'Admin') {
+            Yii::$app->session->setFlash('error', 'This page is only for Teachers and Parents.');
+            return $this->redirect(['index']);
+        }
+
         $userId = Yii::$app->user->id;
         $userRole = Yii::$app->user->identity->role;
 
@@ -225,6 +302,8 @@ class UserDocumentsController extends Controller
 
     /**
      * ✅ UPDATED: Updates an existing UserDocuments model with versioning support
+     * Admin can only update status, admin_notes, and rejection_reason
+     * Teachers/Parents can update their own documents
      * @param int $document_id Document ID
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
@@ -233,27 +312,54 @@ class UserDocumentsController extends Controller
     {
         $model = $this->findModel($document_id);
         $oldFileUrl = $model->file_url;
+        $userRole = Yii::$app->user->identity->role;
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-            // Handle file upload - check both 'file' and 'file_url' attributes
-            $uploadedFile = UploadedFile::getInstance($model, 'file_url');
-            if (!$uploadedFile) {
-                $uploadedFile = UploadedFile::getInstance($model, 'file');
-            }
-            
-            if ($uploadedFile) {
-                $model->file = $uploadedFile;
+            // ✅ If Admin, only allow status, admin_notes, and rejection_reason changes
+            if ($userRole === 'Admin') {
+                $allowedAttributes = ['status', 'admin_notes', 'rejection_reason'];
+                $model->load(Yii::$app->request->post(), '');
                 
-                // If a new file is uploaded, replace the old one
-                if ($model->uploadFile()) {
-                    // Delete the old file
-                    if ($oldFileUrl && file_exists(Yii::getAlias('@webroot/' . $oldFileUrl))) {
-                        @unlink(Yii::getAlias('@webroot/' . $oldFileUrl));
+                // Only keep allowed attributes
+                foreach ($model->attributes as $attribute => $value) {
+                    if (!in_array($attribute, $allowedAttributes) && 
+                        $attribute !== 'updated_at' && 
+                        $attribute !== 'verified_by' && 
+                        $attribute !== 'verified_at') {
+                        $model->$attribute = $this->findModel($document_id)->$attribute;
                     }
                 }
-            } else {
-                // Keep old file if no new upload
+                
+                // Set verification fields if status changed to approved or rejected
+                if (in_array($model->status, [UserDocuments::STATUS_APPROVED, UserDocuments::STATUS_REJECTED])) {
+                    $model->verified_by = Yii::$app->user->id;
+                    $model->verified_at = date('Y-m-d H:i:s');
+                }
+                
+                // Don't allow file upload for Admin
                 $model->file_url = $oldFileUrl;
+            } else {
+                // ✅ Teachers/Parents can update everything including file
+                // Handle file upload - check both 'file' and 'file_url' attributes
+                $uploadedFile = UploadedFile::getInstance($model, 'file_url');
+                if (!$uploadedFile) {
+                    $uploadedFile = UploadedFile::getInstance($model, 'file');
+                }
+                
+                if ($uploadedFile) {
+                    $model->file = $uploadedFile;
+                    
+                    // If a new file is uploaded, replace the old one
+                    if ($model->uploadFile()) {
+                        // Delete the old file
+                        if ($oldFileUrl && file_exists(Yii::getAlias('@webroot/' . $oldFileUrl))) {
+                            @unlink(Yii::getAlias('@webroot/' . $oldFileUrl));
+                        }
+                    }
+                } else {
+                    // Keep old file if no new upload
+                    $model->file_url = $oldFileUrl;
+                }
             }
 
             // ✅ Update timestamp
@@ -274,12 +380,19 @@ class UserDocumentsController extends Controller
 
     /**
      * ✅ UPDATED: Soft delete - marks as deleted instead of physical deletion
+     * Only Teachers and Parents can delete
      * @param int $document_id Document ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($document_id)
     {
+        // ✅ Prevent Admin from deleting
+        if (Yii::$app->user->identity->role === 'Admin') {
+            Yii::$app->session->setFlash('error', 'Admins cannot delete documents.');
+            return $this->redirect(['view', 'document_id' => $document_id]);
+        }
+
         $model = $this->findModel($document_id);
 
         // ✅ Soft delete - mark as deleted
@@ -295,7 +408,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * ✅ NEW: Approve document (Admin only)
+     * ✅ UPDATED: Approve document (Admin only)
      */
     public function actionApprove($document_id)
     {
@@ -310,6 +423,7 @@ class UserDocumentsController extends Controller
         $model->verified_by = Yii::$app->user->id;
         $model->verified_at = date('Y-m-d H:i:s');
         $model->updated_at = date('Y-m-d H:i:s');
+        $model->rejection_reason = null; // Clear any previous rejection reason
 
         if ($model->save(false)) {
             Yii::$app->session->setFlash('success', 'Document approved successfully.');
@@ -319,7 +433,7 @@ class UserDocumentsController extends Controller
     }
 
     /**
-     * ✅ NEW: Reject document (Admin only)
+     * ✅ UPDATED: Reject document (Admin only)
      */
     public function actionReject($document_id)
     {

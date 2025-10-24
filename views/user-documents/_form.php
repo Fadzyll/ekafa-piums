@@ -2,13 +2,12 @@
 
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
-use app\models\DocumentCategory;
-use app\models\UserDocuments;
-use yii\helpers\ArrayHelper;
 
 /** @var yii\web\View $this */
 /** @var app\models\UserDocuments $model */
 /** @var yii\widgets\ActiveForm $form */
+
+$isAdmin = Yii::$app->user->identity->role === 'Admin';
 ?>
 
 <style>
@@ -349,13 +348,17 @@ use yii\helpers\ArrayHelper;
 <div class="card shadow-lg border-0">
     <div class="upload-form-header">
         <div class="upload-form-title">
-            <i class="bi bi-<?= $model->isNewRecord ? 'cloud-upload-fill' : 'pencil-square' ?>"></i>
-            <?= Html::encode($this->title ?? 'Manage User Document') ?>
+            <i class="bi bi-<?= $isAdmin ? 'shield-check' : ($model->isNewRecord ? 'cloud-upload-fill' : 'pencil-square') ?>"></i>
+            <?= Html::encode($this->title ?? ($isAdmin ? 'Review Document' : 'Manage User Document')) ?>
         </div>
         <p class="upload-form-subtitle">
-            <?= $model->isNewRecord 
-                ? 'Upload a new document to the system' 
-                : 'Update document information and file' ?>
+            <?php if ($isAdmin): ?>
+                Review document and update status as needed
+            <?php else: ?>
+                <?= $model->isNewRecord 
+                    ? 'Upload a new document to the system' 
+                    : 'Update document information and file' ?>
+            <?php endif; ?>
         </p>
     </div>
 
@@ -366,208 +369,10 @@ use yii\helpers\ArrayHelper;
             'enableClientValidation' => true,
         ]); ?>
 
-        <!-- User & Document Info -->
-        <div class="upload-section">
-            <div class="section-header">
-                <i class="bi bi-info-circle-fill"></i>
-                Document Information
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'user_id')->textInput([
-                        'type' => 'number',
-                        'min' => 1,
-                        'placeholder' => 'Enter user ID'
-                    ])->label('<i class="bi bi-person"></i> User ID', ['class' => 'form-label']) ?>
-                    <div class="input-helper">
-                        <i class="bi bi-lightbulb"></i>
-                        <span>Enter the ID of the user this document belongs to</span>
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'category_id')->dropDownList(
-                        ArrayHelper::map(
-                            DocumentCategory::find()->where(['status' => DocumentCategory::STATUS_ACTIVE])->all(),
-                            'category_id',
-                            'category_name'
-                        ),
-                        ['prompt' => 'Select Document Category']
-                    )->label('<i class="bi bi-folder"></i> Document Category', ['class' => 'form-label']) ?>
-                    <div class="input-helper">
-                        <i class="bi bi-lightbulb"></i>
-                        <span>Choose the appropriate category for this document</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'document_type')->textInput([
-                        'maxlength' => true,
-                        'placeholder' => 'e.g., Birth Certificate, Teaching License'
-                    ])->label('<i class="bi bi-tag"></i> Document Type', ['class' => 'form-label']) ?>
-                    <div class="input-helper">
-                        <i class="bi bi-lightbulb"></i>
-                        <span>Specify the type of document</span>
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'document_name')->textInput([
-                        'maxlength' => true,
-                        'placeholder' => 'e.g., John Doe Birth Certificate'
-                    ])->label('<i class="bi bi-file-text"></i> Document Name', ['class' => 'form-label']) ?>
-                    <div class="input-helper">
-                        <i class="bi bi-lightbulb"></i>
-                        <span>Provide a descriptive name for this document</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'owner_type')->dropDownList(
-                        UserDocuments::optsOwnerType(),
-                        ['prompt' => 'Select Owner Type']
-                    )->label('<i class="bi bi-person-badge"></i> Owner Type', ['class' => 'form-label']) ?>
-                </div>
-
-                <div class="col-md-6 mb-0">
-                    <?= $form->field($model, 'owner_id')->textInput([
-                        'type' => 'number',
-                        'min' => 0,
-                        'placeholder' => 'Enter owner ID'
-                    ])->label('<i class="bi bi-hash"></i> Owner ID', ['class' => 'form-label']) ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- File Upload -->
-        <div class="upload-section">
-            <div class="section-header">
-                <i class="bi bi-cloud-upload-fill"></i>
-                Upload File
-            </div>
-
-            <div class="file-upload-zone" id="fileUploadZone">
-                <div class="file-upload-icon">
-                    <i class="bi bi-cloud-arrow-up"></i>
-                </div>
-                <div class="file-upload-text">
-                    Drag & Drop your file here
-                </div>
-                <div class="file-upload-hint">
-                    or click to browse • Supports PDF, JPG, PNG, JPEG • Max 5MB
-                </div>
-                <?= $form->field($model, 'file')->fileInput([
-                    'id' => 'fileInput',
-                    'accept' => '.pdf,.jpg,.jpeg,.png'
-                ])->label(false) ?>
-            </div>
-
-            <div class="file-preview" id="filePreview">
-                <div class="file-preview-content">
-                    <div class="file-icon">
-                        <i class="bi bi-file-earmark-pdf" id="fileIcon"></i>
-                    </div>
-                    <div class="file-details">
-                        <div class="file-name" id="fileName">document.pdf</div>
-                        <div class="file-size" id="fileSize">0 KB</div>
-                    </div>
-                    <button type="button" class="remove-file" id="removeFile">
-                        <i class="bi bi-x-lg"></i> Remove
-                    </button>
-                </div>
-            </div>
-
-            <?php if (!$model->isNewRecord && $model->file_url): ?>
-                <div class="current-file-info">
-                    <strong><i class="bi bi-paperclip"></i> Current File:</strong>
-                    <?= Html::a(
-                        $model->original_filename ?: basename($model->file_url), 
-                        Yii::getAlias('@web/' . $model->file_url), 
-                        ['target' => '_blank', 'class' => 'text-primary fw-bold']
-                    ) ?>
-                    <?php if ($model->file_size): ?>
-                        <span class="text-muted ms-2">
-                            (<?= Yii::$app->formatter->asShortSize($model->file_size) ?>)
-                        </span>
-                    <?php endif; ?>
-                    <div class="mt-2 text-muted">
-                        <small>Upload a new file to replace the current one</small>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Status & Additional Info -->
-        <div class="upload-section">
-            <div class="section-header">
-                <i class="bi bi-check2-square"></i>
-                Document Status & Details
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label">
-                    <i class="bi bi-flag"></i>
-                    Document Status
-                </label>
-                <div class="status-selector">
-                    <?php foreach (UserDocuments::optsStatus() as $value => $label): ?>
-                        <div class="status-option">
-                            <?= Html::activeRadio($model, 'status', [
-                                'value' => $value,
-                                'uncheck' => null,
-                                'id' => 'status-' . strtolower(str_replace(' ', '-', $value))
-                            ]) ?>
-                            <label for="status-<?= strtolower(str_replace(' ', '-', $value)) ?>">
-                                <i class="bi bi-<?= $value === UserDocuments::STATUS_APPROVED ? 'check-circle-fill' : ($value === UserDocuments::STATUS_REJECTED ? 'x-circle-fill' : 'clock-fill') ?>"></i>
-                                <span><?= $label ?></span>
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <?= $form->field($model, 'expiry_date')->textInput([
-                        'type' => 'date',
-                        'placeholder' => 'Select expiry date'
-                    ])->label('<i class="bi bi-calendar-x"></i> Expiry Date (Optional)', ['class' => 'form-label']) ?>
-                    <div class="input-helper">
-                        <i class="bi bi-lightbulb"></i>
-                        <span>Set an expiry date if the document is time-sensitive</span>
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-0">
-                    <?= $form->field($model, 'uploaded_by')->textInput([
-                        'type' => 'number',
-                        'placeholder' => 'Auto-filled on save',
-                        'readonly' => true
-                    ])->label('<i class="bi bi-person-up"></i> Uploaded By', ['class' => 'form-label']) ?>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <?= $form->field($model, 'admin_notes')->textarea([
-                    'rows' => 3,
-                    'placeholder' => 'Add any administrative notes about this document...'
-                ])->label('<i class="bi bi-sticky"></i> Admin Notes (Optional)', ['class' => 'form-label']) ?>
-            </div>
-
-            <?php if (!$model->isNewRecord && $model->status === UserDocuments::STATUS_REJECTED): ?>
-                <div class="mb-0">
-                    <?= $form->field($model, 'rejection_reason')->textarea([
-                        'rows' => 3,
-                        'placeholder' => 'Specify the reason for rejection...'
-                    ])->label('<i class="bi bi-exclamation-triangle"></i> Rejection Reason', ['class' => 'form-label']) ?>
-                </div>
-            <?php endif; ?>
-        </div>
+        <?= $this->render('_form_fields', [
+            'model' => $model,
+            'form' => $form,
+        ]) ?>
 
         <!-- Form Actions -->
         <div class="button-group">
@@ -575,9 +380,11 @@ use yii\helpers\ArrayHelper;
                 'class' => 'btn btn-form btn-cancel'
             ]) ?>
             <?= Html::submitButton(
-                $model->isNewRecord 
-                    ? '<i class="bi bi-cloud-upload"></i> Upload Document' 
-                    : '<i class="bi bi-save"></i> Save Changes',
+                $isAdmin 
+                    ? '<i class="bi bi-check-circle"></i> Update Status'
+                    : ($model->isNewRecord 
+                        ? '<i class="bi bi-cloud-upload"></i> Upload Document' 
+                        : '<i class="bi bi-save"></i> Save Changes'),
                 ['class' => 'btn btn-form btn-save']
             ) ?>
         </div>
@@ -586,6 +393,7 @@ use yii\helpers\ArrayHelper;
     </div>
 </div>
 
+<?php if (!$isAdmin): ?>
 <?php
 $script = <<< JS
 // File upload handling
@@ -669,3 +477,4 @@ $('#user-documents-form').on('beforeSubmit', function(e) {
 JS;
 $this->registerJs($script);
 ?>
+<?php endif; ?>
