@@ -56,10 +56,11 @@ $this->title = 'Reset Password';
                             'placeholder' => 'Re-enter new password',
                             'id' => 'confirm-password',
                         ]) ?>
-                        <i class="bi bi-lock-fill input-icon"></i>
+                        <i class="bi bi-lock input-icon"></i>
                         <button type="button" class="password-toggle" data-target="confirm-password">
                             <i class="bi bi-eye"></i>
                         </button>
+                        <i class="bi bi-check-circle-fill validation-icon" id="match-icon" style="display: none;"></i>
                     </div>
                     <?= Html::error($model, 'confirm_password', ['class' => 'invalid-feedback d-block']) ?>
                 <?= $form->field($model, 'confirm_password')->end() ?>
@@ -159,8 +160,10 @@ passwordInput.addEventListener('input', function() {
     strengthText.style.color = color;
 });
 
-// Real-time password match validation
+// Real-time password match validation - UPDATED to show custom icon
 const confirmPasswordInput = document.getElementById('confirm-password');
+const matchIcon = document.getElementById('match-icon');
+
 confirmPasswordInput.addEventListener('input', function() {
     const password = passwordInput.value;
     const confirmPassword = this.value;
@@ -169,10 +172,15 @@ confirmPasswordInput.addEventListener('input', function() {
         if (password !== confirmPassword) {
             this.classList.add('is-invalid');
             this.classList.remove('is-valid');
+            matchIcon.style.display = 'none';
         } else {
             this.classList.remove('is-invalid');
             this.classList.add('is-valid');
+            matchIcon.style.display = 'block';
         }
+    } else {
+        this.classList.remove('is-invalid', 'is-valid');
+        matchIcon.style.display = 'none';
     }
 });
 
@@ -204,15 +212,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     width: 100%;
 }
 
-.input-with-icon .input-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-size: 1.1rem;
-    pointer-events: none;
-    z-index: 2;
+/* When input has validation icon, add more padding */
+.input-with-icon:has(.validation-icon) .form-control {
+    padding-right: 75px;
 }
 
 .input-with-icon .password-toggle {
@@ -239,9 +241,27 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     color: #64748b;
 }
 
-/* Adjust padding when both icon and toggle button present */
-.input-with-icon:has(.password-toggle) .form-control {
-    padding-right: 45px;
+/* Validation checkmark icon */
+.input-with-icon .validation-icon {
+    position: absolute;
+    right: 45px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #10b981;
+    font-size: 1.1rem;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Remove default Bootstrap validation icons */
+.form-control.is-valid,
+.form-control.is-invalid {
+    background-image: none !important;
+    padding-right: 45px !important;
+}
+
+.input-with-icon:has(.validation-icon) .form-control.is-valid {
+    padding-right: 75px !important;
 }
 
 /* Error message styling */
@@ -276,7 +296,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     color: var(--ekafa-gray-500, #64748b);
 }
 
-/* Validation states */
+/* Validation states - remove default borders */
 .is-valid {
     border-color: #10b981 !important;
 }

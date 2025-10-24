@@ -43,24 +43,28 @@ class PasswordResetRequestForm extends Model
         ]);
 
         if (!$user) {
+            Yii::error('Password reset - User not found or inactive: ' . $this->email);
             return false;
         }
 
+        // Generate new token if current one is invalid or doesn't exist
         if (!Users::isPasswordResetTokenValid($user->password_reset_token)) {
             $user->generatePasswordResetToken();
             if (!$user->save(false)) {
+                Yii::error('Password reset - Failed to save token for user: ' . $this->email);
+                Yii::error('Password reset - User save errors: ' . print_r($user->errors, true));
                 return false;
             }
         }
 
         // Try to send email with explicit view path
         try {
-            return Yii::$app
+            $result = Yii::$app
                 ->mailer
                 ->compose(
                     [
-                        'html' => '@app/views/mail/passwordResetToken-html',  // Explicit path
-                        'text' => '@app/views/mail/passwordResetToken-text'   // Explicit path
+                        'html' => '@app/views/mail/passwordResetToken-html',
+                        'text' => '@app/views/mail/passwordResetToken-text'
                     ],
                     ['user' => $user]
                 )
@@ -68,8 +72,17 @@ class PasswordResetRequestForm extends Model
                 ->setTo($this->email)
                 ->setSubject('Password reset for ' . Yii::$app->name)
                 ->send();
+            
+            if ($result) {
+                Yii::info('Password reset email sent successfully to: ' . $this->email);
+            } else {
+                Yii::error('Password reset - Mailer send() returned false for: ' . $this->email);
+            }
+            
+            return $result;
         } catch (\Exception $e) {
-            Yii::error('Failed to send password reset email: ' . $e->getMessage());
+            Yii::error('Password reset - Exception sending email: ' . $e->getMessage());
+            Yii::error('Password reset - Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }
