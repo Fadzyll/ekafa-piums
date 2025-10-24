@@ -2,7 +2,7 @@
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
 
-$this->title = 'Create Parent Account';
+$this->title = 'Reset Password';
 ?>
 
 <div class="auth-wrapper">
@@ -10,14 +10,14 @@ $this->title = 'Create Parent Account';
         <div class="auth-card">
             <div class="auth-header">
                 <div class="auth-logo">
-                    <i class="bi bi-person-plus"></i>
+                    <i class="bi bi-shield-lock"></i>
                 </div>
-                <h1 class="auth-title">Join E-KAFA PIUMS</h1>
-                <p class="auth-subtitle">Create your parent account to get started</p>
+                <h1 class="auth-title">Create New Password</h1>
+                <p class="auth-subtitle">Please enter your new password below</p>
             </div>
 
             <?php $form = ActiveForm::begin([
-                'id' => 'register-form',
+                'id' => 'reset-password-form',
                 'enableClientValidation' => true,
                 'enableAjaxValidation' => false,
                 'fieldConfig' => [
@@ -28,33 +28,17 @@ $this->title = 'Create Parent Account';
                 ],
             ]); ?>
 
-            <!-- Email Field -->
-            <div class="form-group">
-                <?= $form->field($model, 'email')->label('Email')->begin() ?>
-                    <div class="input-with-icon">
-                        <?= Html::activeTextInput($model, 'email', [
-                            'class' => 'form-control',
-                            'placeholder' => 'your.email@example.com',
-                            'autofocus' => true,
-                        ]) ?>
-                        <i class="bi bi-envelope input-icon"></i>
-                    </div>
-                    <small class="form-text">We'll use this email for login and notifications</small>
-                    <?= Html::error($model, 'email', ['class' => 'invalid-feedback d-block']) ?>
-                <?= $form->field($model, 'email')->end() ?>
-            </div>
-
             <!-- Password Field -->
             <div class="form-group">
-                <?= $form->field($model, 'password')->label('Password')->begin() ?>
+                <?= $form->field($model, 'password')->label('New Password')->begin() ?>
                     <div class="input-with-icon">
                         <?= Html::activePasswordInput($model, 'password', [
                             'class' => 'form-control',
-                            'placeholder' => 'Create a strong password',
-                            'id' => 'register-password',
+                            'placeholder' => 'Enter new password',
+                            'id' => 'reset-password',
                         ]) ?>
                         <i class="bi bi-lock input-icon"></i>
-                        <button type="button" class="password-toggle" data-target="register-password">
+                        <button type="button" class="password-toggle" data-target="reset-password">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -65,11 +49,11 @@ $this->title = 'Create Parent Account';
 
             <!-- Confirm Password Field -->
             <div class="form-group">
-                <?= $form->field($model, 'confirm_password')->label('Confirm Password')->begin() ?>
+                <?= $form->field($model, 'confirm_password')->label('Confirm New Password')->begin() ?>
                     <div class="input-with-icon">
                         <?= Html::activePasswordInput($model, 'confirm_password', [
                             'class' => 'form-control',
-                            'placeholder' => 'Re-enter your password',
+                            'placeholder' => 'Re-enter new password',
                             'id' => 'confirm-password',
                         ]) ?>
                         <i class="bi bi-lock-fill input-icon"></i>
@@ -92,37 +76,13 @@ $this->title = 'Create Parent Account';
                 </div>
             </div>
 
-            <!-- Terms & Conditions -->
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" id="terms" required>
-                <label class="form-check-label" for="terms" style="font-size: 0.875rem;">
-                    I agree to the <a href="#" class="text-decoration-none">Terms & Conditions</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
-                </label>
-            </div>
-
             <!-- Submit Button -->
-            <button type="submit" class="btn-modern btn-primary-modern w-100" id="register-btn">
-                <i class="bi bi-person-check"></i>
-                Create Account
+            <button type="submit" class="btn-modern btn-primary-modern w-100 mt-4" id="submit-btn">
+                <i class="bi bi-check-circle"></i>
+                Reset Password
             </button>
 
             <?php ActiveForm::end(); ?>
-
-            <!-- Login Link -->
-            <div class="text-center mt-4">
-                <p class="text-muted mb-0">Already have an account?</p>
-                <?= Html::a('Login as Parent', ['site/login', 'role' => 'parent'], [
-                    'class' => 'btn-modern btn-secondary-modern w-100 mt-2'
-                ]) ?>
-            </div>
-
-            <!-- Back to Home -->
-            <div class="text-center mt-3">
-                <?= Html::a('← Back to Home', ['site/index'], [
-                    'class' => 'text-decoration-none',
-                    'style' => 'color: var(--ekafa-gray-600);'
-                ]) ?>
-            </div>
         </div>
     </div>
 </div>
@@ -149,7 +109,7 @@ document.querySelectorAll('.password-toggle').forEach(button => {
 });
 
 // Password strength checker
-const passwordInput = document.getElementById('register-password');
+const passwordInput = document.getElementById('reset-password');
 const strengthDiv = document.getElementById('password-strength');
 const strengthBar = strengthDiv.querySelector('.progress-bar');
 const strengthText = strengthDiv.querySelector('.strength-text');
@@ -199,21 +159,6 @@ passwordInput.addEventListener('input', function() {
     strengthText.style.color = color;
 });
 
-// Loading state on submit
-document.getElementById('register-form').addEventListener('submit', function(e) {
-    const termsCheckbox = document.getElementById('terms');
-    
-    if (!termsCheckbox.checked) {
-        e.preventDefault();
-        alert('Please accept the Terms & Conditions to continue.');
-        return;
-    }
-    
-    const btn = document.getElementById('register-btn');
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-});
-
 // Real-time password match validation
 const confirmPasswordInput = document.getElementById('confirm-password');
 confirmPasswordInput.addEventListener('input', function() {
@@ -230,14 +175,21 @@ confirmPasswordInput.addEventListener('input', function() {
         }
     }
 });
+
+// Loading state on submit
+document.getElementById('reset-password-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Resetting...';
+});
 JS);
 
 $this->registerCss(<<<CSS
 /* Remove browser autofill icons */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear,
-input[type="password"]::-webkit-credentials-auto-fill-button,
-input[type="email"]::-webkit-credentials-auto-fill-button {
+input[type="password"]::-webkit-credentials-auto-fill-button {
     display: none !important;
 }
 
@@ -300,9 +252,8 @@ input[type="email"]::-webkit-credentials-auto-fill-button {
 }
 
 /* Fix field spacing */
-.field-registeraccform-email,
-.field-registeraccform-password,
-.field-registeraccform-confirm_password {
+.field-resetpasswordform-password,
+.field-resetpasswordform-confirm_password {
     margin-bottom: 0 !important;
 }
 

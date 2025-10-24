@@ -28,7 +28,7 @@ $config = [
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
-            'viewPath' => '@app/mail',
+            'viewPath' => '@app/views/mail',
             'useFileTransport' => true,
         ],
         'log' => [

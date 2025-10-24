@@ -236,8 +236,46 @@ class Users extends \yii\db\ActiveRecord implements IdentityInterface
         return $timestamp + $expire >= time();
     }
 
+    /**
+     * Generates email verification token
+     */
+    public function generateEmailVerificationToken()
+    {
+        $this->verification_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Validates password
+     *
+     * @param string $password password to validate
+     * @return bool if password provided is valid for current user
+     */
+    public function validatePassword($password)
+    {
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
+    }
+
+    /**
+     * Relation to UserDetails (user_profiles table)
+     */
     public function getUserDetails()
     {
         return $this->hasOne(UserDetails::class, ['user_id' => 'user_id']);
+    }
+
+    /**
+     * Relation to UserJobDetails
+     */
+    public function getUserJobDetails()
+    {
+        return $this->hasOne(UserJobDetails::class, ['user_id' => 'user_id']);
+    }
+
+    /**
+     * Relation to PartnerDetails (for Parents)
+     */
+    public function getPartnerDetails()
+    {
+        return $this->hasOne(PartnerDetails::class, ['partner_id' => 'user_id']);
     }
 }

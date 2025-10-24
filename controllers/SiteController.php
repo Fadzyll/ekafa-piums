@@ -10,9 +10,13 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\RegisterAccForm;
+use app\models\PasswordResetRequestForm;
+use app\models\ResetPasswordForm;
 use app\models\UserDetails;
 use app\models\UserJobDetails;
 use app\models\PartnerDetails;
+use yii\base\InvalidArgumentException;
+use yii\web\BadRequestHttpException;
 
 class SiteController extends Controller
 {
@@ -301,16 +305,62 @@ class SiteController extends Controller
         }
     }
 
+    /**
+     * Register parent account
+     */
     public function actionRegisterParent()
     {
         $model = new RegisterAccForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->register()) {
-            Yii::$app->session->setFlash('success', 'Registration successful. You can now log in.');
+            Yii::$app->session->setFlash('success', 'Registration successful! You can now log in with your email and password.');
             return $this->redirect(['site/login', 'role' => 'parent']);
         }
 
         return $this->render('register_parents', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Request password reset
+     */
+    public function actionRequestPasswordReset()
+    {
+        $model = new PasswordResetRequestForm();
+        
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->sendEmail()) {
+                Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
+                return $this->goHome();
+            }
+
+            Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for the provided email address.');
+        }
+
+        return $this->render('requestPasswordResetToken', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Reset password
+     */
+    public function actionResetPassword($token)
+    {
+        try {
+            $model = new ResetPasswordForm($token);
+        } catch (InvalidArgumentException $e) {
+            Yii::$app->session->setFlash('error', 'Invalid or expired password reset token.');
+            return $this->goHome();
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
+            Yii::$app->session->setFlash('success', 'New password saved successfully. You can now log in.');
+            return $this->redirect(['site/select-role']);
+        }
+
+        return $this->render('resetPassword', [
             'model' => $model,
         ]);
     }
